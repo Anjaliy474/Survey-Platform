@@ -3,7 +3,7 @@
 import { ChatCircleDots } from "@phosphor-icons/react/dist/ssr";
 import { useEffect, useState } from "react";
 import { SceneFrame } from "../../SceneFrame";
-import type { EndingProps, SkinProps, StageProps, StoryTemplate } from "../../template-api";
+import type { EndingProps, StageProps, StoryTemplate } from "../../template-api";
 import { Sticker } from "./stickers";
 
 const TYPING_MS = 300;
@@ -82,9 +82,7 @@ function Ending({ mood, reduced, children }: EndingProps) {
 }
 
 /** Reply chips: the label is the whole object, drawn by PropChoice. */
-function Skin(_props: SkinProps) {
-  return null;
-}
+const Skin: StoryTemplate["Skin"] = () => null;
 
 function Thumb({ sceneId }: { sceneId: string }) {
   return (
