@@ -1,0 +1,201 @@
+/* Form controls and small labels (DESIGN.md §5.1 ai button, §5.2 inputs, §5.3 tags, §5.5 segmented). */
+
+.btn--ai {
+  background: var(--ps-ai-bg);
+  color: var(--ps-ai);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ps-ai) 18%, transparent);
+}
+.btn--ai:hover {
+  background: color-mix(in srgb, var(--ps-ai) 14%, var(--ps-ai-bg));
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+.field__label {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  color: var(--ps-ink-900);
+}
+.field__req,
+.field__opt {
+  margin-left: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.field__req {
+  color: var(--ps-persimmon-700);
+}
+.field__opt {
+  color: var(--ps-ink-500);
+}
+.field__help {
+  font-size: 0.875rem;
+  color: var(--ps-ink-500);
+}
+.field__error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ps-danger);
+}
+.field__error::before {
+  content: "!";
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ps-danger);
+  color: var(--ps-white);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.input,
+.textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 14px;
+  border: 1px solid var(--ps-sand-300);
+  border-radius: var(--ps-r-md);
+  background: var(--ps-white);
+  color: var(--ps-ink-900);
+  font: inherit;
+  font-size: 1rem; /* 16px stops iOS from zooming in */
+  line-height: 1.5;
+  transition:
+    border-color var(--ps-dur-fast) var(--ps-ease-out),
+    box-shadow var(--ps-dur-fast) var(--ps-ease-out);
+}
+.input:hover,
+.textarea:hover {
+  border-color: var(--ps-ink-500);
+}
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--ps-persimmon-600);
+  box-shadow: 0 0 0 3px var(--ps-persimmon-100);
+}
+.input.is-invalid,
+.textarea.is-invalid {
+  border-color: var(--ps-danger);
+}
+.textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+.textarea--tall {
+  min-height: 240px;
+  font-family: var(--ps-font-body);
+}
+.textarea--short {
+  min-height: 72px;
+}
+
+.segmented {
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  justify-self: start;
+  padding: 4px;
+  border-radius: var(--ps-r-pill);
+  background: var(--ps-sand-100);
+}
+.segmented button {
+  min-height: 40px;
+  padding: 0 var(--ps-space-4);
+  border: 0;
+  border-radius: var(--ps-r-pill);
+  background: transparent;
+  color: var(--ps-ink-700);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.segmented button[aria-pressed="true"] {
+  background: var(--ps-white);
+  color: var(--ps-ink-900);
+  box-shadow: var(--ps-shadow-1);
+}
+
+.field--switch {
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: var(--ps-space-3);
+}
+.switch {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  margin-top: 2px;
+  border: 0;
+  border-radius: var(--ps-r-pill);
+  background: var(--ps-sand-300);
+  cursor: pointer;
+  transition: background-color var(--ps-dur-base) var(--ps-ease-out);
+}
+.switch i {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ps-white);
+  box-shadow: var(--ps-shadow-1);
+  transition: transform var(--ps-dur-base) var(--ps-ease-out);
+}
+.switch[aria-checked="true"] {
+  background: var(--ps-persimmon-600);
+}
+.switch[aria-checked="true"] i {
+  transform: translateX(20px);
+}
+
+/* Tags (type, role, optional…) and [placeholder] chips (§6.2) */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid var(--ps-sand-200);
+  border-radius: var(--ps-r-pill);
+  background: var(--ps-white);
+  color: var(--ps-ink-700);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.tag--role-behaviour {
+  border-color: var(--ps-viz-2);
+  color: var(--ps-computed);
+}
+.tag--role-attitude {
+  border-color: var(--ps-viz-3);
+  color: var(--ps-ai);
+}
+.tag--role-intention {
+  border-color: var(--ps-viz-4);
+  color: var(--ps-warning);
+}
+.tag--role-demographic {
+  border-color: var(--ps-viz-6);
+  color: var(--ps-ink-700);
+}
+.tag--role-outcome {
+  border-color: var(--ps-persimmon-400);
+  color: var(--ps-persimmon-700);
+}
+.ph {
+  padding: 0 5px;
+  border: 1.5px dashed var(--ps-warning);
+  border-radius: 6px;
+  background: var(--ps-warning-bg);
+  color: var(--ps-warning);
+  font-weight: 700;
+}

@@ -8,6 +8,7 @@ import { useStudio } from "@/lib/studio/store";
 import type { Section } from "@/lib/studio/types";
 import Link from "next/link";
 import { ComingSoon } from "./ComingSoon";
+import { DraftPreview } from "./DraftPreview";
 import { ResultsTabs } from "./ResultsTabs";
 import { StepRail } from "./StepRail";
 import { TopBar, type TopAction } from "./TopBar";
@@ -118,6 +119,8 @@ export function SurveySectionView({ id, section }: { id: string; section: Sectio
           >
             Finish the steps first. Once people answer, their responses show up here.
           </EmptyState>
+        ) : section === "build" && survey.ai ? (
+          <DraftPreview survey={survey} />
         ) : (
           <ComingSoon title={info.title} about={info.about} spec={info.spec} />
         )}

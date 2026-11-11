@@ -99,7 +99,7 @@ export function HomeView() {
                 </Link>
                 <div className="idea-chips" aria-label="Ideas to start from">
                   {IDEAS.map((idea) => (
-                    <Link key={idea} href="/app/new" className="chip">
+                    <Link key={idea} href={`/app/new/prompt?q=${encodeURIComponent(idea)}`} className="chip">
                       {idea}
                     </Link>
                   ))}

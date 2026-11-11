@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { StudioShell } from "@/components/studio/StudioShell";
+import "@/styles/forms.css";
 import "@/styles/studio.css";
+import "@/styles/studio-create.css";
 
 export const metadata: Metadata = {
   title: { default: "Studio", template: "%s · PlaySurvey Studio" },

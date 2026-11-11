@@ -42,6 +42,9 @@ Following `UI_UX_LAYOUT.md`, one page at a time:
 - [x] M1 Landing page (`/`), with sample data
 - [x] P1 Survey Player (`/s/:slug`): all 7 mechanics, 4 styles, 3 playful levels, 3 themes, sample surveys
 - [x] Studio shell + S1 Home (`/app`): sidebar, top bar, step rail, results tabs, survey cards with Duplicate / Close / Delete
-- [ ] Next: Start chooser + the three ways to start (build step 4)
+- [x] Start chooser + three ways to start (`/app/new`, `/app/new/questions`, `/research`, `/prompt`) with the AI working panel
+- [ ] Next: Question builder + review (build step 5)
+
+**AI in demo mode.** `POST /api/ai/shape` runs the create pipeline (question shaper → bias checker → rules engine) and streams each stage. The shaper and bias checker are built-in stand-ins in `src/lib/ai/demo-*.ts` that return the exact `combined.system.txt` JSON schemas; the rules engine (`src/lib/ai/rules-engine.ts`) is real. Connecting Claude replaces the two demo files, not their callers.
 
 The Studio keeps sample surveys in your browser until the backend exists. Preview Home's states with `/app?preview=loading|empty|error`; "Demo only: restore the sample surveys" is in Settings.

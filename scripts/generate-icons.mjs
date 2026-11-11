@@ -6,11 +6,11 @@ const root = process.argv[2] ?? ".";
 const WANT = {
   // Player and badges (bold / duotone)
   Check: ["bold", "duotone", "regular"], X: ["bold", "duotone", "regular"], ArrowLeft: ["bold"], LockSimple: ["bold", "regular"], CloudSlash: ["bold"],
-  Sparkle: ["bold"], Calculator: ["bold", "regular"], CheckCircle: ["bold", "regular"], Ruler: ["bold"], ShieldCheck: ["bold"], Warning: ["bold", "regular"],
+  Sparkle: ["bold", "regular"], Calculator: ["bold", "regular"], CheckCircle: ["bold", "regular"], Ruler: ["bold"], ShieldCheck: ["bold"], Warning: ["bold", "regular"],
   // Studio (regular, DESIGN.md §4)
   House: ["regular", "fill"], Plus: ["bold"], PlusCircle: ["regular", "fill"], Gear: ["regular", "fill"], SidebarSimple: ["regular"],
   MagnifyingGlass: ["regular"], DotsThree: ["bold"], Copy: ["regular"], Trash: ["regular"], StopCircle: ["regular"],
-  ArrowUpRight: ["regular"], ArrowRight: ["bold"], LinkSimple: ["regular"], ArrowClockwise: ["regular"], Star: ["fill"],
+  ArrowUpRight: ["regular"], ListChecks: ["regular"], Lightning: ["regular"], Lightbulb: ["regular"], Info: ["regular"], ArrowRight: ["bold"], LinkSimple: ["regular"], ArrowClockwise: ["regular"], Star: ["fill"],
 };
 const out = [];
 for (const [name, weights] of Object.entries(WANT)) {

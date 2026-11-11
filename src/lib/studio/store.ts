@@ -5,7 +5,8 @@
  * seeded with sample surveys; every action below becomes an API call later, with the same shape.
  */
 import { useSyncExternalStore } from "react";
-import type { StudioSurvey } from "./types";
+import type { SurveyRequest } from "@/lib/ai/types";
+import type { DraftAi, StudioSurvey } from "./types";
 
 const KEY = "playsurvey:studio";
 const VERSION = 1;
@@ -163,6 +164,26 @@ export const studio = {
     };
     update((list) => [copy, ...list]);
     return copy;
+  },
+  /** A new draft from a start page and the AI's proposal. */
+  createDraft(title: string, brief: SurveyRequest, ai: DraftAi): StudioSurvey {
+    const now = Date.now();
+    const survey: StudioSurvey = {
+      id: newId(),
+      slug: null,
+      title,
+      status: "draft",
+      step: "build",
+      questions: ai.shaper.questions.map((q) => ({ open: q.type === "long_text" })),
+      stats: null,
+      createdAt: now,
+      updatedAt: now,
+      closedAt: null,
+      brief,
+      ai,
+    };
+    update((list) => [survey, ...list]);
+    return survey;
   },
   close(id: string) {
     const now = Date.now();
