@@ -25,7 +25,7 @@ export function ThreeWays() {
       <Clouds set="band" />
       <div className="wrap">
         <SectionHead id="ways-title" eyebrow="Start any way" title="Bring questions, a problem, or just one line" center>
-          AI suggests, with a reason for every change. Nothing changes until you tap Accept. Go on, try it.
+          AI suggests. You accept. Try it.
         </SectionHead>
 
         <div className="ways__grid">
@@ -33,7 +33,7 @@ export function ThreeWays() {
             tone="teal"
             icon={<ListChecks size={26} weight="duotone" />}
             title="Bring your questions"
-            description="Paste what you have. We fix bias and unclear wording, and leave good questions alone."
+            description="Paste them in. We fix bias, keep the good ones."
             typed="How amazing was our new canteen menu?"
             suggestion="diff"
           />
@@ -41,7 +41,7 @@ export function ThreeWays() {
             tone="persimmon"
             icon={<MagnifyingGlass size={26} weight="duotone" />}
             title="Describe your research"
-            description="Tell us the decision you’re facing. We suggest what to ask and why each question matters."
+            description="Name the decision. We suggest what to ask."
             typed="We run a café near campus. Should we open on Sundays?"
             delay={500}
             suggestion="new-question"
@@ -50,7 +50,7 @@ export function ThreeWays() {
             tone="marigold"
             icon={<Lightning size={26} weight="duotone" />}
             title="Quick one-line prompt"
-            description="One sentence is enough. You get a full draft to edit, with blanks marked where we need details."
+            description="One line in. A full draft out."
             typed="Feedback survey for our college fest"
             delay={1000}
             suggestion="draft"
@@ -60,7 +60,7 @@ export function ThreeWays() {
       </div>
 
       <div className="ticker" data-reveal>
-        <p className="ticker__label">Not sure where to start? People ask things like:</p>
+        <p className="ticker__label">People ask things like</p>
         <div className="ticker__viewport">
           <ul className="ticker__track">
             {PROMPTS.map((p) => (

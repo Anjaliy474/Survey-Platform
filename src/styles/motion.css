@@ -1,0 +1,279 @@
+/*
+ * Motion layer for the landing page: entrance choreography, scroll-linked parallax,
+ * pointer effects and smooth-scroll plumbing. Tokens only.
+ *
+ * Rules kept from DESIGN.md: content is always visible without JS, and nothing here runs
+ * with prefers-reduced-motion. Scroll-linked effects use CSS scroll timelines where the
+ * browser supports them, and are simply absent elsewhere.
+ * Individual transform properties (translate, scale) are used so these effects stack on
+ * top of the existing transform-based animations instead of fighting them.
+ */
+
+/* ================= Smooth scroll (Lenis) ================= */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+html.lenis {
+  scroll-behavior: auto;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* ================= Scroll progress (top of the header) ================= */
+.scroll-progress {
+  display: none;
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-progress {
+      display: block;
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 2px;
+      background: var(--ps-progress);
+      transform-origin: left center;
+      animation: progress-grow linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+}
+@keyframes progress-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ================= Nav: current section ================= */
+.site-nav a[aria-current="true"] {
+  color: var(--ps-ink-900);
+}
+.site-nav a[aria-current="true"]::after {
+  transform: scaleX(1);
+}
+
+/* ================= Calls to action: magnetic lean ================= */
+.btn--marketing {
+  translate: var(--mag-x, 0) var(--mag-y, 0);
+  transition:
+    transform var(--ps-dur-fast) var(--ps-ease-out),
+    translate 320ms var(--ps-ease-out),
+    background-color var(--ps-dur-fast) var(--ps-ease-out),
+    box-shadow var(--ps-dur-fast) var(--ps-ease-out);
+}
+
+/* ================= Cards: pointer spotlight ================= */
+.card.is-spot {
+  background-image: radial-gradient(380px circle at var(--mx) var(--my), var(--ps-spotlight), transparent 65%);
+  border-color: var(--ps-spotlight-ring);
+}
+.who__card--insight.is-spot {
+  background-image:
+    radial-gradient(380px circle at var(--mx) var(--my), var(--ps-spotlight), transparent 65%),
+    linear-gradient(160deg, var(--ps-persimmon-50), var(--ps-white) 70%);
+}
+.card {
+  transition: border-color var(--ps-dur-base) var(--ps-ease-out);
+}
+
+/* ================= Seamless band edges ================= */
+.decide.band--mist {
+  background: linear-gradient(
+    180deg,
+    var(--ps-web-bg) 0,
+    var(--ps-mist) 160px,
+    var(--ps-mist) calc(100% - 160px),
+    var(--ps-web-bg) 100%
+  );
+}
+.faq.band--mist {
+  background: linear-gradient(180deg, var(--ps-web-bg) 0, var(--ps-mist) 160px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ---------- Hero entrance: title, line, buttons, then the poll ---------- */
+  .hero__title {
+    animation: rise-in 1000ms var(--ps-ease-out) 80ms backwards;
+  }
+  .hero__sub {
+    animation: rise-in 900ms var(--ps-ease-out) 260ms backwards;
+  }
+  .hero__cta {
+    animation: rise-in 900ms var(--ps-ease-out) 380ms backwards;
+  }
+  .poll-stage {
+    animation: poll-in 1200ms var(--ps-ease-out) 480ms backwards;
+  }
+  .hero-chip {
+    animation: chip-pop 700ms var(--ps-ease-bounce) backwards;
+  }
+  .hero-chip:nth-child(1) {
+    animation-delay: 620ms;
+  }
+  .hero-chip:nth-child(2) {
+    animation-delay: 720ms;
+  }
+  .hero-chip:nth-child(3) {
+    animation-delay: 820ms;
+  }
+  .toys {
+    animation: fade-in 1400ms var(--ps-ease-out) 300ms backwards;
+  }
+
+  /* ---------- Section titles wipe up; reveals gain a soft focus-pull ---------- */
+  .reveal-ready .section-head.is-in:not(.is-instant) .section-head__title,
+  .reveal-ready .final__inner.is-in:not(.is-instant) .final__title {
+    animation: title-wipe 1000ms var(--ps-ease-out) 120ms backwards;
+  }
+  .reveal-ready .section-head.is-in:not(.is-instant) .section-head__intro {
+    animation: rise-in 900ms var(--ps-ease-out) 280ms backwards;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    translate: 0 28px;
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+@keyframes poll-in {
+  from {
+    opacity: 0;
+    translate: 0 90px;
+    scale: 0.94;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+@keyframes chip-pop {
+  from {
+    scale: 0;
+  }
+  to {
+    scale: 1;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes title-wipe {
+  from {
+    clip-path: inset(0 0 100% 0);
+    translate: 0 0.45em;
+  }
+  to {
+    clip-path: inset(-0.2em -0.2em -0.3em -0.2em);
+    translate: 0 0;
+  }
+}
+/* Replaces the base reveal with the same lift plus a short focus-pull. */
+@keyframes ps-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.98);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+/* ================= Scroll-linked parallax ================= */
+@property --hero-exit {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* 0 → 1 over the first screen of scrolling; children read it. */
+    .hero {
+      animation: hero-exit linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100svh;
+    }
+
+    /* Headline drifts up and softens as the poll takes over. */
+    .hero__copy {
+      opacity: calc(1 - var(--hero-exit) * 0.85);
+      translate: 0 calc(var(--hero-exit) * -90px);
+      scale: calc(1 - var(--hero-exit) * 0.05);
+    }
+
+    /* Clay pieces rise at their own depth; clouds lag behind. */
+    .toy {
+      translate:
+        calc(var(--px) * var(--depth) * -600px)
+        calc(var(--py) * var(--depth) * -400px + var(--hero-exit) * var(--depth) * -3600px);
+    }
+    .hero .clouds {
+      translate: 0 calc(var(--hero-exit) * 140px);
+    }
+
+    /* Phone preview settles into place as it scrolls in. */
+    .phone__screen {
+      animation: settle linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 45%;
+    }
+
+    /* Sticky dashboard leans in as its band arrives. */
+    .dash {
+      animation: settle linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 80%;
+    }
+
+    /* Final band: clouds drift up past the title as the page ends. */
+    .final .clouds {
+      animation: drift-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+  }
+}
+
+@keyframes hero-exit {
+  to {
+    --hero-exit: 1;
+  }
+}
+@keyframes settle {
+  from {
+    scale: 0.9;
+    translate: 0 60px;
+  }
+  to {
+    scale: 1;
+    translate: 0 0;
+  }
+}
+@keyframes drift-up {
+  from {
+    translate: 0 80px;
+  }
+  to {
+    translate: 0 -80px;
+  }
+}

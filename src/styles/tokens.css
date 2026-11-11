@@ -72,6 +72,10 @@
   --ps-mist: #f6f8fc;
   --ps-line: #e9edf3;
   --ps-glass: rgba(255, 255, 255, 0.8);
+  /* Motion layer (motion.css): pointer spotlight on cards, scroll progress bar */
+  --ps-spotlight: rgba(240, 100, 60, 0.075);
+  --ps-spotlight-ring: rgba(240, 100, 60, 0.22);
+  --ps-progress: linear-gradient(90deg, #f0643c, #ffc233 60%, #14a39a);
   --ps-web-sky: linear-gradient(180deg, #e8f1ff 0%, #f3f7ff 38%, #ffffff 78%, #fff4ee 100%);
   --ps-web-card-shadow: 0 1px 2px rgba(34, 25, 46, 0.04), 0 12px 32px -20px rgba(34, 25, 46, 0.18);
   --ps-web-float-shadow: 0 40px 80px -40px rgba(60, 80, 130, 0.45);

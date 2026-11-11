@@ -19,7 +19,7 @@ const AUDIENCES = [
       "What would make you visit on a Sunday?",
       "How likely are you to recommend us to a friend? (0–10)",
     ],
-    insight: "Brunch and a quiet place to study came up most often as reasons to visit on Sundays.",
+    insight: "Brunch and a quiet study spot came up most for Sundays.",
   },
   {
     id: "research",
@@ -32,7 +32,7 @@ const AUDIENCES = [
       "How manageable does your workload feel?",
       "What, if anything, would help most?",
     ],
-    insight: "Themes come with quotes and response IDs, so your open-answer coding is traceable in your methods section.",
+    insight: "Every theme traces back to quotes and response IDs.",
   },
   {
     id: "org",
@@ -45,7 +45,7 @@ const AUDIENCES = [
       "How satisfied were you with the event overall?",
       "Anything we should do differently next time? (optional)",
     ],
-    insight: "Most people who left did so at the one open question, so the next draft makes it optional and moves it last.",
+    insight: "Most drop-off came at the open question, so it moves last.",
   },
   {
     id: "analyst",
@@ -58,7 +58,7 @@ const AUDIENCES = [
       "“Compare first-year and final-year students”",
       "“Did satisfaction change after week 2?”",
     ],
-    insight: "Charts are checked against the data type, groups under 10 are flagged, and every number is computed.",
+    insight: "Charts checked, small groups flagged, every number computed.",
   },
 ] as const;
 

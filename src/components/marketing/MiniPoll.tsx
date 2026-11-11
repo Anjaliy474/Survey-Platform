@@ -3,8 +3,8 @@
 import { useState } from "react";
 
 const CHOICES = [
-  { id: "yes", face: "👍", label: "Let’s go", reply: "Got it. Start with one line, your own questions, or a problem you want to solve." },
-  { id: "later", face: "🤔", label: "Not yet", reply: "Got it. Play the demo poll at the top whenever you like." },
+  { id: "yes", face: "👍", label: "Let’s go", reply: "Got it. One line is enough to start." },
+  { id: "later", face: "🤔", label: "Not yet", reply: "Got it. The demo poll is up top." },
 ] as const;
 
 /** The 1-question mini poll in the final call to action. */

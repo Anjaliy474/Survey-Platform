@@ -34,8 +34,7 @@ export function Hero({ stats }: { stats: PollStats }) {
           </span>
         </h1>
         <p className="hero__sub">
-          Turn any question into a two-minute, game-like survey, and every answer into insight you can act on.
-          Try one right here.
+          Two-minute, game-like surveys. Insight you can act on. Try one below.
         </p>
         <div className="hero__cta">
           <Link className="btn btn--lg btn--marketing" href="/signup" prefetch={false}>

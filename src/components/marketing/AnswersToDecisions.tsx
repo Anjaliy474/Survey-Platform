@@ -24,17 +24,17 @@ const STEPS = [
   {
     kicker: "How many?",
     title: "See who took part and where they left",
-    body: "Starts, finishes and the exact question where people dropped off. Next time, AI uses this to suggest a shorter survey.",
+    body: "Starts, finishes and the exact drop-off point.",
   },
   {
     kicker: "What did they say?",
     title: "Open answers, grouped for you",
-    body: "AI groups answers that say the same thing into themes, and backs each one with real quotes and response IDs. Code counts them. Opinions held by one person stay visible too.",
+    body: "Themes backed by real quotes. Code does the counting.",
   },
   {
     kicker: "So what?",
     title: "Ask your data in plain words",
-    body: "Ask a question and get a short answer with the numbers, the base, and what the data can’t tell you. Tap to see exactly how it was calculated.",
+    body: "Short answers, with the maths one tap away.",
   },
 ];
 

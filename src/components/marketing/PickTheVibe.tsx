@@ -22,9 +22,9 @@ const STYLES: { id: Style; label: string; note: string }[] = [
   { id: "classic", label: "Classic", note: "A plain, tidy form" },
 ];
 const LEVELS: { id: Level; label: string; help: string }[] = [
-  { id: "off", label: "Off", help: "Neutral, professional copy. No feedback after answers." },
-  { id: "light", label: "Light", help: "Friendly lead-ins and a milestone every few questions." },
-  { id: "medium", label: "Medium", help: "Warm copy, plus the same short “Got it.” after every answer." },
+  { id: "off", label: "Off", help: "Neutral and professional." },
+  { id: "light", label: "Light", help: "Friendly lead-ins and milestones." },
+  { id: "medium", label: "Medium", help: "Warm, with a neutral “Got it.” after each answer." },
 ];
 const THEMES: { id: Theme; label: string }[] = [
   { id: "marigold", label: "Marigold" },
@@ -62,10 +62,7 @@ export function PickTheVibe() {
           <h2 id="vibe-title" className="section-head__title">
             Same questions. Your style.
           </h2>
-          <p className="section-head__intro">
-            Switch the style, the playful level and the theme. The question, its options and its scale never change,
-            so your data stays comparable.
-          </p>
+          <p className="section-head__intro">Change the look. The question never changes.</p>
         </div>
 
         <div className="vibe__grid">
@@ -209,10 +206,7 @@ export function PickTheVibe() {
                 />
               ))}
             </div>
-            <p className="vibe__help">
-              No points, prizes, timers or sliders, at any level. They push people toward certain answers or make them
-              rush.
-            </p>
+            <p className="vibe__help">No points, prizes or timers. They bend answers.</p>
           </div>
         </div>
       </div>
