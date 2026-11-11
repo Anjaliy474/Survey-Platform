@@ -39,6 +39,9 @@ export type StudioSurvey = {
   review?: Record<string, "keep" | "exclude">;
   /** Theme coding per open question (Themes page). */
   themes?: Record<string, ThemeState>;
+  /** Sample surveys: when all responses were deleted, and single responses deleted on request. */
+  responsesDeletedAt?: number;
+  deletedResponses?: string[];
   /** The dashboard built from the creator's request (Dashboard page). */
   dashboard?: DashboardState;
 };

@@ -13,7 +13,8 @@ import { DEFAULT_PUBLISH, buildPublished, makeSlug, publishChecklist, readyToPub
 import { surveyHref } from "@/lib/studio/sections";
 import { studio, useStudio } from "@/lib/studio/store";
 import type { PublishSettings, StudioSurvey } from "@/lib/studio/types";
-import { DEMO_USER } from "@/lib/studio/user";
+import { useMe } from "@/lib/account";
+import { useOnline } from "@/lib/player/progress-store";
 import { ResultsTabs } from "../ResultsTabs";
 import { StepRail } from "../StepRail";
 import { TopBar } from "../TopBar";
@@ -46,6 +47,8 @@ export function PublishView({ survey }: { survey: StudioSurvey }) {
   const [justPublished, setJustPublished] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const responses = useResponses(survey.slug);
+  const me = useMe();
+  const online = useOnline();
 
   const form = survey.publish ?? DEFAULT_PUBLISH;
   const setForm = (patch: Partial<PublishSettings>) => studio.patch(survey.id, (s) => ({ publish: { ...(s.publish ?? DEFAULT_PUBLISH), ...patch } }));
@@ -60,14 +63,19 @@ export function PublishView({ survey }: { survey: StudioSurvey }) {
     const rows = publishChecklist(survey);
     const failing = rows.filter((r) => !r.ok).length;
     const problem = today ? settingsProblem(form, today) : null;
-    const ready = readyToPublish(survey) && !problem;
-    const reason = failing ? `Fix ${failing} ${failing === 1 ? "item" : "items"} in the checklist first.` : (problem ?? undefined);
+    const ready = readyToPublish(survey) && !problem && online;
+    const reason = !online
+      ? "You’re offline. Publish when you’re back."
+      : failing
+        ? `Fix ${failing} ${failing === 1 ? "item" : "items"} in the checklist first.`
+        : (problem ?? undefined);
 
     const publish = () => {
       if (!ready || state?.status !== "ready") return;
       const taken = new Set(state.surveys.map((s) => s.slug).filter((s): s is string => !!s));
       const slug = makeSlug(survey.title, taken);
-      const player = buildPublished(survey, slug, DEMO_USER.name, form);
+      // Respondents see the organisation, or the creator's name.
+      const player = buildPublished(survey, slug, me?.org.trim() || me?.name || "PlaySurvey creator", form);
       publishLocal(player);
       studio.patch(survey.id, () => ({
         status: "live",

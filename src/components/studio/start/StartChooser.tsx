@@ -1,5 +1,6 @@
 "use client";
 
+import { type Role, useMe } from "@/lib/account";
 import Link from "next/link";
 import type { ComponentType, KeyboardEvent } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -67,9 +68,19 @@ function TypingLine({ text, delay }: { text: string; delay: number }) {
   );
 }
 
+const SUGGEST: Record<Role, string> = {
+  business: "/app/new/prompt",
+  researcher: "/app/new/research",
+  community: "/app/new/prompt",
+  analyst: "/app/new/questions",
+};
+
 /** S2 "How do you want to start?" (UI_UX_LAYOUT.md). Arrow keys move between the cards. */
 export function StartChooser() {
   const refs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const me = useMe();
+  // From onboarding: the start that suits the creator's role.
+  const suggested = me?.role ? SUGGEST[me.role] : null;
 
   function onKeyDown(e: KeyboardEvent, i: number) {
     const keys: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
@@ -100,6 +111,7 @@ export function StartChooser() {
                 <span className="chooser-card__icon" aria-hidden="true">
                   <w.Icon size={26} weight="regular" />
                 </span>
+                {suggested === w.href && <span className="chooser-card__suggested">Suggested for you</span>}
                 <h2>{w.title}</h2>
                 <p>{w.line}</p>
                 <span className="chooser-card__example">

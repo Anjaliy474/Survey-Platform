@@ -1,6 +1,7 @@
 "use client";
 
-import { DEMO_USER } from "@/lib/studio/user";
+import { account, initialsOf, useMe } from "@/lib/account";
+import { useOnline } from "@/lib/player/progress-store";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType, ReactNode } from "react";
@@ -33,9 +34,6 @@ function subscribePref(l: () => void) {
   };
 }
 
-/** Demo creator until sign-up exists (build step 12). */
-const USER = DEMO_USER;
-
 type NavItem = { href: string; label: string; Icon: ComponentType<{ size?: number; weight?: "regular" | "fill" }>; match: (p: string) => boolean };
 const HOME: NavItem = { href: "/app", label: "Home", Icon: House, match: (p) => p === "/app" || p.startsWith("/app/s/") };
 const NEW: NavItem = { href: "/app/new", label: "New survey", Icon: PlusCircle, match: (p) => p.startsWith("/app/new") };
@@ -48,6 +46,9 @@ const SETTINGS: NavItem = { href: "/app/settings", label: "Settings", Icon: Gear
 export function StudioShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const pref = useSyncExternalStore(subscribePref, readPref, () => "auto" as SidebarPref);
+  const me = useMe();
+  const online = useOnline();
+  const name = me?.name ?? "Demo creator";
 
   function toggle() {
     const collapsedNow =
@@ -86,11 +87,22 @@ export function StudioShell({ children }: { children: ReactNode }) {
           </nav>
           <div className="sidebar__bottom">
             {item(SETTINGS)}
-            <div className="sidebar__user" title={USER.name}>
+            <div className="sidebar__user" title={me?.email ?? name}>
               <span className="avatar" aria-hidden="true">
-                {USER.initials}
+                {initialsOf(name)}
               </span>
-              <span className="sidebar__label">{USER.name}</span>
+              <span className="sidebar__label sidebar__who">
+                <span>{name}</span>
+                {me?.signedIn ? (
+                  <button type="button" className="sidebar__auth" onClick={() => account.logOut()}>
+                    Log out
+                  </button>
+                ) : (
+                  <Link href="/login" className="sidebar__auth">
+                    Log in
+                  </Link>
+                )}
+              </span>
             </div>
             <button type="button" className="sidebar__collapse" onClick={toggle} aria-label={collapsedLabel} title={collapsedLabel}>
               <SidebarSimple size={20} weight="regular" />
@@ -99,6 +111,11 @@ export function StudioShell({ children }: { children: ReactNode }) {
         </aside>
 
         <div className="studio__main" id="studio-main">
+          {!online && (
+            <p className="offline-banner" role="status">
+              You’re offline. Changes will save when you’re back.
+            </p>
+          )}
           {children}
         </div>
 

@@ -132,3 +132,8 @@ export function useResponses(slug: string | null): StoredResponse[] {
 }
 
 export const newResponseId = () => `R-${Date.now().toString(36).slice(-5).toUpperCase()}${Math.floor(Math.random() * 1296).toString(36).toUpperCase().padStart(2, "0")}`;
+
+/** A respondent's deletion request: remove one response for good. */
+export function deleteResponse(slug: string, id: string) {
+  set(responsesKey(slug), getResponses(slug).filter((r) => r.id !== id));
+}

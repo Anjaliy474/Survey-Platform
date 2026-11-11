@@ -17,7 +17,7 @@ export default function NotFound() {
           ?
         </span>
         <h1>We couldn’t find that page</h1>
-        <p>It may have moved, or it isn’t built yet. Sign-up and the Studio are coming next.</p>
+        <p>It may have moved, or the link has a typo.</p>
         <Link className="btn btn--lg btn--marketing" href="/">
           Go home
         </Link>

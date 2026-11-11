@@ -662,3 +662,11 @@
     border-radius: 0;
   }
 }
+
+/* Inline text link inside app copy */
+.link {
+  color: var(--ps-persimmon-700);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

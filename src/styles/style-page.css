@@ -28,12 +28,6 @@
   position: sticky;
   top: calc(64px + 58px + var(--ps-space-4));
 }
-.link {
-  color: var(--ps-persimmon-700);
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
 
 /* Numbered sections */
 .stylesec {

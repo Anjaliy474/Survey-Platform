@@ -27,10 +27,17 @@ export function useResultsData(survey: StudioSurvey): { player: PlayerSurvey | n
   const stored = useResponses(survey.player ? survey.slug : null);
   const sample = !survey.player && survey.slug ? getSurvey(survey.slug) : undefined;
   const player = survey.player ?? sample ?? null;
+  const deletedAll = survey.responsesDeletedAt;
+  const deleted = survey.deletedResponses;
   const rows = useMemo(() => {
-    if (sample) return now ? (sampleResponses(sample, now) ?? []) : [];
+    if (sample) {
+      // Deletions (Settings → Data and privacy) apply to the sample set too.
+      if (deletedAll || !now) return [];
+      const all = sampleResponses(sample, now) ?? [];
+      return deleted?.length ? all.filter((r) => !deleted.includes(r.id)) : all;
+    }
     return localResponses(stored);
-  }, [sample, now, stored]);
+  }, [sample, now, stored, deletedAll, deleted]);
   return { player, rows, isSample: !!sample, liveCount: stored.length };
 }
 

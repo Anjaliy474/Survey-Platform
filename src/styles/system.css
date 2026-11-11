@@ -153,3 +153,10 @@
   font-size: 1.125rem;
   color: var(--ps-ink-500);
 }
+
+.not-found__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--ps-space-3);
+}

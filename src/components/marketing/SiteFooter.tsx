@@ -10,17 +10,18 @@ const COLUMNS = [
   {
     title: "Product",
     links: [
-      { label: "How it works", href: "#ways" },
-      { label: "Styles", href: "#vibe" },
-      { label: "Who it's for", href: "#who" },
-      { label: "FAQ", href: "#faq" },
+      { label: "How it works", href: "/#ways" },
+      { label: "Styles", href: "/#vibe" },
+      { label: "Who it's for", href: "/#who" },
+      { label: "FAQ", href: "/#faq" },
+      { label: "Pricing", href: "/pricing" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "Our principles", href: "#trust" },
-      { label: "Try the demo poll", href: "#top" },
+      { label: "Our principles", href: "/#trust" },
+      { label: "Try the demo poll", href: "/#top" },
     ],
   },
   {

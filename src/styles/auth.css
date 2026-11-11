@@ -1,0 +1,386 @@
+/* Auth shell (UI_UX_LAYOUT.md §3.2) and onboarding (A2). */
+
+.auth {
+  display: grid;
+  grid-template-columns: 45% 55%;
+  min-height: 100svh;
+  background: var(--ps-cream-50);
+}
+.auth__sky {
+  position: relative;
+  overflow: hidden;
+  background: var(--ps-web-sky);
+}
+.auth__line {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 14%;
+  font-family: var(--ps-font-display);
+  font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ps-ink-900);
+}
+.auth__toy {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  background-image: var(--ps-gloss-highlight);
+  box-shadow:
+    var(--ps-gloss-edge),
+    var(--ps-gloss-drop);
+  animation: toy-float 11s ease-in-out infinite;
+}
+.auth__toy--chip {
+  --rot: -8deg;
+  top: 16%;
+  left: 14%;
+  width: 92px;
+  height: 92px;
+  border-radius: 26px;
+  background-color: var(--ps-pastel-lilac);
+  color: var(--ps-human);
+  font-family: var(--ps-font-display);
+  font-size: 2.8rem;
+  font-weight: 800;
+}
+.auth__toy--pill {
+  --rot: 6deg;
+  top: 30%;
+  right: 12%;
+  display: flex;
+  gap: 8px;
+  padding: 16px 20px;
+  border-radius: var(--ps-r-pill);
+  background-color: var(--ps-pastel-mint);
+  animation-delay: -4s;
+}
+.auth__toy--pill i {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ps-white);
+  box-shadow: inset 0 -2px 0 rgba(34, 25, 46, 0.08);
+}
+.auth__toy--face {
+  --rot: -4deg;
+  top: 50%;
+  left: 24%;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background-color: var(--ps-pastel-butter);
+  font-size: 2.4rem;
+  animation-delay: -7s;
+}
+.auth__side {
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+.auth__logo {
+  padding: var(--ps-space-5) var(--ps-space-8);
+}
+.auth__main {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: var(--ps-space-6) var(--ps-space-6) var(--ps-space-16);
+}
+.authform {
+  display: grid;
+  gap: var(--ps-space-4);
+  width: 100%;
+  max-width: 400px;
+}
+.authform h1 {
+  font-family: var(--ps-font-display);
+  font-size: clamp(1.75rem, 1.4rem + 1vw, 2.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.authform__google {
+  width: 100%;
+  gap: 10px;
+}
+.authform__g {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ps-ink-900);
+  color: var(--ps-white);
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+.authform__note {
+  margin-top: calc(-1 * var(--ps-space-2));
+  font-size: 0.875rem;
+  color: var(--ps-info);
+}
+.authform__or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.875rem;
+  color: var(--ps-ink-700);
+}
+.authform__or::before,
+.authform__or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--ps-sand-200);
+}
+.authform__form {
+  display: grid;
+  gap: var(--ps-space-4);
+}
+.authform__formerror {
+  padding: 10px 12px;
+  border-radius: var(--ps-r-md);
+  background: var(--ps-danger-bg);
+}
+.authform__pw {
+  position: relative;
+}
+.authform__pw .input {
+  padding-right: 48px;
+}
+.authform__eye {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: var(--ps-r-sm);
+  background: transparent;
+  color: var(--ps-ink-700);
+  cursor: pointer;
+}
+.authform__eye:hover {
+  background: var(--ps-sand-100);
+}
+.authform__submit {
+  width: 100%;
+}
+.authform__small,
+.authform__switch {
+  font-size: 0.875rem;
+  color: var(--ps-ink-700);
+}
+.authform__proto {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: var(--ps-r-md);
+  background: var(--ps-sand-100);
+  font-size: 0.8125rem;
+  color: var(--ps-ink-700);
+}
+.authform__proto svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+/* Onboarding */
+.onboard-page {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100svh;
+  overflow: hidden;
+  background: var(--ps-web-sky);
+}
+.onboard-page__logo {
+  position: relative;
+  z-index: 1;
+  padding: var(--ps-space-5) var(--ps-gutter);
+}
+.onboard-page__card {
+  position: relative;
+  z-index: 1;
+  align-self: start;
+  justify-self: center;
+  width: min(560px, calc(100% - 32px));
+  margin: var(--ps-space-6) 0 var(--ps-space-16);
+  padding: var(--ps-space-6);
+  border-radius: var(--ps-r-2xl);
+  background: var(--ps-white);
+  box-shadow: var(--ps-shadow-3);
+}
+.onboard {
+  display: grid;
+  gap: var(--ps-space-5);
+}
+.onboard section {
+  display: grid;
+  gap: var(--ps-space-4);
+}
+.onboard h1 {
+  font-family: var(--ps-font-display);
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 1.9rem);
+  line-height: 1.15;
+}
+.onboard__sub {
+  margin-top: calc(-1 * var(--ps-space-2));
+  color: var(--ps-ink-700);
+}
+.onboard__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.onboard__dots {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.onboard__dots li {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ps-sand-300);
+  transition: width var(--ps-dur-base) var(--ps-ease-out);
+}
+.onboard__dots li.is-done {
+  background: var(--ps-persimmon-400);
+}
+.onboard__dots li.is-on {
+  width: 28px;
+  border-radius: var(--ps-r-pill);
+  background: var(--ps-persimmon-600);
+}
+.onboard__tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ps-space-3);
+}
+.onboard__tile {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-height: 140px;
+  padding: var(--ps-space-4);
+  border: 1.5px solid var(--ps-sand-200);
+  border-radius: var(--ps-r-xl);
+  background: var(--ps-cream-50);
+  color: var(--ps-ink-900);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform var(--ps-dur-fast) var(--ps-ease-out),
+    border-color var(--ps-dur-fast) var(--ps-ease-out);
+}
+.onboard__tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--ps-persimmon-400);
+}
+.onboard__tile[aria-checked="true"] {
+  border-color: var(--ps-persimmon-600);
+  box-shadow: 0 0 0 3px var(--ps-persimmon-100);
+}
+.onboard__tile > span:not(.onboard__icon):not(.onboard__check) {
+  font-size: 0.875rem;
+  color: var(--ps-ink-700);
+}
+.onboard__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background-color: var(--ps-pastel-peach);
+  background-image: var(--ps-gloss-highlight);
+  box-shadow: var(--ps-gloss-edge);
+}
+.onboard__check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ps-persimmon-600);
+  color: var(--ps-white);
+}
+.onboard__nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--ps-space-2);
+}
+.onboard__summary {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.onboard__summary li {
+  display: grid;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: var(--ps-r-md);
+  background: var(--ps-cream-50);
+}
+.onboard__summary span {
+  font-size: 0.8125rem;
+  color: var(--ps-ink-700);
+}
+.onboard__fine {
+  font-size: 0.875rem;
+  color: var(--ps-ink-700);
+}
+.field__optional {
+  font-weight: 400;
+  color: var(--ps-ink-700);
+}
+
+@media (max-width: 899px) {
+  .auth {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 72px 1fr;
+  }
+  .auth__toy,
+  .auth__line,
+  .auth__sky .clouds {
+    display: none;
+  }
+  .auth__logo {
+    padding: var(--ps-space-4) var(--ps-space-4) 0;
+  }
+  .auth__main {
+    align-content: start;
+    padding: var(--ps-space-4) var(--ps-space-4) var(--ps-space-12);
+  }
+}
+@media (max-width: 559px) {
+  .onboard-page__card {
+    padding: var(--ps-space-5) var(--ps-space-4);
+  }
+  .onboard__tiles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .onboard__tile {
+    min-height: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth__toy {
+    animation: none;
+  }
+}
