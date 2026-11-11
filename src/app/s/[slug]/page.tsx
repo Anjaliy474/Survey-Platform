@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { Player } from "@/components/player/Player";
 import { PlayerMessage } from "@/components/player/PlayerMessage";
 import { checkSurvey } from "@/lib/player/rules";
@@ -18,8 +19,20 @@ export async function generateMetadata({ params }: PageProps<"/s/[slug]">): Prom
   };
 }
 
-/** P1 Survey Player, `/s/:slug`. Public, no login. */
-export default async function SurveyPage({ params }: PageProps<"/s/[slug]">) {
+/**
+ * P1 Survey Player, `/s/:slug`. Public, no login.
+ * The URL is read inside <Suspense> (Next 16 Partial Prefetching): the shell is shared by
+ * every survey link, and the survey itself streams in, or is prerendered for known slugs.
+ */
+export default function SurveyPage({ params }: PageProps<"/s/[slug]">) {
+  return (
+    <Suspense fallback={<PlayerLoading />}>
+      <SurveyFromUrl params={params} />
+    </Suspense>
+  );
+}
+
+async function SurveyFromUrl({ params }: { params: PageProps<"/s/[slug]">["params"] }) {
   const { slug } = await params;
   const survey = getSurvey(slug);
   if (!survey) notFound();
@@ -49,4 +62,17 @@ export default async function SurveyPage({ params }: PageProps<"/s/[slug]">) {
   }
 
   return <Player survey={survey} />;
+}
+
+function PlayerLoading() {
+  return (
+    <div className="player theme-marigold" aria-busy="true">
+      <main className="player__main pl-message">
+        <span className="sr-only">Loading the survey…</span>
+        <span className="skeleton" style={{ width: "70%", height: 36 }} />
+        <span className="skeleton" style={{ width: "100%", height: 20 }} />
+        <span className="skeleton" style={{ width: "40%", height: 28 }} />
+      </main>
+    </div>
+  );
 }
