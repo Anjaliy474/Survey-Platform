@@ -181,10 +181,10 @@ export async function buildWorld(
   const preparedMatch = findPrepared(picks.concept);
   const prepared =
     preparedMatch && sameQuestions(preparedMatch.set, set) && preparedMatch.picks.format === picks.format ? preparedMatch : null;
-  const usePrepared = () => ({ world: pinPicks(structuredClone(prepared!.world), picks), failures: [], prepared: true });
+  const preparedResult = () => ({ world: pinPicks(structuredClone(prepared!.world), picks), failures: [], prepared: true });
 
   if (!aiAvailable()) {
-    if (prepared && !edit) return usePrepared();
+    if (prepared && !edit) return preparedResult();
     throw new AiError(NOT_CONNECTED);
   }
 
@@ -197,9 +197,9 @@ export async function buildWorld(
       if (failures.length === 0) return { world: last, failures, prepared: false };
     }
   } catch (e) {
-    if (prepared && !edit) return usePrepared();
+    if (prepared && !edit) return preparedResult();
     throw e;
   }
-  if (prepared && !edit) return usePrepared();
+  if (prepared && !edit) return preparedResult();
   return { world: last!, failures, prepared: false };
 }
