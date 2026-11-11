@@ -179,6 +179,21 @@
   font-size: 1.5rem;
   line-height: 1;
 }
+/* Long labels ("Very dissatisfied") must never be cut off on a 360px phone */
+.pl-scale {
+  container-type: inline-size;
+}
+.pl-scale__option > span:last-child {
+  max-width: 100%;
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
+@container (max-width: 340px) {
+  .pl-scale__option {
+    padding-inline: 1px;
+    font-size: 0.6875rem;
+  }
+}
 .pl-scale--compact {
   gap: var(--ps-space-1);
 }
@@ -278,3 +293,275 @@
   border-radius: 4px;
   border: 1px solid color-mix(in srgb, var(--theme-text) 20%, transparent);
 }
+
+/* ---------- Results reveal (shared by the landing poll and the Player) ---------- */
+.reveal-title {
+  font-family: var(--ps-font-display);
+  font-size: 1.375rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.reveal-block {
+  display: grid;
+  gap: 5px;
+}
+.reveal-q {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--ps-ink-700);
+}
+.reveal-row {
+  display: grid;
+  grid-template-columns: minmax(0, 8.5rem) 1fr 2.5rem;
+  align-items: center;
+  gap: var(--ps-space-2);
+  font-size: 0.8125rem;
+}
+.reveal-row__label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  white-space: nowrap;
+}
+.reveal-row__bar {
+  height: 12px;
+  border-radius: var(--ps-r-pill);
+  background: var(--ps-sand-100);
+  overflow: hidden;
+}
+.reveal-row__bar i {
+  display: block;
+  width: var(--v);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ps-viz-2);
+  transform-origin: left;
+  animation: grow-bar 900ms var(--ps-ease-out) 350ms backwards;
+}
+.reveal-row.is-you .reveal-row__bar i {
+  background: var(--ps-persimmon-400);
+}
+.reveal-row.is-you {
+  font-weight: 700;
+}
+.reveal-row__val {
+  text-align: right;
+  font-weight: 700;
+}
+@keyframes grow-bar {
+  from {
+    transform: scaleX(0);
+  }
+}
+.you-tag {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: var(--ps-persimmon-600);
+  color: var(--ps-white);
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.reveal-snacks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.reveal-snack {
+  padding: 4px 10px;
+  border: 1px solid var(--ps-sand-200);
+  border-radius: var(--ps-r-pill);
+  background: var(--ps-white);
+  font-size: 0.8125rem;
+}
+.reveal-snack b {
+  color: var(--ps-computed);
+}
+.reveal-caveat,
+.reveal-foot {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--ps-ink-500);
+}
+.reveal-foot {
+  margin-top: auto;
+}
+.burst {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+.burst i {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  opacity: 0;
+  animation: burst 1s var(--ps-ease-out) forwards;
+}
+@keyframes burst {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  to {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--r)) scale(1);
+  }
+}
+
+/* ---------- tap_chips_single / multi as full-width tiles (long labels) ---------- */
+.pl-tiles {
+  display: grid;
+  gap: var(--ps-space-2);
+}
+.pl-tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ps-space-3);
+  min-height: 56px;
+  padding: 10px var(--ps-space-4);
+  border-radius: var(--ps-r-lg);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  text-align: left;
+}
+.pl-tile .pl-chip__tick {
+  flex: none;
+}
+.pl-tot__icon b {
+  font-family: var(--ps-font-display);
+  font-size: 1.375rem;
+  font-weight: 800;
+}
+
+/* ---------- segmented_scale: joined segments, only the chosen one fills ---------- */
+.pl-seg {
+  display: grid;
+  overflow: hidden;
+  border: 2px solid var(--theme-tile-border);
+  border-radius: var(--ps-r-lg);
+  background: var(--theme-tile);
+  box-shadow: var(--ps-clay-ledge);
+}
+.pl-seg__opt {
+  min-height: 64px;
+  padding: 10px 4px;
+  border: 0;
+  border-left: 1px solid var(--theme-tile-border);
+  background: transparent;
+  color: var(--theme-text);
+  font: inherit;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--ps-dur-base) var(--ps-ease-out),
+    color var(--ps-dur-base) var(--ps-ease-out);
+}
+.pl-seg__opt:first-child {
+  border-left: 0;
+}
+@media (hover: hover) {
+  .pl-seg__opt:hover {
+    background: var(--theme-selected);
+  }
+}
+.pl-seg__opt.is-selected {
+  background: var(--theme-button);
+  color: var(--theme-button-text);
+  font-weight: 700;
+}
+.pl-seg__opt.is-pop {
+  animation: pl-pop 250ms var(--ps-ease-bounce);
+}
+.pl-seg__opt:focus-visible {
+  outline-offset: -4px;
+}
+.pl-ends {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--ps-space-3);
+  margin-top: 6px;
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--theme-text) 70%, transparent);
+}
+
+/* ---------- number_row_11: 0–10 circles, two rows on narrow screens ---------- */
+.pl-nps-wrap {
+  container-type: inline-size;
+}
+.pl-nps {
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 4px;
+}
+.pl-nps__opt {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-height: 44px;
+  border-radius: 50%;
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+@container (max-width: 400px) {
+  .pl-nps {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--ps-space-2);
+  }
+}
+
+/* ---------- text_box: always optional ---------- */
+.pl-textwrap {
+  display: grid;
+  gap: 4px;
+}
+.pl-text {
+  width: 100%;
+  min-height: 132px;
+  padding: 14px var(--ps-space-4);
+  border: 2px solid var(--theme-tile-border);
+  border-radius: var(--ps-r-lg);
+  background: var(--theme-tile);
+  color: var(--theme-text);
+  font: inherit;
+  font-size: 1rem; /* 16px stops iOS from zooming in */
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color var(--ps-dur-base) var(--ps-ease-out);
+}
+.pl-text--single {
+  min-height: 56px;
+}
+.pl-text::placeholder {
+  color: color-mix(in srgb, var(--theme-text) 45%, transparent);
+}
+.pl-text:focus {
+  outline: none;
+  border-color: var(--theme-button);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-button) 22%, transparent);
+}
+.pl-count {
+  justify-self: end;
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--theme-text) 60%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+.pl-count.is-near {
+  color: var(--ps-warning);
+  font-weight: 700;
+}
+

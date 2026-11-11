@@ -1,0 +1,155 @@
+/*
+ * Pieces shared by every surface: the logo, sky clouds and the site-wide 404 page.
+ * Loaded globally, so the 404 page no longer pulls the whole marketing stylesheet into every route.
+ */
+
+/* ================= Logo ================= */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--ps-font-display);
+  font-size: 1.3125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ps-ink-900);
+  text-decoration: none;
+}
+.logo__mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background-color: var(--ps-persimmon-400);
+  background-image: var(--ps-clay-highlight);
+  box-shadow:
+    var(--ps-clay-inner),
+    0 8px 14px -8px var(--ps-persimmon-600);
+  transition: transform 400ms var(--ps-ease-bounce);
+}
+.logo__mark::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ps-marigold-400);
+  box-shadow: inset 0 -2px 3px rgba(34, 25, 46, 0.15);
+}
+.logo:hover .logo__mark {
+  transform: rotate(-12deg) scale(1.08);
+}
+
+/* ================= Clouds ================= */
+.clouds {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.cloud {
+  position: absolute;
+  left: 0;
+  width: var(--cloud-w);
+  height: calc(var(--cloud-w) * 0.34);
+  border-radius: var(--ps-r-pill);
+  background: var(--ps-cloud);
+  filter: blur(3px);
+  opacity: 0.85;
+  animation: cloud-drift 90s linear infinite;
+}
+.cloud::before,
+.cloud::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: inherit;
+}
+.cloud::before {
+  width: 46%;
+  height: 130%;
+  left: 14%;
+  bottom: 30%;
+}
+.cloud::after {
+  width: 34%;
+  height: 100%;
+  left: 48%;
+  bottom: 40%;
+}
+@keyframes cloud-drift {
+  from {
+    transform: translateX(-40vw);
+  }
+  to {
+    transform: translateX(130vw);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .clouds {
+    display: none;
+  }
+}
+
+@keyframes toy-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--rot, 0deg));
+  }
+  50% {
+    transform: translateY(-14px) rotate(calc(var(--rot, 0deg) + 3deg));
+  }
+}
+
+/* ================= 404 ================= */
+.not-found {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100svh;
+  overflow: hidden;
+  background: var(--ps-web-sky);
+}
+.not-found__logo {
+  position: relative;
+  z-index: 1;
+  padding: var(--ps-space-5) var(--ps-gutter);
+}
+.not-found__body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 18px;
+  padding: var(--ps-space-6) var(--ps-gutter) var(--ps-space-20);
+  text-align: center;
+}
+.not-found__chip {
+  --rot: -6deg;
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 28px;
+  background-color: var(--ps-pastel-lilac);
+  background-image: var(--ps-gloss-highlight);
+  box-shadow:
+    var(--ps-gloss-edge),
+    var(--ps-gloss-drop);
+  color: var(--ps-human);
+  font-family: var(--ps-font-display);
+  font-size: 3rem;
+  font-weight: 800;
+  animation: toy-float 10s ease-in-out infinite;
+}
+.not-found h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  letter-spacing: -0.03em;
+}
+.not-found p {
+  max-width: 46ch;
+  font-size: 1.125rem;
+  color: var(--ps-ink-500);
+}

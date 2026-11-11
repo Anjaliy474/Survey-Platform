@@ -66,11 +66,15 @@ export function estimateSeconds(questions: readonly { open: boolean }[]): number
   return questions.reduce((total, q) => total + (q.open ? SECONDS_PER_OPEN : SECONDS_PER_CLOSED), 0);
 }
 
+/** "30s", "1.5 min", "2 min" (rounded to 5 s under a minute, to half-minutes above). */
+export function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${Math.max(5, Math.round(seconds / 5) * 5)}s`;
+  return `${Math.round(seconds / 30) / 2} min`;
+}
+
 /** "about 30s", "about 1.5 min", "about 2 min". */
 export function formatAbout(seconds: number): string {
-  if (seconds < 60) return `about ${Math.max(5, Math.round(seconds / 5) * 5)}s`;
-  const minutes = Math.round(seconds / 30) / 2;
-  return `about ${minutes} min`;
+  return `about ${formatDuration(seconds)}`;
 }
 
 const countFormat = new Intl.NumberFormat("en-US");

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Calculator, Check, CheckCircle, Ruler, ShieldCheck, Sparkle, Warning } from "@phosphor-icons/react/dist/ssr";
+import { Calculator, Check, CheckCircle, Ruler, ShieldCheck, Sparkle, Warning } from "@/components/icons";
 
 /**
  * Provenance and status badges (DESIGN.md §3.4, §5.3).

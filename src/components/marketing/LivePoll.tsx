@@ -2,9 +2,9 @@
 
 import { ArrowCounterClockwise, ArrowDown, ArrowLeft, CoffeeBean, Leaf, LockSimple } from "@phosphor-icons/react/dist/ssr";
 import { AnimatePresence, motion, useSpring } from "motion/react";
-import type { CSSProperties } from "react";
 import { useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
+import { Burst, RevealRow } from "@/components/player/Celebration";
 import { EmojiScale, ProgressBar, RemainingPill, TapChipsMulti, ThisOrThat } from "@/components/player/mechanics";
 import { submittedPoll, useFinePointer, usePrefersReducedMotion } from "@/lib/client-hooks";
 import { formatCount } from "@/lib/compute";
@@ -289,48 +289,5 @@ export function LivePoll({ stats }: { stats: PollStats }) {
         </section>
       </div>
     </motion.div>
-  );
-}
-
-function RevealRow({ label, pct, you }: { label: string; pct: number; you: boolean }) {
-  return (
-    <div className={`reveal-row ${you ? "is-you" : ""}`}>
-      <span className="reveal-row__label">
-        {label}
-        {you && <span className="you-tag">You</span>}
-      </span>
-      <span className="reveal-row__bar" aria-hidden="true">
-        <i style={{ "--v": `${pct}%` } as CSSProperties} />
-      </span>
-      <span className="reveal-row__val tabular">{pct}%</span>
-    </div>
-  );
-}
-
-const BURST_COLORS = ["var(--ps-persimmon-400)", "var(--ps-marigold-400)", "var(--ps-viz-2)", "var(--ps-sky-accent)"];
-
-/** One celebration burst (DESIGN.md §7.3): 26 squares, 1s, only the first time. Deterministic layout. */
-function Burst() {
-  return (
-    <div className="burst" aria-hidden="true">
-      {Array.from({ length: 26 }, (_, k) => {
-        const angle = (k * 137.508 * Math.PI) / 180;
-        const radius = 120 + ((k * 53) % 130);
-        return (
-          <i
-            key={k}
-            style={
-              {
-                background: BURST_COLORS[k % BURST_COLORS.length],
-                "--x": `${Math.cos(angle) * radius}px`,
-                "--y": `${Math.sin(angle) * radius}px`,
-                "--r": `${(k * 71) % 360}deg`,
-                animationDelay: `${(k % 5) * 30}ms`,
-              } as CSSProperties
-            }
-          />
-        );
-      })}
-    </div>
   );
 }

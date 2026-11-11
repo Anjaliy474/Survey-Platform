@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useId, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { EmojiScale, ProgressBar, RemainingPill } from "@/components/player/mechanics";
@@ -215,6 +216,11 @@ export function PickTheVibe() {
             </p>
           </div>
         </div>
+
+        <p className="vibe__try" data-reveal>
+          Want the whole thing? Try a sample survey: <Link href="/s/cafe-feedback">café feedback (chat style)</Link> or{" "}
+          <Link href="/s/volunteer-feedback">volunteer feedback (one per screen)</Link>.
+        </p>
       </div>
     </section>
   );
