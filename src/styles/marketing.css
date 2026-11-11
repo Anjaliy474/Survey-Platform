@@ -2267,3 +2267,117 @@ button.clay:focus-visible {
     display: none;
   }
 }
+
+/* M2 Pricing */
+.pricing {
+  display: grid;
+  justify-items: center;
+  gap: var(--ps-space-8);
+}
+.pricing__head {
+  max-width: 640px;
+  text-align: center;
+}
+.pricing__head h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  letter-spacing: -0.03em;
+}
+.pricing__head p {
+  margin-top: var(--ps-space-3);
+  font-size: 1.125rem;
+  color: var(--ps-ink-500);
+}
+.pricing__toggle {
+  justify-self: center;
+  margin-bottom: calc(-1 * var(--ps-space-4));
+}
+.pricing__plans {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 360px));
+  gap: var(--ps-space-5);
+}
+.plan {
+  display: grid;
+  align-content: start;
+  gap: var(--ps-space-4);
+  padding: var(--ps-space-6);
+  border: 1px solid var(--ps-line);
+  border-radius: var(--ps-r-2xl);
+  background: var(--ps-white);
+  box-shadow: var(--ps-web-card-shadow);
+}
+.plan--pro {
+  border: 2px solid var(--ps-ink-900);
+}
+.plan h2 {
+  font-size: 1.5rem;
+}
+.plan__for {
+  color: var(--ps-ink-500);
+}
+.plan__price {
+  display: grid;
+  gap: 4px;
+}
+.plan__amount {
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.plan__note {
+  font-size: 0.875rem;
+  color: var(--ps-ink-500);
+}
+.plan__features {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.plan__features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.plan__features svg {
+  flex: none;
+  margin-top: 4px;
+  color: var(--ps-success);
+}
+.pricing__explain,
+.pricing__faq {
+  width: 100%;
+  max-width: 740px;
+}
+.pricing__explain h2,
+.pricing__faq h2 {
+  margin-bottom: var(--ps-space-3);
+  font-size: 1.5rem;
+}
+.pricing__explain p {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--ps-ink-800);
+}
+.pricing__faq details {
+  padding: var(--ps-space-4) 0;
+  border-bottom: 1px solid var(--ps-line);
+}
+.pricing__faq summary {
+  font-weight: 700;
+  cursor: pointer;
+}
+.pricing__faq details p {
+  margin-top: var(--ps-space-2);
+  color: var(--ps-ink-800);
+}
+@media (max-width: 767px) {
+  .pricing__plans {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+  .plan {
+    padding: var(--ps-space-5);
+  }
+}
