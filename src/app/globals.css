@@ -1,0 +1,162 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+@import "../styles/ui.css";
+@import "../styles/player.css";
+@import "../styles/marketing.css";
+
+/*
+ * Tailwind mapping (DESIGN.md §3.10). The default palette, fonts, type scale, radii and
+ * shadows are removed so utilities can only use PlaySurvey tokens.
+ */
+@theme {
+  --color-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --breakpoint-sm: 30rem; /* 480 */
+  --breakpoint-md: 48rem; /* 768 */
+  --breakpoint-lg: 64rem; /* 1024 */
+  --breakpoint-xl: 80rem; /* 1280 */
+}
+
+@theme inline {
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-white: var(--ps-white);
+  --color-cream: var(--ps-cream-50);
+  --color-mist: var(--ps-mist);
+  --color-line: var(--ps-line);
+  --color-persimmon-50: var(--ps-persimmon-50);
+  --color-persimmon-100: var(--ps-persimmon-100);
+  --color-persimmon-400: var(--ps-persimmon-400);
+  --color-persimmon-600: var(--ps-persimmon-600);
+  --color-persimmon-700: var(--ps-persimmon-700);
+  --color-marigold-100: var(--ps-marigold-100);
+  --color-marigold-400: var(--ps-marigold-400);
+  --color-sand-100: var(--ps-sand-100);
+  --color-sand-200: var(--ps-sand-200);
+  --color-sand-300: var(--ps-sand-300);
+  --color-ink-500: var(--ps-ink-500);
+  --color-ink-700: var(--ps-ink-700);
+  --color-ink-900: var(--ps-ink-900);
+  --color-success: var(--ps-success);
+  --color-success-bg: var(--ps-success-bg);
+  --color-warning: var(--ps-warning);
+  --color-warning-bg: var(--ps-warning-bg);
+  --color-danger: var(--ps-danger);
+  --color-danger-bg: var(--ps-danger-bg);
+  --color-info: var(--ps-info);
+  --color-info-bg: var(--ps-info-bg);
+  --color-ai: var(--ps-ai);
+  --color-ai-bg: var(--ps-ai-bg);
+  --color-computed: var(--ps-computed);
+  --color-computed-bg: var(--ps-computed-bg);
+  --color-human: var(--ps-human);
+  --color-human-bg: var(--ps-human-bg);
+
+  --font-display: var(--ps-font-display);
+  --font-body: var(--ps-font-body);
+  --font-mono: var(--ps-font-mono);
+
+  --text-hero: clamp(2.5rem, 6.6vw, 5rem);
+  --text-hero--line-height: 1.04;
+  --text-hero--letter-spacing: -0.04em;
+  --text-hero--font-weight: 700;
+  --text-display: clamp(2rem, 4.2vw, 3rem);
+  --text-display--line-height: 1.08;
+  --text-display--letter-spacing: -0.03em;
+  --text-display--font-weight: 700;
+  --text-h1: 2rem;
+  --text-h1--line-height: 2.375rem;
+  --text-h1--letter-spacing: -0.015em;
+  --text-h1--font-weight: 700;
+  --text-h2: 1.5rem;
+  --text-h2--line-height: 1.875rem;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h2--font-weight: 700;
+  --text-h3: 1.125rem;
+  --text-h3--line-height: 1.5rem;
+  --text-h3--font-weight: 600;
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.75rem;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5rem;
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.25rem;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+  --text-caption--letter-spacing: 0.06em;
+  --text-caption--font-weight: 600;
+  --text-kpi: 2.5rem;
+  --text-kpi--line-height: 2.75rem;
+  --text-kpi--letter-spacing: -0.01em;
+  --text-kpi--font-weight: 700;
+  --text-mono: 0.75rem;
+  --text-mono--line-height: 1.125rem;
+
+  --radius-sm: var(--ps-r-sm);
+  --radius-md: var(--ps-r-md);
+  --radius-lg: var(--ps-r-lg);
+  --radius-xl: var(--ps-r-xl);
+  --radius-2xl: var(--ps-r-2xl);
+  --radius-pill: var(--ps-r-pill);
+
+  --shadow-1: var(--ps-shadow-1);
+  --shadow-2: var(--ps-shadow-2);
+  --shadow-3: var(--ps-shadow-3);
+  --shadow-clay: var(--ps-clay-inner), var(--ps-clay-drop);
+  --shadow-card: var(--ps-web-card-shadow);
+  --shadow-float: var(--ps-web-float-shadow);
+
+  --ease-out: var(--ps-ease-out);
+  --ease-bounce: var(--ps-ease-bounce);
+}
+
+@layer base {
+  :root {
+    interpolate-size: allow-keywords;
+  }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--ps-header-h) + var(--ps-space-2));
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--ps-web-bg);
+    color: var(--ps-ink-900);
+    font-family: var(--ps-font-body);
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--ps-font-display);
+    font-weight: 700;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ps-persimmon-700);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--ps-persimmon-100);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: var(--ps-dur-fast) !important;
+  }
+}

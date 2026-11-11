@@ -1,0 +1,197 @@
+/*
+ * PlaySurvey design tokens (DESIGN.md §3).
+ * Components use these names, never raw hex or pixel values.
+ */
+:root {
+  /* 3.1 Brand */
+  --ps-persimmon-50: #fff1ec;
+  --ps-persimmon-100: #ffdfd3;
+  --ps-persimmon-400: #f0643c; /* not for text */
+  --ps-persimmon-600: #c4461b;
+  --ps-persimmon-700: #a93a14;
+  --ps-marigold-100: #fff3d1;
+  --ps-marigold-400: #ffc233;
+
+  /* 3.2 Neutrals (warm) */
+  --ps-cream-50: #fffbf5;
+  --ps-white: #ffffff;
+  --ps-sand-100: #f6efe4;
+  --ps-sand-200: #ece2d3;
+  --ps-sand-300: #d9cbb6;
+  --ps-ink-500: #6e6479;
+  --ps-ink-700: #4a4057;
+  --ps-ink-800: #3a3046; /* marketing button hover (§5.1) */
+  --ps-ink-900: #22192e;
+
+  /* 3.3 Semantic */
+  --ps-success: #17744a;
+  --ps-success-bg: #e6f6ee;
+  --ps-warning: #8a5300;
+  --ps-warning-bg: #fff4db;
+  --ps-danger: #b0243f;
+  --ps-danger-bg: #fdecef;
+  --ps-info: #3046b8;
+  --ps-info-bg: #eaf0ff;
+
+  /* 3.4 Provenance */
+  --ps-ai: #3046b8;
+  --ps-ai-bg: #eaf0ff;
+  --ps-computed: #0b6b66;
+  --ps-computed-bg: #e0f5f3;
+  --ps-human: #6a3fc4;
+  --ps-human-bg: #f1ebff;
+
+  /* 3.5 Data visualisation */
+  --ps-viz-1: #f0643c;
+  --ps-viz-2: #14a39a;
+  --ps-viz-3: #4c6ef5;
+  --ps-viz-4: #f2a900;
+  --ps-viz-5: #a855c7;
+  --ps-viz-6: #6b7a90;
+  --ps-viz-hatch: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.55) 0 4px, transparent 4px 8px);
+
+  /* 3.6 Player theme: Marigold (default). Other themes below. */
+  --theme-bg: #fffbf5;
+  --theme-text: #22192e;
+  --theme-button: #c4461b;
+  --theme-button-text: #ffffff;
+  --theme-accent: #f0643c;
+  --theme-tile: #ffffff;
+  --theme-tile-border: #ece2d3;
+  --theme-selected: #fff1ec;
+  --theme-pill: #fff3d1;
+
+  /* 3.7 Morning sky */
+  --ps-sky-top: #e7f1ff;
+  --ps-sky-glow: #ffe9df;
+  --ps-sky-accent: #7fb2f0; /* objects and clouds only, never buttons */
+  --ps-cloud: rgba(255, 255, 255, 0.9);
+
+  /* 3.12 Website: "Professional play" */
+  --ps-web-bg: #ffffff;
+  --ps-mist: #f6f8fc;
+  --ps-line: #e9edf3;
+  --ps-glass: rgba(255, 255, 255, 0.8);
+  --ps-web-sky: linear-gradient(180deg, #e8f1ff 0%, #f3f7ff 38%, #ffffff 78%, #fff4ee 100%);
+  --ps-web-card-shadow: 0 1px 2px rgba(34, 25, 46, 0.04), 0 12px 32px -20px rgba(34, 25, 46, 0.18);
+  --ps-web-float-shadow: 0 40px 80px -40px rgba(60, 80, 130, 0.45);
+  --ps-pastel-sky: #9cc3f5;
+  --ps-pastel-peach: #ffd9c8;
+  --ps-pastel-mint: #c9f1e8;
+  --ps-pastel-lilac: #e6deff;
+  --ps-pastel-butter: #ffedb8;
+  --ps-gloss-highlight: radial-gradient(circle at 30% 18%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 50%);
+  --ps-gloss-edge: inset 0 2px 0 rgba(255, 255, 255, 0.8);
+  --ps-gloss-drop: 0 24px 40px -18px rgba(60, 80, 130, 0.35);
+  --ps-dark-pill-shadow: 0 10px 24px -12px rgba(34, 25, 46, 0.6);
+  --ps-scrim: rgba(34, 25, 46, 0.4);
+
+  /* 3.8 Typography (next/font sets --font-jakarta, --font-figtree and --font-jetbrains) */
+  --ps-font-display: var(--font-jakarta), "Plus Jakarta Sans", "Figtree", system-ui, sans-serif;
+  --ps-font-body: var(--font-figtree), "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans",
+    "Noto Sans Devanagari", sans-serif;
+  --ps-font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  /* 3.9 Space (4px base) */
+  --ps-space-1: 4px;
+  --ps-space-2: 8px;
+  --ps-space-3: 12px;
+  --ps-space-4: 16px;
+  --ps-space-5: 20px;
+  --ps-space-6: 24px;
+  --ps-space-8: 32px;
+  --ps-space-10: 40px;
+  --ps-space-12: 48px;
+  --ps-space-16: 64px;
+  --ps-space-20: 80px;
+  --ps-space-24: 96px;
+  --ps-space-32: 128px;
+
+  /* Radius */
+  --ps-r-sm: 8px;
+  --ps-r-md: 12px;
+  --ps-r-lg: 16px;
+  --ps-r-xl: 24px;
+  --ps-r-2xl: 32px;
+  --ps-r-pill: 999px;
+
+  /* Elevation (warm-tinted) */
+  --ps-shadow-1: 0 1px 2px rgba(34, 25, 46, 0.06);
+  --ps-shadow-2: 0 4px 12px rgba(34, 25, 46, 0.08);
+  --ps-shadow-3: 0 16px 40px rgba(34, 25, 46, 0.14);
+  --ps-clay-inner: inset 0 -7px 14px rgba(34, 25, 46, 0.12);
+  --ps-clay-drop: 0 18px 30px -12px rgba(34, 25, 46, 0.28);
+  --ps-clay-ledge: inset 0 -4px 0 rgba(34, 25, 46, 0.06);
+  --ps-clay-highlight: radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 55%);
+
+  /* Motion */
+  --ps-dur-fast: 120ms;
+  --ps-dur-base: 200ms;
+  --ps-dur-slide: 280ms;
+  --ps-dur-reveal: 400ms;
+  --ps-dur-flip: 600ms;
+  --ps-dur-count: 800ms;
+  --ps-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ps-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* 3.11 Layout */
+  --ps-max-marketing: 1160px;
+  --ps-header-h: 72px;
+  --ps-gutter: max(16px, env(safe-area-inset-left));
+}
+
+@media (min-width: 480px) {
+  :root {
+    --ps-gutter: max(20px, env(safe-area-inset-left));
+  }
+}
+@media (min-width: 768px) {
+  :root {
+    --ps-gutter: 24px;
+  }
+}
+@media (min-width: 1024px) {
+  :root {
+    --ps-gutter: 32px;
+  }
+}
+@media (min-width: 1280px) {
+  :root {
+    --ps-gutter: 40px;
+  }
+}
+
+/* 3.6 Player themes, applied with a class on the Player root */
+.theme-marigold {
+  --theme-bg: #fffbf5;
+  --theme-text: #22192e;
+  --theme-button: #c4461b;
+  --theme-button-text: #ffffff;
+  --theme-accent: #f0643c;
+  --theme-tile: #ffffff;
+  --theme-tile-border: #ece2d3;
+  --theme-selected: #fff1ec;
+  --theme-pill: #fff3d1;
+}
+.theme-lagoon {
+  --theme-bg: #effaf8;
+  --theme-text: #22192e;
+  --theme-button: #0b7a73;
+  --theme-button-text: #ffffff;
+  --theme-accent: #14a39a;
+  --theme-tile: #ffffff;
+  --theme-tile-border: #cfe9e5;
+  --theme-selected: #e0f5f3;
+  --theme-pill: #d5f0ec;
+}
+.theme-night {
+  --theme-bg: #1c1726;
+  --theme-text: #f4eeff;
+  --theme-button: #ffc233;
+  --theme-button-text: #22192e;
+  --theme-accent: #ffc233;
+  --theme-tile: #2a2338;
+  --theme-tile-border: rgba(244, 238, 255, 0.16);
+  --theme-selected: rgba(255, 194, 51, 0.16);
+  --theme-pill: rgba(255, 194, 51, 0.2);
+}

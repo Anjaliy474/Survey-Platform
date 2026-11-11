@@ -1,0 +1,280 @@
+/*
+ * Survey Player pieces (DESIGN.md §7). Themed through --theme-* variables (§3.6),
+ * so the same components render in the live poll, the style preview and the Player.
+ */
+
+.pl-progress {
+  height: 4px;
+  border-radius: var(--ps-r-pill);
+  background: color-mix(in srgb, var(--theme-text) 10%, transparent);
+  overflow: hidden;
+}
+.pl-progress > i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--theme-accent);
+  transition: width var(--ps-dur-reveal) var(--ps-ease-out);
+}
+
+.pl-remaining {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--ps-space-1) 10px;
+  border-radius: var(--ps-r-pill);
+  background: var(--theme-pill);
+  color: var(--theme-text);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pl-lead {
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--theme-text) 72%, transparent);
+}
+.pl-question {
+  font-family: var(--ps-font-display);
+  font-size: 1.375rem;
+  line-height: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--theme-text);
+  text-wrap: balance;
+}
+.pl-question:focus {
+  outline: none;
+}
+.pl-helper {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: color-mix(in srgb, var(--theme-text) 70%, transparent);
+}
+.pl-feedback {
+  min-height: 1.375rem;
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  font-weight: 700;
+  color: var(--theme-button);
+}
+
+/* ---------- Option base: big, tactile, pressable ---------- */
+.pl-option {
+  position: relative;
+  appearance: none;
+  font: inherit;
+  color: var(--theme-text);
+  background: var(--theme-tile);
+  border: 2px solid var(--theme-tile-border);
+  box-shadow: var(--ps-clay-ledge);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--ps-dur-fast) var(--ps-ease-out),
+    border-color var(--ps-dur-base) var(--ps-ease-out),
+    background-color var(--ps-dur-base) var(--ps-ease-out),
+    box-shadow var(--ps-dur-fast) var(--ps-ease-out);
+}
+@media (hover: hover) {
+  .pl-option:hover {
+    border-color: color-mix(in srgb, var(--theme-button) 45%, var(--theme-tile-border));
+    transform: translateY(-1px);
+  }
+}
+.pl-option:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.pl-option.is-selected {
+  background: var(--theme-selected);
+  border-color: var(--theme-button);
+}
+.pl-option.is-pop {
+  animation: pl-pop 250ms var(--ps-ease-bounce);
+}
+@keyframes pl-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.pl-option__tick,
+.pl-chip__tick {
+  display: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--theme-button);
+  color: var(--theme-button-text);
+}
+.pl-option__tick {
+  position: absolute;
+  top: var(--ps-space-2);
+  right: var(--ps-space-2);
+}
+.is-selected > .pl-option__tick,
+.is-selected > .pl-chip__tick {
+  display: grid;
+}
+
+/* ---------- this_or_that ---------- */
+.pl-tot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--ps-space-3);
+}
+.pl-tot__option {
+  display: grid;
+  justify-items: center;
+  gap: var(--ps-space-2);
+  min-height: 48px;
+  padding: 18px 10px var(--ps-space-4);
+  border-radius: var(--ps-r-xl);
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+.pl-tot__icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: var(--ps-r-lg);
+  color: var(--ps-white);
+  background-image: var(--ps-clay-highlight);
+  box-shadow:
+    var(--ps-clay-inner),
+    0 10px 16px -10px rgba(34, 25, 46, 0.5);
+}
+
+/* ---------- emoji_scale ---------- */
+.pl-scale {
+  display: grid;
+  gap: 6px;
+}
+.pl-scale__option {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: var(--ps-space-1);
+  min-height: 80px;
+  padding: 10px 2px var(--ps-space-2);
+  border-radius: var(--ps-r-lg);
+  font-size: 0.75rem;
+  line-height: 1.1;
+  font-weight: 600;
+  text-align: center;
+}
+.pl-scale__face {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.pl-scale--compact {
+  gap: var(--ps-space-1);
+}
+.pl-scale--compact .pl-scale__option {
+  min-height: 64px;
+  padding: 7px 1px 5px;
+  border-radius: var(--ps-r-md);
+  font-size: 0.625rem;
+}
+.pl-scale--compact .pl-scale__face {
+  font-size: 1.25rem;
+}
+
+/* ---------- tap_chips_multi ---------- */
+.pl-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ps-space-2);
+}
+.pl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 0 var(--ps-space-4);
+  border-radius: var(--ps-r-pill);
+  font-size: 1rem;
+  font-weight: 600;
+}
+.pl-chip__tick {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---------- Bottom bar ---------- */
+.pl-nav {
+  display: flex;
+  gap: 10px;
+}
+.pl-back {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--ps-r-lg);
+  border: 1.5px solid color-mix(in srgb, var(--theme-text) 22%, transparent);
+  background: var(--theme-tile);
+  color: var(--theme-text);
+  cursor: pointer;
+  transition: background-color var(--ps-dur-fast) var(--ps-ease-out);
+}
+.pl-back:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.pl-next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ps-space-2);
+  flex: 1;
+  height: 52px;
+  border: 0;
+  border-radius: var(--ps-r-pill);
+  background: var(--theme-button);
+  color: var(--theme-button-text);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform var(--ps-dur-fast) var(--ps-ease-out),
+    filter var(--ps-dur-fast) var(--ps-ease-out);
+}
+.pl-next:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.pl-next:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.pl-next:disabled {
+  background: color-mix(in srgb, var(--theme-text) 12%, var(--theme-bg));
+  color: color-mix(in srgb, var(--theme-text) 55%, var(--theme-bg));
+  cursor: default;
+}
+
+.pl-keyhint {
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--theme-text) 60%, transparent);
+}
+.pl-keyhint kbd {
+  font-family: var(--ps-font-mono);
+  font-size: 0.6875rem;
+  padding: 0 5px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--theme-text) 20%, transparent);
+}
