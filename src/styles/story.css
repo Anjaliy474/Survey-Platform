@@ -212,6 +212,7 @@ button.story-chip:focus-visible {
 .props--reply_chips .prop {
   grid-auto-flow: column;
   align-items: center;
+  align-content: center;
   min-height: 48px;
   padding: 0 16px;
   border-color: color-mix(in srgb, var(--story-card-text) 18%, transparent);
