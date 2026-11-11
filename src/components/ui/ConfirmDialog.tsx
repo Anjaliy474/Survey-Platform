@@ -13,6 +13,7 @@ export function ConfirmDialog({
   title,
   children,
   confirmLabel,
+  cancelLabel = "Cancel",
   tone = "primary",
   onConfirm,
   onClose,
@@ -21,6 +22,8 @@ export function ConfirmDialog({
   title: string;
   children: ReactNode;
   confirmLabel: string;
+  /** The other choice; it also runs when the dialog is closed with Esc or ✕. */
+  cancelLabel?: string;
   tone?: "primary" | "danger";
   onConfirm: () => void;
   onClose: () => void;
@@ -55,7 +58,7 @@ export function ConfirmDialog({
         <div className="modal__body">{children}</div>
         <div className="modal__actions">
           <button type="button" className="btn btn--md btn--secondary" onClick={onClose} autoFocus>
-            Cancel
+            {cancelLabel}
           </button>
           <button type="button" className={`btn btn--md btn--${tone}`} onClick={onConfirm}>
             {confirmLabel}

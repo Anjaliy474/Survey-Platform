@@ -262,7 +262,7 @@
   gap: var(--ps-space-3);
 }
 .pl-link {
-  color: var(--theme-button);
+  color: var(--theme-link, var(--theme-button));
   font-weight: 700;
 }
 .pl-madewith {
@@ -453,4 +453,16 @@
 }
 .pl-enjoy .pl-feedback {
   min-height: 0;
+}
+
+/* Roundness (DESIGN.md §6.9): Round is the default; Soft and Pill rescale the corner tokens. */
+.player--shape-soft {
+  --ps-r-md: 6px;
+  --ps-r-lg: 8px;
+  --ps-r-xl: 12px;
+}
+.player--shape-pill {
+  --ps-r-md: 20px;
+  --ps-r-lg: 26px;
+  --ps-r-xl: 32px;
 }

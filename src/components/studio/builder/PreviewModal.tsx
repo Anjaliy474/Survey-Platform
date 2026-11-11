@@ -34,7 +34,9 @@ export function PreviewModal({ open, survey, onClose }: { open: boolean; survey:
         <button type="button" className="phone-frame__close" aria-label="Close preview" onClick={onClose}>
           <X size={18} weight="bold" />
         </button>
-        <div className="phone-frame__screen">{open && <Player survey={survey} />}</div>
+        <div className="phone-frame__screen" data-preview-scroll>
+          {open && <Player survey={survey} preview />}
+        </div>
       </div>
     </dialog>
   );

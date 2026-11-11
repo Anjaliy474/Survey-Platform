@@ -30,6 +30,7 @@ export type Mechanic =
 export type PresentationStyle = "one_per_screen" | "pages" | "chat" | "classic";
 export type PlayfulLevel = "off" | "light" | "medium";
 export type ThemeName = "marigold" | "lagoon" | "night";
+export type Shape = "soft" | "round" | "pill";
 
 export type Question = {
   id: string;
@@ -72,6 +73,10 @@ export type PlayerSurvey = {
   title: string;
   creator: { name: string; logoUrl?: string; url?: string };
   theme: ThemeName;
+  /** A creator's own colours (Custom theme), already contrast-checked. */
+  customTheme?: { bg: string; text: string; button: string; buttonText: string; link: string };
+  /** Corner roundness of tiles and buttons (DESIGN.md §6.9). Round when missing. */
+  shape?: Shape;
   purpose_line: string;
   consent_line: string;
   questions: Question[];

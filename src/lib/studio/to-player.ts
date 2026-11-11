@@ -75,6 +75,8 @@ export function toPlayerSurvey(input: {
   consent_line: string;
   questions: Question[];
   gamified?: Gamified;
+  customTheme?: PlayerSurvey["customTheme"];
+  shape?: PlayerSurvey["shape"];
 }): PlayerSurvey {
   const questions = plainQuestions(input.questions);
   return {
@@ -83,6 +85,8 @@ export function toPlayerSurvey(input: {
     title: input.title,
     creator: { name: input.creatorName },
     theme: input.theme,
+    ...(input.customTheme ? { customTheme: input.customTheme } : {}),
+    ...(input.shape && input.shape !== "round" ? { shape: input.shape } : {}),
     purpose_line: input.purpose_line,
     consent_line: input.consent_line,
     questions,

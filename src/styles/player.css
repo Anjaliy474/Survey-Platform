@@ -60,7 +60,7 @@
   font-size: 0.9375rem;
   line-height: 1.375rem;
   font-weight: 700;
-  color: var(--theme-button);
+  color: var(--theme-link, var(--theme-button));
 }
 
 /* ---------- Option base: big, tactile, pressable ---------- */

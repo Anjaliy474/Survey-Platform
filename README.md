@@ -43,8 +43,10 @@ Following `UI_UX_LAYOUT.md`, one page at a time:
 - [x] P1 Survey Player (`/s/:slug`): all 7 mechanics, 4 styles, 3 playful levels, 3 themes, sample surveys
 - [x] Studio shell + S1 Home (`/app`): sidebar, top bar, step rail, results tabs, survey cards with Duplicate / Close / Delete
 - [x] Start chooser + three ways to start (`/app/new`, `/app/new/questions`, `/research`, `/prompt`) with the AI working panel
-- [ ] Next: Question builder + review (build step 5)
+- [x] S4 Question builder + review (`/app/s/:id/build`): accept / edit / keep mine, bias flags, rules meter, preview
+- [x] S5 Style and gamify (`/app/s/:id/style`): style, playful level, theme with contrast check, words on screen, mechanics, reveal, live phone preview
+- [ ] Next: Publish and share (build step 7)
 
-**AI in demo mode.** `POST /api/ai/shape` runs the create pipeline (question shaper → bias checker → rules engine) and streams each stage. The shaper and bias checker are built-in stand-ins in `src/lib/ai/demo-*.ts` that return the exact `combined.system.txt` JSON schemas; the rules engine (`src/lib/ai/rules-engine.ts`) is real. Connecting Claude replaces the two demo files, not their callers.
+**AI in demo mode.** `POST /api/ai/shape` runs the create pipeline (question shaper → bias checker → rules engine) and streams each stage; `POST /api/ai/gamify` runs the gamifier and then the Player's schema check. The AI stages are built-in stand-ins in `src/lib/ai/demo-*.ts` that return the exact `combined.system.txt` JSON schemas; the rules engine (`src/lib/ai/rules-engine.ts`) and every check in code are real. Connecting Claude replaces the demo files, not their callers.
 
 The Studio keeps sample surveys in your browser until the backend exists. Preview Home's states with `/app?preview=loading|empty|error`; "Demo only: restore the sample surveys" is in Settings.

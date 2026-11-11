@@ -23,7 +23,7 @@ export const AUTO_ADVANCE_MS = 400;
 export const SINGLE_VALUE: Mechanic[] = ["tap_chips_single", "this_or_that", "segmented_scale", "emoji_scale", "number_row_11"];
 
 const COPY_LIMITS = { lead_in: 12, feedback_after_answer: 5, milestone: 12 } as const;
-const BANNED_WORDS = /\b(points?|score|scores|badges?|streaks?|leaderboards?|prizes?|rewards?|hurry|win|winner)\b/i;
+export const BANNED_WORDS = /\b(points?|score|scores|badges?|streaks?|leaderboards?|prizes?|rewards?|hurry|win|winner)\b/i;
 const MAX_QUESTIONS = 15;
 const MAX_OPEN = 2;
 const MAX_REVEAL = 3;
@@ -172,6 +172,14 @@ export function checkSurvey(survey: PlayerSurvey): string[] {
     if (!q || isOpenEnded(q) || q.sensitive || q.collects_personal_data) p.push(`${id} can't be in the reveal`);
   }
   return p;
+}
+
+/** Closed, not sensitive, no personal data: allowed in the reveal (DESIGN.md rule 7). Null when allowed. */
+export function revealEligible(q: Question): string | null {
+  if (isOpenEnded(q)) return "Open answers are never shown in the reveal.";
+  if (q.sensitive) return "Sensitive questions are never shown.";
+  if (q.collects_personal_data) return "Personal data is never shown.";
+  return null;
 }
 
 export function firstMissingRequired(questions: readonly Question[], answers: Answers): Question | undefined {

@@ -1,4 +1,5 @@
 import type { BiasOutput, RulesReport, ShaperOutput, SurveyRequest } from "@/lib/ai/types";
+import type { Gamified, PlayfulLevel, PresentationStyle, Shape, ThemeName } from "@/lib/player/types";
 import type { BuilderState } from "./builder";
 
 /** A creator's survey as the Studio lists it. Numbers are counts; percentages are computed. */
@@ -27,6 +28,26 @@ export type StudioSurvey = {
   ai?: DraftAi;
   /** The creator's working question set (build step 5). */
   builder?: BuilderState;
+  /** Style and gamify choices (build step 6). */
+  look?: StyleSettings;
+};
+
+export type StyleSettings = {
+  style: PresentationStyle;
+  level: PlayfulLevel;
+  theme: ThemeName | "custom";
+  custom: { bg: string; button: string };
+  shape: Shape;
+  /** The gamifier's output with the creator's edits; null while the words are first written. */
+  gamified: Gamified | null;
+  /** Copy lines the creator changed (field paths). They are asked about before regenerating. */
+  editedFields: string[];
+  recommendation: { style: PresentationStyle; reason: string } | null;
+  /** The question set the words were written for; a change in Build refreshes them. */
+  questionsSig: string;
+  /** Varies the demo gamifier's wording on Rewrite and Regenerate. */
+  seed: number;
+  engine: "demo" | "claude";
 };
 
 export type DraftAi = {

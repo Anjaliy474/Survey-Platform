@@ -9,6 +9,7 @@ import type { Section } from "@/lib/studio/types";
 import Link from "next/link";
 import { ComingSoon } from "./ComingSoon";
 import { BuilderView } from "./builder/BuilderView";
+import { StyleView } from "./style/StyleView";
 import { ResultsTabs } from "./ResultsTabs";
 import { StepRail } from "./StepRail";
 import { TopBar, type TopAction } from "./TopBar";
@@ -60,6 +61,8 @@ export function SurveySectionView({ id, section }: { id: string; section: Sectio
   }
 
   if (survey.status === "draft" && section === "build") return <BuilderView survey={survey} />;
+  const reachedStyle = survey.step === "style" || survey.step === "publish";
+  if (survey.status === "draft" && section === "style" && reachedStyle && survey.builder) return <StyleView survey={survey} />;
 
   const published = survey.status !== "draft";
   const publicUrl = survey.slug ? `/s/${survey.slug}` : null;
@@ -90,6 +93,7 @@ export function SurveySectionView({ id, section }: { id: string; section: Sectio
   }
 
   const lockedResults = !published && RESULT_SECTIONS.includes(section);
+  const lockedStep = !published && ((section === "style" && !reachedStyle) || (section === "publish" && survey.step !== "publish"));
 
   return (
     <>
@@ -109,7 +113,19 @@ export function SurveySectionView({ id, section }: { id: string; section: Sectio
         <h1 className="sr-only">
           {info.title}: {survey.title}
         </h1>
-        {lockedResults ? (
+        {lockedStep ? (
+          <EmptyState
+            symbol={<LockSimple size={28} weight="bold" />}
+            title="Finish the earlier steps first"
+            actions={
+              <Link href={surveyHref(survey.id, survey.step)} className="btn btn--md btn--primary">
+                Continue where you left off
+              </Link>
+            }
+          >
+            {section === "style" ? "Approve your questions, then pick how the survey looks." : "Pick a style for your survey, then publish it here."}
+          </EmptyState>
+        ) : lockedResults ? (
           <EmptyState
             symbol={<LockSimple size={28} weight="bold" />}
             title="Results unlock after you publish"

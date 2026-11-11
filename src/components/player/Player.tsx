@@ -2,6 +2,7 @@
 
 import { ArrowLeft, CloudSlash, LockSimple } from "@/components/icons";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { useFinePointer, usePrefersReducedMotion } from "@/lib/client-hooks";
@@ -42,15 +43,41 @@ function usePreviewOverrides() {
   }, [search]);
 }
 
+/** The theme class, plus inline colours for a creator's custom theme (already contrast-checked). */
+function themeLook(survey: PlayerSurvey, override?: ThemeName): { className: string; style?: CSSProperties } {
+  const shape = survey.shape && survey.shape !== "round" ? ` player--shape-${survey.shape}` : "";
+  const c = survey.customTheme;
+  if (override || !c) return { className: `theme-${override ?? survey.theme}${shape}` };
+  const dark = c.text.toLowerCase() === "#ffffff";
+  return {
+    className: `theme-${dark ? "night" : "marigold"}${shape}`,
+    style: {
+      "--theme-bg": c.bg,
+      "--theme-text": c.text,
+      "--theme-button": c.button,
+      "--theme-button-text": c.buttonText,
+      "--theme-accent": c.button,
+      "--theme-link": c.link,
+      "--theme-tile": dark ? `color-mix(in srgb, ${c.bg} 86%, #ffffff)` : "#ffffff",
+      "--theme-tile-border": `color-mix(in srgb, ${c.text} 16%, ${c.bg})`,
+      "--theme-selected": `color-mix(in srgb, ${c.button} 14%, ${c.bg})`,
+      "--theme-pill": `color-mix(in srgb, ${c.button} 18%, ${c.bg})`,
+    } as CSSProperties,
+  };
+}
+
 /**
  * The survey Player (UI_UX_LAYOUT.md P1): Welcome → questions → Submit → Thank-you → reveal.
  * Public, no login, one 560px column on the creator's theme.
+ *
+ * `preview` is the Studio's phone preview: it never scrolls the page around it, and the
+ * Thank-you screen always shows the thank-you words.
  */
-export function Player({ survey }: { survey: PlayerSurvey }) {
+export function Player({ survey, preview = false }: { survey: PlayerSurvey; preview?: boolean }) {
   const overrides = usePreviewOverrides();
-  const style = overrides.style ?? survey.gamified.style;
-  const level = overrides.level ?? survey.gamified.playful_level;
-  const theme = overrides.theme ?? survey.theme;
+  const style = (!preview && overrides.style) || survey.gamified.style;
+  const level = (!preview && overrides.level) || survey.gamified.playful_level;
+  const look = themeLook(survey, preview ? undefined : overrides.theme);
   const reduce = usePrefersReducedMotion();
   const fine = useFinePointer();
   const online = useOnline();
@@ -83,13 +110,19 @@ export function Player({ survey }: { survey: PlayerSurvey }) {
     if (!focusPending.current) return;
     focusPending.current = false;
     const target = view === "answering" ? headingId(screens[index][0]) : "player-title";
-    document.getElementById(target)?.focus({ preventScroll: true });
+    const el = document.getElementById(target);
+    el?.focus({ preventScroll: true });
+    if (preview) {
+      const box = el?.closest<HTMLElement>("[data-preview-scroll]");
+      box?.scrollTo({ top: style === "chat" && view === "answering" ? box.scrollHeight : 0, behavior: reduce ? "auto" : "smooth" });
+      return;
+    }
     if (style === "chat" && view === "answering") {
       document.getElementById("chat-current")?.scrollIntoView({ block: "end", behavior: reduce ? "auto" : "smooth" });
     } else {
       window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
     }
-  }, [screenKey, screens, index, style, view, reduce]);
+  }, [screenKey, screens, index, style, view, reduce, preview]);
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
@@ -189,7 +222,7 @@ export function Player({ survey }: { survey: PlayerSurvey }) {
   /* ---------- welcome ---------- */
   if (view === "welcome") {
     return (
-      <div className={`player theme-${theme}`}>
+      <div className={`player ${look.className}`} style={look.style}>
         {header}
         <main className="player__main">
           <div className="pl-screen pl-welcome">
@@ -219,13 +252,13 @@ export function Player({ survey }: { survey: PlayerSurvey }) {
   if (view === "done") {
     const reveal = computePlayerReveal(survey, answers);
     return (
-      <div className={`player theme-${theme}`}>
+      <div className={`player ${look.className}`} style={look.style}>
         {header}
         <main className="player__main">
           <div className="pl-screen pl-done">
             {justSubmitted && !reduce && <Burst />}
             <h1 id="player-title" tabIndex={-1} className="pl-welcome__title">
-              {justSubmitted ? survey.gamified.closing.thank_you : "You’ve already answered this one. Thanks!"}
+              {justSubmitted || preview ? survey.gamified.closing.thank_you : "You’ve already answered this one. Thanks!"}
             </h1>
             {progress.pendingSync && !online && (
               <p className="pl-consent">Your answers are saved on this device and will be sent when you’re back online.</p>
@@ -280,9 +313,11 @@ export function Player({ survey }: { survey: PlayerSurvey }) {
               <Link href="/" prefetch={false} className="pl-madewith">
                 Made with PlaySurvey
               </Link>
-              <button type="button" className="pl-demo-reset" onClick={resetDemo}>
-                Demo only: answer again
-              </button>
+              {!preview && (
+                <button type="button" className="pl-demo-reset" onClick={resetDemo}>
+                  Demo only: answer again
+                </button>
+              )}
             </div>
           </div>
         </main>
@@ -319,7 +354,7 @@ export function Player({ survey }: { survey: PlayerSurvey }) {
   };
 
   return (
-    <div className={`player theme-${theme} player--${style}`}>
+    <div className={`player ${look.className} player--${style}`} style={look.style}>
       {header}
       <p className="sr-only" aria-live="polite">
         {announce}
