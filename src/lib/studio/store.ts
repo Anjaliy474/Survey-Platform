@@ -185,6 +185,11 @@ export const studio = {
     update((list) => [survey, ...list]);
     return survey;
   },
+  /** Change one survey (title, builder state, step…); updatedAt is set for you. */
+  patch(id: string, change: (s: StudioSurvey) => Partial<StudioSurvey>) {
+    const now = Date.now();
+    update((list) => list.map((x) => (x.id === id ? { ...x, ...change(x), updatedAt: now } : x)));
+  },
   close(id: string) {
     const now = Date.now();
     update((list) => list.map((x) => (x.id === id ? { ...x, status: "closed", closedAt: now, updatedAt: now } : x)));

@@ -565,7 +565,17 @@ export function demoShape(req: SurveyRequest): ShaperOutput {
     decisions = req.mode === "describe_research" && cleanInput ? [trimQ(cleanInput.split(/(?<=[.?!])\s/)[0]).slice(0, 160)] : [t.decision];
     notes.push(...(t.notes ?? []));
     if (!subject) assumptions.push("We couldn't tell exactly what the survey is about, so names and details are left as [placeholders] for you to fill.");
-    if (req.mode === "quick_prompt") assumptions.push(`We read this as a ${topic === "general" ? "general feedback" : topic === "demand" ? "demand-check" : topic} survey.`);
+    const KIND: Record<Topic, string> = {
+      event: "an event feedback",
+      demand: "a demand-check",
+      pricing: "a pricing feedback",
+      workplace: "a workplace pulse",
+      learning: "a course feedback",
+      customer: "a customer feedback",
+      wellbeing: "a student wellbeing",
+      general: "a general feedback",
+    };
+    if (req.mode === "quick_prompt") assumptions.push(`We read this as ${KIND[topic]} survey.`);
     assumptions.push(ctx.audience ? `People answering: ${ctx.audience}.` : "We assumed the people answering are the ones the brief is about.");
 
     if (rigged) {

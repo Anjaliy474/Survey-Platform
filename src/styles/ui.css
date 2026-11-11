@@ -588,3 +588,77 @@
 .menu__item.is-danger {
   color: var(--ps-danger);
 }
+
+/* ---------- Drawer (§5.6), on the native <dialog> ---------- */
+.drawer {
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--ps-white);
+  color: var(--ps-ink-900);
+  box-shadow: var(--ps-shadow-3);
+}
+.drawer::backdrop {
+  background: var(--ps-scrim);
+}
+.drawer--right {
+  inset: 0 0 0 auto;
+  width: min(440px, 100%);
+  height: 100svh;
+  border-radius: var(--ps-r-xl) 0 0 var(--ps-r-xl);
+}
+.drawer--right[open] {
+  animation: drawer-in-right var(--ps-dur-slide) var(--ps-ease-out);
+}
+.drawer--bottom {
+  inset: auto 0 0 0;
+  width: 100%;
+  max-height: 85svh;
+  border-radius: var(--ps-r-xl) var(--ps-r-xl) 0 0;
+}
+.drawer--bottom[open] {
+  animation: drawer-in-up var(--ps-dur-slide) var(--ps-ease-out);
+}
+@keyframes drawer-in-right {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+@keyframes drawer-in-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+.drawer__box {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: inherit;
+}
+.drawer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ps-space-3);
+  padding: var(--ps-space-4) var(--ps-space-5);
+  border-bottom: 1px solid var(--ps-sand-200);
+}
+.drawer__head h2 {
+  font-size: 1.25rem;
+}
+.drawer__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--ps-space-5);
+  padding-bottom: calc(var(--ps-space-5) + env(safe-area-inset-bottom));
+}
+@media (max-width: 767px) {
+  .drawer--right {
+    width: 100%;
+    border-radius: 0;
+  }
+}

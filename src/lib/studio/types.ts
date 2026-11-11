@@ -1,4 +1,5 @@
 import type { BiasOutput, RulesReport, ShaperOutput, SurveyRequest } from "@/lib/ai/types";
+import type { BuilderState } from "./builder";
 
 /** A creator's survey as the Studio lists it. Numbers are counts; percentages are computed. */
 export type SurveyStatus = "draft" | "live" | "closed";
@@ -24,6 +25,8 @@ export type StudioSurvey = {
   brief?: SurveyRequest;
   /** The AI proposal, still a draft until the creator accepts each part in the builder. */
   ai?: DraftAi;
+  /** The creator's working question set (build step 5). */
+  builder?: BuilderState;
 };
 
 export type DraftAi = {

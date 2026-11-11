@@ -16,6 +16,8 @@ export type TopAction = {
   Icon?: ComponentType<IconProps>;
   /** Put the icon after the label (for "Next: …" arrows). */
   iconAfter?: boolean;
+  /** Shown but not usable; the reason appears as a tooltip and under the button on phones. */
+  disabledReason?: string;
 };
 
 function ActionButton({ action, variant }: { action: TopAction; variant: "primary" | "secondary" }) {
@@ -28,6 +30,12 @@ function ActionButton({ action, variant }: { action: TopAction; variant: "primar
       {action.iconAfter && icon}
     </>
   );
+  if (action.disabledReason)
+    return (
+      <button type="button" className={cls} aria-disabled="true" title={action.disabledReason} aria-describedby="topbar-disabled-reason">
+        {body}
+      </button>
+    );
   if (action.href && action.external)
     return (
       <a className={cls} href={action.href} target="_blank" rel="noopener">
@@ -115,9 +123,15 @@ export function TopBar({
           </div>
         )}
       </header>
+      {primary?.disabledReason && (
+        <p id="topbar-disabled-reason" className="sr-only">
+          {primary.disabledReason}
+        </p>
+      )}
       {primary && (
         <div className="mobile-primary">
           <ActionButton action={primary} variant="primary" />
+          {primary.disabledReason && <p className="mobile-primary__reason">{primary.disabledReason}</p>}
         </div>
       )}
     </>
