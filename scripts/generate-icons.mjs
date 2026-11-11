@@ -11,6 +11,11 @@ const WANT = {
   House: ["regular", "fill"], Plus: ["bold"], PlusCircle: ["regular", "fill"], Gear: ["regular", "fill"], SidebarSimple: ["regular"],
   MagnifyingGlass: ["regular"], DotsThree: ["bold"], Copy: ["regular"], Trash: ["regular"], StopCircle: ["regular"],
   ArrowUpRight: ["regular"], ListChecks: ["regular"], Lightning: ["regular"], Lightbulb: ["regular"], Info: ["regular"], ArrowRight: ["bold"], LinkSimple: ["regular"], ArrowClockwise: ["regular"], Star: ["fill"],
+  // Publish, results and account (build steps 7–13)
+  WhatsappLogo: ["fill"], QrCode: ["regular"], Code: ["regular"], DownloadSimple: ["regular"], ChartBar: ["regular", "fill"], Table: ["regular"],
+  ChatCircleText: ["regular", "fill"], FileText: ["regular", "fill"], Funnel: ["regular"], Flag: ["regular", "fill"], Quotes: ["regular", "fill"],
+  SquaresFour: ["regular", "fill"], PaperPlaneRight: ["fill"], Eye: ["regular"], EyeSlash: ["regular"], User: ["regular"], SignOut: ["regular"],
+  Envelope: ["regular"], Printer: ["regular"],
 };
 const out = [];
 for (const [name, weights] of Object.entries(WANT)) {
@@ -25,7 +30,7 @@ for (const [name, weights] of Object.entries(WANT)) {
     }).join("");
     return `    ${w}: <>${svg}</>,`;
   });
-  out.push(`export const ${name} = icon({\n${entries.join("\n")}\n});`);
+  out.push(`export const ${name} = /*#__PURE__*/ icon({\n${entries.join("\n")}\n});`);
 }
 const file = `/**
  * Phosphor icons (https://phosphoricons.com, MIT licence), copied as single weights.

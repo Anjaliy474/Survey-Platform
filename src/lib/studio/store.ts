@@ -4,6 +4,7 @@
  * The creator's surveys. Until the backend exists they live in this browser (localStorage),
  * seeded with sample surveys; every action below becomes an API call later, with the same shape.
  */
+import { setPublishedStatus, unpublishLocal } from "@/lib/player/published-store";
 import { useSyncExternalStore } from "react";
 import type { SurveyRequest } from "@/lib/ai/types";
 import type { DraftAi, StudioSurvey } from "./types";
@@ -133,6 +134,12 @@ function update(change: (surveys: StudioSurvey[]) => StudioSurvey[]) {
   emit();
 }
 
+function findSurvey(id: string): StudioSurvey | undefined {
+  const s = getSnapshot();
+  return s.status === "ready" ? s.surveys.find((x) => x.id === id) : undefined;
+}
+const slugOf = (id: string) => findSurvey(id)?.slug ?? null;
+
 const newId = () => `s-${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`;
 
 export const studio = {
@@ -156,6 +163,8 @@ export const studio = {
       slug: null,
       title: `${original.title} (copy)`,
       status: "draft",
+      player: undefined,
+      publishedAt: undefined,
       step: "build",
       stats: null,
       createdAt: now,
@@ -192,13 +201,20 @@ export const studio = {
   },
   close(id: string) {
     const now = Date.now();
-    update((list) => list.map((x) => (x.id === id ? { ...x, status: "closed", closedAt: now, updatedAt: now } : x)));
+    const slug = slugOf(id);
+    update((list) => list.map((x) => (x.id === id ? { ...x, status: "closed", closedAt: now, updatedAt: now, player: x.player && { ...x.player, status: "closed" } } : x)));
+    if (slug) setPublishedStatus(slug, "closed");
   },
   reopen(id: string) {
-    update((list) => list.map((x) => (x.id === id ? { ...x, status: "live", closedAt: null } : x)));
+    const slug = slugOf(id);
+    update((list) => list.map((x) => (x.id === id ? { ...x, status: "live", closedAt: null, player: x.player && { ...x.player, status: "live" } } : x)));
+    if (slug) setPublishedStatus(slug, "live");
   },
   remove(id: string) {
+    const survey = findSurvey(id);
     update((list) => list.filter((x) => x.id !== id));
+    // A survey published from the Studio stops answering at its link.
+    if (survey?.slug && survey.player) unpublishLocal(survey.slug);
   },
 };
 

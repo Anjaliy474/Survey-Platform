@@ -18,6 +18,8 @@ export type Progress = {
   submittedAt: number | null;
   /** Submitted while offline; to be sent when back online. */
   pendingSync: boolean;
+  /** The response this device submitted (so the enjoyment tap can be added to it). */
+  responseId?: string;
 };
 
 export type PlayerEvent = { type: "start" | "answer" | "screen" | "submit"; at: number; questionId?: string; screen?: number };

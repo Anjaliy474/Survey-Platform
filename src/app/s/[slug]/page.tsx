@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { LocalSurvey } from "@/components/player/LocalSurvey";
 import { Player } from "@/components/player/Player";
 import { PlayerMessage } from "@/components/player/PlayerMessage";
 import { checkSurvey } from "@/lib/player/rules";
@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: PageProps<"/s/[slug]">): Prom
   const { slug } = await params;
   const survey = getSurvey(slug);
   return {
-    title: survey ? `${survey.title} · ${survey.creator.name}` : "Survey not found",
+    title: survey ? `${survey.title} · ${survey.creator.name}` : "Survey",
     robots: { index: false, follow: false },
   };
 }
@@ -35,7 +35,8 @@ export default function SurveyPage({ params }: PageProps<"/s/[slug]">) {
 async function SurveyFromUrl({ params }: { params: PageProps<"/s/[slug]">["params"] }) {
   const { slug } = await params;
   const survey = getSurvey(slug);
-  if (!survey) notFound();
+  // Not a built-in sample: a survey published from the Studio in this browser (no backend yet).
+  if (!survey) return <LocalSurvey slug={slug} />;
 
   if (survey.status === "closed") {
     return (

@@ -2,13 +2,13 @@
 
 import { ArrowRight, ArrowUpRight, LinkSimple, LockSimple } from "@/components/icons";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { useToast } from "@/components/ui/Toast";
 import { NEXT_STEP, SECTION_INFO, surveyHref } from "@/lib/studio/sections";
 import { useStudio } from "@/lib/studio/store";
 import type { Section } from "@/lib/studio/types";
 import Link from "next/link";
 import { ComingSoon } from "./ComingSoon";
 import { BuilderView } from "./builder/BuilderView";
+import { PublishView } from "./publish/PublishView";
 import { StyleView } from "./style/StyleView";
 import { ResultsTabs } from "./ResultsTabs";
 import { StepRail } from "./StepRail";
@@ -22,7 +22,6 @@ const RESULT_SECTIONS: Section[] = ["results", "themes", "dashboard", "responses
  */
 export function SurveySectionView({ id, section }: { id: string; section: Section }) {
   const state = useStudio();
-  const toast = useToast();
   const survey = state?.status === "ready" ? state.surveys.find((s) => s.id === id) : undefined;
   const info = SECTION_INFO[section];
 
@@ -61,6 +60,7 @@ export function SurveySectionView({ id, section }: { id: string; section: Sectio
   }
 
   if (survey.status === "draft" && section === "build") return <BuilderView survey={survey} />;
+  if (section === "publish" && (survey.status !== "draft" || survey.step === "publish")) return <PublishView survey={survey} />;
   const reachedStyle = survey.step === "style" || survey.step === "publish";
   if (survey.status === "draft" && section === "style" && reachedStyle && survey.builder) return <StyleView survey={survey} />;
 
@@ -72,19 +72,7 @@ export function SurveySectionView({ id, section }: { id: string; section: Sectio
   if (published && publicUrl) {
     secondary.push({ label: "View survey", href: publicUrl, external: true, Icon: ArrowUpRight });
     if (survey.status === "live") {
-      primary = {
-        label: "Share",
-        Icon: LinkSimple,
-        onClick: async () => {
-          const link = `${window.location.origin}${publicUrl}`;
-          try {
-            await navigator.clipboard.writeText(link);
-            toast({ message: "Link copied. Paste it into WhatsApp, email or a post." });
-          } catch {
-            toast({ message: `Copy this link: ${link}` });
-          }
-        },
-      };
+      primary = { label: "Share", Icon: LinkSimple, href: surveyHref(survey.id, "publish") };
     }
   }
   if (!published) {

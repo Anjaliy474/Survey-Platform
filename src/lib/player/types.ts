@@ -86,6 +86,17 @@ export type PlayerSurvey = {
    * and per-option counts for the reveal questions. Sample data until the backend exists.
    */
   aggregates: { completed: number; counts: Record<string, number[]>; isSample: boolean };
+  /** Publish settings (UI_UX_LAYOUT.md S6). Missing on the built-in samples. */
+  settings?: SurveySettings;
+};
+
+export type SurveySettings = {
+  /** Off: the thank-you screen offers "Answer again" on the same device. */
+  onePerPerson: boolean;
+  /** Closes automatically at this time (ms), or after this many responses. */
+  closeAt: number | null;
+  closeAfter: number | null;
+  language: "en";
 };
 
 /** One answer: an option or scale index, several option indexes, an NPS score, or text. */

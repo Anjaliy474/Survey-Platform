@@ -1,5 +1,6 @@
 "use client";
 
+import { DEMO_USER } from "@/lib/studio/user";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType, ReactNode } from "react";
@@ -33,7 +34,7 @@ function subscribePref(l: () => void) {
 }
 
 /** Demo creator until sign-up exists (build step 12). */
-const USER = { name: "Demo creator", initials: "DC" };
+const USER = DEMO_USER;
 
 type NavItem = { href: string; label: string; Icon: ComponentType<{ size?: number; weight?: "regular" | "fill" }>; match: (p: string) => boolean };
 const HOME: NavItem = { href: "/app", label: "Home", Icon: House, match: (p) => p === "/app" || p.startsWith("/app/s/") };

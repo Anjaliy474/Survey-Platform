@@ -66,3 +66,16 @@ export function useSearchParam(name: string): string {
   const search = useSyncExternalStore(subscribeUrl, () => window.location.search, () => "");
   return new URLSearchParams(search).get(name) ?? "";
 }
+
+/* ---- The current time, to the minute (for "closes on a date" checks) ---- */
+
+function subscribeMinute(listener: () => void) {
+  const id = window.setInterval(listener, 30_000);
+  return () => window.clearInterval(id);
+}
+const minuteNow = () => Math.floor(Date.now() / 60_000) * 60_000;
+
+/** Now, rounded down to the minute; 0 during server rendering. */
+export function useNowMinute(): number {
+  return useSyncExternalStore(subscribeMinute, minuteNow, () => 0);
+}

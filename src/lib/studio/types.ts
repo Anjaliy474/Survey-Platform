@@ -1,5 +1,5 @@
 import type { BiasOutput, RulesReport, ShaperOutput, SurveyRequest } from "@/lib/ai/types";
-import type { Gamified, PlayfulLevel, PresentationStyle, Shape, ThemeName } from "@/lib/player/types";
+import type { Gamified, PlayerSurvey, PlayfulLevel, PresentationStyle, Shape, ThemeName } from "@/lib/player/types";
 import type { BuilderState } from "./builder";
 
 /** A creator's survey as the Studio lists it. Numbers are counts; percentages are computed. */
@@ -30,6 +30,19 @@ export type StudioSurvey = {
   builder?: BuilderState;
   /** Style and gamify choices (build step 6). */
   look?: StyleSettings;
+  /** Publish settings, kept while the creator is still deciding (build step 7). */
+  publish?: PublishSettings;
+  /** What respondents get: the survey as published (build step 7). */
+  player?: PlayerSurvey;
+  publishedAt?: number;
+};
+
+export type PublishSettings = {
+  close: "never" | "date" | "count";
+  /** yyyy-mm-dd, closes at the end of that day (local time). */
+  closeDate: string;
+  closeAfter: number;
+  onePerPerson: boolean;
 };
 
 export type StyleSettings = {

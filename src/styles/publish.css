@@ -1,0 +1,238 @@
+/* S6 Publish and share (UI_UX_LAYOUT.md): one centred 720px column. */
+
+.publish {
+  display: grid;
+  gap: var(--ps-space-5);
+  width: 100%;
+  max-width: calc(720px + 2 * var(--ps-space-8));
+  margin-inline: auto;
+  padding: var(--ps-space-8) var(--ps-space-8) var(--ps-space-16);
+}
+.publish__title {
+  font-family: var(--ps-font-display);
+  font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+  line-height: 1.1;
+}
+.publish__title:focus {
+  outline: none;
+}
+.publish__lede {
+  color: var(--ps-ink-700);
+  font-size: 1.0625rem;
+}
+.publish__card {
+  display: grid;
+  gap: var(--ps-space-4);
+  padding: var(--ps-space-6);
+  border: 1px solid var(--ps-sand-200);
+  border-radius: var(--ps-r-xl);
+  background: var(--ps-white);
+}
+.publish__card h2 {
+  font-family: var(--ps-font-display);
+  font-size: 1.25rem;
+}
+.publish__cardhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ps-space-2);
+}
+.publish__score {
+  padding: 3px 10px;
+  border-radius: var(--ps-r-pill);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+.publish__score.is-ok {
+  background: var(--ps-success-bg);
+  color: var(--ps-success);
+}
+.publish__score.is-bad {
+  background: var(--ps-danger-bg);
+  color: var(--ps-danger);
+}
+
+/* Checklist (DESIGN.md §6.11) */
+.checklist {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.checklist__row {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--ps-space-3);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ps-sand-100);
+}
+.checklist__row:last-child {
+  border-bottom: 0;
+}
+.checklist__mark {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+.checklist__row.is-ok .checklist__mark {
+  background: var(--ps-success-bg);
+  color: var(--ps-success);
+}
+.checklist__row.is-bad .checklist__mark {
+  background: var(--ps-danger-bg);
+  color: var(--ps-danger);
+}
+.checklist__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.checklist__text > span {
+  font-size: 0.875rem;
+  color: var(--ps-ink-700);
+  overflow-wrap: anywhere;
+}
+.checklist__fix {
+  align-self: center;
+  padding: 6px 4px;
+}
+
+.publish__sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ps-space-2);
+  margin-top: var(--ps-space-2);
+  font-size: 0.9375rem;
+}
+.publish__sub .input {
+  width: auto;
+}
+.publish__count {
+  width: 120px !important;
+}
+.publish__cta {
+  display: grid;
+  justify-items: start;
+  gap: var(--ps-space-2);
+}
+
+/* After publishing */
+.publish__hero {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: var(--ps-space-3);
+}
+.publish__hero .burst i {
+  top: 24px;
+  left: 120px;
+}
+.share__wa {
+  justify-self: start;
+  background: var(--ps-success);
+  color: var(--ps-white);
+}
+.share__wa:hover {
+  background: color-mix(in srgb, var(--ps-success) 85%, #000);
+  transform: translateY(-1px);
+}
+.share__row {
+  display: flex;
+  gap: var(--ps-space-2);
+}
+.share__input {
+  min-width: 0;
+  font-family: var(--ps-font-mono);
+  font-size: 0.875rem;
+}
+.share.is-muted .share__row,
+.share.is-muted .qrcard {
+  opacity: 0.6;
+}
+
+.qrcard {
+  display: flex;
+  align-items: center;
+  gap: var(--ps-space-5);
+  padding: var(--ps-space-4);
+  border-radius: var(--ps-r-lg);
+  background: var(--ps-cream-50);
+}
+.qrcard__code {
+  display: block;
+  flex: none;
+  width: 136px;
+  height: 136px;
+  border-radius: var(--ps-r-md);
+  box-shadow: 0 0 0 1px var(--ps-sand-200);
+}
+.qrcard__text {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  font-size: 0.9375rem;
+}
+.qrcard__text span {
+  color: var(--ps-ink-700);
+}
+
+.embed {
+  display: grid;
+  gap: var(--ps-space-2);
+}
+.embed summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.embed[open] summary {
+  margin-bottom: var(--ps-space-2);
+}
+.embed__code {
+  font-family: var(--ps-font-mono);
+  font-size: 0.8125rem;
+  resize: vertical;
+}
+.embed .btn {
+  justify-self: start;
+}
+.next-card {
+  justify-items: start;
+  background: var(--ps-marigold-100);
+  border-color: transparent;
+}
+.next-card .field__help {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 767px) {
+  .publish {
+    padding: var(--ps-space-5) var(--ps-space-4) calc(var(--ps-space-24) + 64px);
+  }
+  .publish__card {
+    padding: var(--ps-space-5) var(--ps-space-4);
+  }
+  /* The top bar's Publish sticks to the bottom on phones instead. */
+  .publish__cta {
+    display: none;
+  }
+  /* WhatsApp first and full width on phones (UI_UX_LAYOUT.md S6). */
+  .share__wa {
+    justify-self: stretch;
+  }
+  .qrcard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "reac
 import { Badge } from "@/components/ui/Badge";
 import { useFinePointer, usePrefersReducedMotion } from "@/lib/client-hooks";
 import { useOnline, useProgress } from "@/lib/player/progress-store";
+import { newResponseId, recordResponse, updateResponse } from "@/lib/player/published-store";
 import { computePlayerReveal } from "@/lib/player/reveal";
 import {
   AUTO_ADVANCE_MS,
@@ -176,8 +177,12 @@ export function Player({ survey, preview = false }: { survey: PlayerSurvey; prev
       return;
     }
     focusPending.current = true;
-    store.update((p) => ({ ...p, status: "submitted", submittedAt: Date.now(), pendingSync: !navigator.onLine }));
+    store.update((p) => ({ ...p, status: "submitted", submittedAt: Date.now(), pendingSync: !navigator.onLine, responseId: newResponseId() }));
     store.logEvent({ type: "submit" });
+    const done = store.getSnapshot();
+    if (!preview && done.responseId) {
+      recordResponse(survey.slug, { id: done.responseId, startedAt: done.startedAt, submittedAt: done.submittedAt ?? 0, answers: done.answers, enjoyment: null });
+    }
     setJustSubmitted(true);
   }
 
@@ -271,7 +276,10 @@ export function Player({ survey, preview = false }: { survey: PlayerSurvey; prev
               <EmojiScale
                 points={ENJOYMENT.map((label, i) => ({ face: FACES_5[i], label }))}
                 value={progress.enjoyment}
-                onChange={(i) => store.update((p) => ({ ...p, enjoyment: i }))}
+                onChange={(i) => {
+                  store.update((p) => ({ ...p, enjoyment: i }));
+                  if (progress.responseId && !preview) updateResponse(survey.slug, progress.responseId, { enjoyment: i });
+                }}
                 labelledBy="enjoy-title"
                 pop={!reduce}
                 size="compact"
@@ -313,10 +321,16 @@ export function Player({ survey, preview = false }: { survey: PlayerSurvey; prev
               <Link href="/" prefetch={false} className="pl-madewith">
                 Made with PlaySurvey
               </Link>
-              {!preview && (
-                <button type="button" className="pl-demo-reset" onClick={resetDemo}>
-                  Demo only: answer again
+              {!preview && survey.settings && !survey.settings.onePerPerson ? (
+                <button type="button" className="pl-link pl-again" onClick={resetDemo}>
+                  Answer again
                 </button>
+              ) : (
+                !preview && (
+                  <button type="button" className="pl-demo-reset" onClick={resetDemo}>
+                    Demo only: answer again
+                  </button>
+                )
               )}
             </div>
           </div>
