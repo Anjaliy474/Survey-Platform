@@ -1,7 +1,7 @@
 "use client";
 
 import type { Gamified, PlayfulLevel, PresentationStyle, Question } from "@/lib/player/types";
-import type { BiasOutput, ShapedQuestion, ShapeEvent, SurveyRequest, ThemeOutput, ThemeRequest } from "./types";
+import type { BiasOutput, DashboardRequest, DashboardSpec, ShapedQuestion, ShapeEvent, SurveyRequest, ThemeOutput, ThemeRequest } from "./types";
 
 /** Run the create pipeline once and return the final result (no stage display). */
 export async function shapeOnce(request: SurveyRequest): Promise<Extract<ShapeEvent, { type: "result" }> | null> {
@@ -74,6 +74,20 @@ export async function extractThemes(req: ThemeRequest): Promise<{ engine: "demo"
       body: JSON.stringify(req),
     });
     return res.ok ? ((await res.json()) as { engine: "demo" | "claude"; result: ThemeOutput }) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Run the dashboard_spec stage; code re-checks the spec on the server before it comes back. */
+export async function buildDashboard(req: DashboardRequest): Promise<{ engine: "demo" | "claude"; spec: DashboardSpec; codeNotes: string[] } | null> {
+  try {
+    const res = await fetch("/api/ai/dashboard", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(req),
+    });
+    return res.ok ? ((await res.json()) as { engine: "demo" | "claude"; spec: DashboardSpec; codeNotes: string[] }) : null;
   } catch {
     return null;
   }

@@ -143,3 +143,47 @@ export type ThemeRequest = {
   responses: { id: string; text: string }[];
   codebook?: Pick<Theme, "theme_id" | "label" | "description">[];
 };
+
+/* ---------------- dashboard_spec (combined.system.txt) ---------------- */
+
+export type FieldType = "nominal" | "ordinal_scale" | "nps" | "multi_choice" | "numeric" | "date" | "themes" | "personal";
+export type SchemaField = { field: string; label: string; type: FieldType; question?: string; options?: string[] };
+export type ChartType = "bar" | "grouped_bar" | "stacked_bar_100" | "diverging_likert" | "histogram" | "line" | "kpi_tile" | "table";
+export type Aggregate = "count" | "share" | "mean" | "median" | "nps" | "mentions";
+export type DashCaveat = "few_periods" | "small_group" | "ordinal_mean" | "multi_select" | "flagged_responses_included" | "convenience_sample";
+
+export type DashChart = {
+  chart_id: string;
+  title: string;
+  answers_question: string;
+  type: ChartType;
+  x: { field: string; time_grain: "none" | "day" | "week" | "month"; sort: "natural" | "value_desc" };
+  measure: { aggregate: Aggregate; field: string | null };
+  group_by: string | null;
+  show_n: boolean;
+  show_uncertainty: boolean;
+  caveats: DashCaveat[];
+};
+
+export type Dashboard = {
+  title: string;
+  description: string;
+  filters: { field: string; control: "dropdown" | "multi_select" | "date_range" }[];
+  charts: DashChart[];
+  dashboard_caveats: DashCaveat[];
+};
+
+export type DashboardSpec = {
+  mode: "create" | "edit";
+  dashboard: Dashboard;
+  request_mapping: { requested: string; outcome: "fulfilled" | "adapted" | "declined"; chart_ids: string[]; explanation: string }[];
+  questions_for_analyst: string[];
+  flags: string[];
+};
+
+export type DashboardRequest = {
+  mode: "create" | "edit";
+  request: string;
+  schema: { fields: SchemaField[]; date_periods_available: number };
+  current?: Dashboard;
+};

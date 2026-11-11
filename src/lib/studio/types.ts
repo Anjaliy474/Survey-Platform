@@ -1,4 +1,4 @@
-import type { BiasOutput, RulesReport, ShaperOutput, SurveyRequest, ThemeOutput } from "@/lib/ai/types";
+import type { BiasOutput, Dashboard, DashboardSpec, RulesReport, ShaperOutput, SurveyRequest, ThemeOutput } from "@/lib/ai/types";
 import type { Gamified, PlayerSurvey, PlayfulLevel, PresentationStyle, Shape, ThemeName } from "@/lib/player/types";
 import type { BuilderState } from "./builder";
 
@@ -39,6 +39,25 @@ export type StudioSurvey = {
   review?: Record<string, "keep" | "exclude">;
   /** Theme coding per open question (Themes page). */
   themes?: Record<string, ThemeState>;
+  /** The dashboard built from the creator's request (Dashboard page). */
+  dashboard?: DashboardState;
+};
+
+export type DashboardState = {
+  spec: Dashboard;
+  /** This round's mapping of the request: done, adapted or not possible. */
+  mapping: DashboardSpec["request_mapping"];
+  questions: string[];
+  flags: string[];
+  /** Changes code made on its own rules pass. */
+  codeNotes: string[];
+  /** Charts the creator accepted (solid, "You approved"); the rest are drafts. */
+  accepted: string[];
+  /** Charts the last edit changed (they pulse once). */
+  changed: string[];
+  requests: string[];
+  updatedAt: number;
+  engine: "demo" | "claude";
 };
 
 export type ThemeState = {

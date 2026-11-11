@@ -154,7 +154,7 @@ export function Columns({
 }
 
 /** A clean axis top just above the tallest bar (61 → 80, 19 → 20), with a whole-number middle line. */
-function niceMax(v: number): number {
+export function niceMax(v: number): number {
   if (v <= 4) return 4;
   const pow = Math.pow(10, Math.floor(Math.log10(v)));
   for (const step of [pow / 10, pow / 5, pow / 2, pow, pow * 2, pow * 5].filter((s) => s >= 1)) {

@@ -48,7 +48,8 @@ Following `UI_UX_LAYOUT.md`, one page at a time:
 - [x] S6 Publish and share (`/app/s/:id/publish`): checklist, close / one-response settings, share sheet with copy, WhatsApp, QR (PNG) and embed
 - [x] R1 Results overview (`/app/s/:id/results`): caveat banner, KPIs, responses over time, drop-off, a chart per question (bars, diverging Likert, NPS), data quality flags, View as table
 - [x] R3 Themes (`/app/s/:id/themes`): themes with coding rules and verbatim quotes, counts and ties from code, sentiment split, minority mentions, suggested new themes, rename / merge, personal data masked
-- [ ] Next: Dashboard (build step 10)
+- [x] R4 Dashboard (`/app/s/:id/dashboard`): describe it in words, library charts only, a done / adapted / not-possible mapping, filters, draft cards to accept or remove, edits in words, n per group and hatched small groups
+- [ ] Next: Sign-up, onboarding and settings (build step 12)
 
 **AI in demo mode.** `POST /api/ai/shape` runs the create pipeline (question shaper → bias checker → rules engine) and streams each stage; `POST /api/ai/gamify` runs the gamifier and then the Player's schema check. `POST /api/ai/themes` masks personal data, runs the theme extractor, then checks every quote is an exact substring of its response. The AI stages are built-in stand-ins in `src/lib/ai/demo-*.ts` that return the exact `combined.system.txt` JSON schemas; the rules engine (`src/lib/ai/rules-engine.ts`) and every check in code are real. Connecting Claude replaces the demo files, not their callers.
 

@@ -1,0 +1,412 @@
+/* R4 Dashboard (UI_UX_LAYOUT.md): prompt bar, request mapping, filters, a 12-column chart grid. */
+
+.dash {
+  display: grid;
+  gap: var(--ps-space-4);
+}
+.dash__prompt {
+  display: flex;
+  gap: var(--ps-space-2);
+}
+.dash__input {
+  flex: 1;
+  height: 56px;
+  font-size: 1rem;
+}
+.dash__prompt .btn {
+  height: 56px;
+}
+.dash__examples {
+  margin-top: calc(-1 * var(--ps-space-2));
+}
+.dash__start {
+  display: grid;
+  justify-items: center;
+  gap: var(--ps-space-2);
+  max-width: 520px;
+  margin: var(--ps-space-8) auto;
+  text-align: center;
+  color: var(--ps-ink-700);
+}
+.dash__start svg {
+  color: var(--ps-ai);
+}
+.dash__start h2 {
+  font-family: var(--ps-font-display);
+  font-size: 1.375rem;
+  color: var(--ps-ink-900);
+}
+
+/* "What we did with your request" */
+.mapping {
+  padding: var(--ps-space-4);
+  border: 1px solid var(--ps-sand-200);
+  border-radius: var(--ps-r-lg);
+  background: var(--ps-white);
+}
+.mapping summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.mapping__rows {
+  display: grid;
+  gap: 8px;
+  margin: var(--ps-space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.mapping__row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  font-size: 0.9375rem;
+}
+.mapping__row > span:last-child {
+  display: grid;
+  gap: 2px;
+  overflow-wrap: anywhere;
+}
+.mapping__mark {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+.mapping__row.is-fulfilled .mapping__mark {
+  background: var(--ps-success-bg);
+  color: var(--ps-success);
+}
+.mapping__row.is-adapted .mapping__mark {
+  background: var(--ps-info-bg);
+  color: var(--ps-info);
+}
+.mapping__row.is-declined .mapping__mark {
+  background: var(--ps-danger-bg);
+  color: var(--ps-danger);
+}
+.mapping__why {
+  font-size: 0.875rem;
+  color: var(--ps-ink-700);
+}
+.mapping__qs {
+  display: grid;
+  gap: 6px;
+  margin-top: var(--ps-space-3);
+}
+
+/* Filters */
+.dash__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ps-space-3);
+}
+.dash__filter {
+  display: grid;
+  gap: 4px;
+  min-width: 160px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--ps-ink-700);
+}
+.dash__filter .input {
+  height: 40px;
+}
+
+/* Chart grid and cards (draft = dashed) */
+.dash__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--ps-space-4);
+}
+.dcard {
+  display: grid;
+  align-content: start;
+  gap: var(--ps-space-3);
+  min-width: 0;
+  padding: var(--ps-space-5);
+  border: 1px solid var(--ps-sand-200);
+  border-radius: var(--ps-r-xl);
+  background: var(--ps-white);
+}
+.dcard.is-draft {
+  border: 1.5px dashed var(--ps-sand-300);
+}
+.dcard.is-changed {
+  animation: dcard-pulse 1.2s var(--ps-ease-out) 1;
+}
+@keyframes dcard-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ps-ai) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 14px transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dcard.is-changed {
+    animation: none;
+  }
+}
+.dcard__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.dcard__head h3 {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+.dcard__actions {
+  display: flex;
+  gap: 6px;
+}
+.caveat-chip--warn {
+  background: var(--ps-warning-bg);
+  color: var(--ps-warning);
+}
+.dash-empty {
+  padding: var(--ps-space-4);
+  border-radius: var(--ps-r-md);
+  background: var(--ps-sand-100);
+  font-size: 0.875rem;
+  color: var(--ps-ink-700);
+}
+.dash-kpi {
+  display: grid;
+  gap: 4px;
+}
+.dash-kpi__value {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.dash-kpi__sub {
+  font-size: 0.8125rem;
+  color: var(--ps-ink-700);
+}
+/* Small groups (n < 10): the series colour with a 45° hatch (DESIGN.md §3.5) */
+.is-small {
+  background-image: var(--ps-viz-hatch) !important;
+}
+
+/* Bars: shares, averages with 95% whiskers, or signed NPS around a zero line */
+.dbars {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dbars__row {
+  display: grid;
+  grid-template-columns: minmax(90px, 34%) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+}
+.dbars__label {
+  overflow-wrap: anywhere;
+}
+.dbars__label small {
+  color: var(--ps-ink-700);
+  white-space: nowrap;
+}
+.dbars__track {
+  position: relative;
+  height: 16px;
+}
+.dbars__bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  min-width: 2px;
+  border-radius: 0 4px 4px 0;
+  background: var(--ps-viz-2);
+}
+.dbars__bar.is-neg {
+  border-radius: 4px 0 0 4px;
+  background: #7e3a99;
+}
+.dbars__zero {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: 50%;
+  width: 1px;
+  background: var(--ps-ink-500);
+}
+.dbars__ci {
+  position: absolute;
+  top: 50%;
+  height: 1.5px;
+  background: var(--ps-ink-500);
+  pointer-events: none;
+}
+.dbars__ci::before,
+.dbars__ci::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  width: 1.5px;
+  height: 9px;
+  background: var(--ps-ink-500);
+}
+.dbars__ci::before {
+  left: 0;
+}
+.dbars__ci::after {
+  right: 0;
+}
+.dbars__value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Grouped bars */
+.grouped {
+  display: grid;
+  gap: var(--ps-space-3);
+}
+.grouped__cats {
+  display: grid;
+  gap: var(--ps-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.grouped__cats > li {
+  display: grid;
+  gap: 4px;
+}
+.grouped__cat {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+.grouped__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 8px;
+}
+.grouped__track {
+  height: 12px;
+}
+.grouped__track i {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 0 4px 4px 0;
+}
+.grouped__val {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* 100% stacked and diverging rows */
+.stacked {
+  display: grid;
+  gap: var(--ps-space-3);
+}
+.stacked__rows {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.stacked__rows > li {
+  display: grid;
+  gap: 4px;
+}
+.stacked__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.stacked__label small {
+  font-weight: 400;
+  color: var(--ps-ink-700);
+}
+.stacked__bar {
+  display: flex;
+  gap: 2px;
+  height: 24px;
+}
+.stacked__seg {
+  display: flex;
+  align-items: center;
+  flex-grow: 0;
+  flex-shrink: 0;
+  min-width: 3px;
+  padding-left: 5px;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Line (5+ periods only) */
+.line {
+  width: 100%;
+  height: auto;
+}
+.line__grid {
+  stroke: var(--ps-sand-200);
+  stroke-width: 1;
+}
+.line__tick {
+  font-size: 11px;
+  fill: var(--ps-ink-500);
+}
+.line__path {
+  fill: none;
+  stroke: var(--ps-viz-2);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.line__dot {
+  fill: var(--ps-viz-2);
+  stroke: var(--ps-white);
+  stroke-width: 2;
+}
+.dash__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ps-space-3);
+}
+
+@media (max-width: 1023px) {
+  .dash__grid > .dcard {
+    grid-column: span 12 !important;
+  }
+  .dash__grid > .dcard:has(.dash-kpi) {
+    grid-column: span 6 !important;
+  }
+}
+@media (max-width: 767px) {
+  .dash__grid > .dcard:has(.dash-kpi) {
+    grid-column: span 12 !important;
+  }
+  .dash__prompt {
+    flex-direction: column;
+  }
+  .dcard {
+    padding: var(--ps-space-4);
+  }
+  .dbars__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .dbars__label {
+    grid-column: 1 / -1;
+  }
+}

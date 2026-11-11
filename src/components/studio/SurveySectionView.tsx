@@ -10,6 +10,7 @@ import { ComingSoon } from "./ComingSoon";
 import { BuilderView } from "./builder/BuilderView";
 import { PublishView } from "./publish/PublishView";
 import { ResultsView } from "./results/ResultsView";
+import { DashboardView } from "./results/DashboardView";
 import { ThemesView } from "./results/ThemesView";
 import { StyleView } from "./style/StyleView";
 import { ResultsTabs } from "./ResultsTabs";
@@ -65,6 +66,7 @@ export function SurveySectionView({ id, section }: { id: string; section: Sectio
   if (section === "publish" && (survey.status !== "draft" || survey.step === "publish")) return <PublishView survey={survey} />;
   if (survey.status !== "draft" && section === "results") return <ResultsView survey={survey} />;
   if (survey.status !== "draft" && section === "themes") return <ThemesView survey={survey} />;
+  if (survey.status !== "draft" && section === "dashboard") return <DashboardView survey={survey} />;
   const reachedStyle = survey.step === "style" || survey.step === "publish";
   if (survey.status === "draft" && section === "style" && reachedStyle && survey.builder) return <StyleView survey={survey} />;
 
