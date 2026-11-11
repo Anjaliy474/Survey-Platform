@@ -1,0 +1,133 @@
+%% AI-First Survey Platform: end-to-end architecture flow
+%% Team 3, PD3.401 AI for Product Managers
+%% Colour key: blue = AI (LLM), orange = rules, green = code computes, purple = human decision, grey = data store
+%% Core principle: AI writes words, code computes every number, the user approves every change.
+
+flowchart TB
+
+  subgraph USERS["Users"]
+    direction LR
+    CR["Survey creator<br/>startup · researcher · organization"]
+    RS["Respondent"]
+    AN["Analyst / insight consumer"]
+  end
+
+  subgraph CREATE["Step 1 - Create: Creator Studio"]
+    direction TB
+    subgraph ENTRY["Three ways to start"]
+      direction LR
+      E1["Bring your questions"]
+      E2["Describe your research"]
+      E3["Quick one-line prompt"]
+    end
+    AI_SHAPE["AI Question Shaper<br/>suggest · improve · draft<br/>shows a reason per question<br/>asks follow-ups if brief is thin"]
+    AI_BIAS["AI Bias Checker<br/>leading · loaded · double-barrelled"]
+    R_RULES["Rules Engine<br/>cap 10 default, 15 max · time budget<br/>order · field types · validation"]
+    R_PRIV["Privacy Rules<br/>minimal personal data<br/>mandatory consent line - DPDP"]
+    FINAL{"Creator reviews<br/>before/after view<br/>accept or edit each change"}
+  end
+
+  subgraph GAMIFY["Step 2 - Gamify and publish"]
+    direction TB
+    STYLE["Creator picks style<br/>one-per-screen · pages · chat · classic<br/>playful layer level"]
+    AI_GAME["AI Gamifier<br/>maps each question to a mechanic<br/>writes neutral microcopy"]
+    R_MECH["Mechanics Library + Schema Check<br/>same scale points and options<br/>no points, prizes or avatars"]
+    PUB["Published survey link"]
+  end
+
+  subgraph COLLECT["Step 3 - Collect"]
+    direction TB
+    PLAYER["Gamified Survey Player<br/>progress + time left · tap answers<br/>aggregate reveal only after 20 responses"]
+    GUARD["Intake Guardrails<br/>responses treated as data, never commands<br/>injection flags · rate limits · bot checks"]
+  end
+
+  subgraph STORE["Data layer"]
+    direction LR
+    DB_S[("Surveys and<br/>question sets")]
+    DB_R[("Responses")]
+    DB_E[("Events<br/>completion · drop-off")]
+    DB_D[("Dashboard specs")]
+  end
+
+  subgraph ANALYSE["Step 4 - Analyse"]
+    direction TB
+    AI_THEME["AI Theme Extractor<br/>themes + verbatim quotes<br/>+ response IDs, ties stated"]
+    AI_DASH["AI Dashboard Spec Writer<br/>plain-language request to spec"]
+    AI_CHAT["AI Chat-to-Query<br/>question to query<br/>explains the result"]
+    R_CHART["Chart Validator<br/>chart type vs data type<br/>small groups under 10 flagged"]
+    COMPUTE["Compute Engine<br/>counts · averages · segments<br/>EVERY number comes from here"]
+    REDACT["Output Guardrails<br/>PII redaction · quote verifier<br/>suspicious responses flagged"]
+    OUT["Insights · live interactive dashboard<br/>chat answers · sample caveat"]
+  end
+
+  subgraph EVAL["Quality gate - offline eval loop"]
+    direction LR
+    GOLD["Golden set<br/>10 examples, growing to 30-50"]
+    RUNS["Generate<br/>3 runs per example"]
+    CCHK["Code checks<br/>exact properties"]
+    JUDGE["LLM judge<br/>different model family"]
+    HUMAN["Human spot-check<br/>10 random + all A1, A2, E1"]
+    GATE{"Ship gate<br/>8 of 10 pass<br/>zero critical failures"}
+  end
+
+  subgraph LEGEND["Legend"]
+    direction LR
+    L_AI["AI - LLM"]
+    L_RULE["Rules"]
+    L_CODE["Code computes"]
+    L_HUMAN["Human decides"]
+    L_DB[("Data store")]
+  end
+
+  %% Step 1: create
+  CR --> ENTRY
+  E1 & E2 & E3 --> AI_SHAPE
+  AI_SHAPE --> AI_BIAS --> R_RULES --> R_PRIV --> FINAL
+  FINAL -->|"needs changes"| AI_SHAPE
+  FINAL -->|"approved"| STYLE
+  FINAL --> DB_S
+
+  %% Step 2: gamify and publish
+  STYLE --> AI_GAME --> R_MECH --> PUB
+
+  %% Step 3: collect
+  PUB --> RS
+  RS --> PLAYER --> GUARD --> DB_R
+  PLAYER -.->|"logs"| DB_E
+
+  %% Step 4: analyse
+  AN -->|"give me the themes"| AI_THEME
+  AN -->|"build me a dashboard"| AI_DASH
+  AN -->|"ask a question"| AI_CHAT
+  DB_R --> AI_THEME
+  DB_R --> COMPUTE
+  AI_THEME --> REDACT
+  AI_DASH --> R_CHART --> COMPUTE
+  AI_DASH --> DB_D
+  AI_CHAT --> COMPUTE
+  COMPUTE --> OUT
+  REDACT --> OUT
+  OUT --> AN
+
+  %% Learning loops
+  DB_E -.->|"drop-off data improves the next survey"| AI_SHAPE
+  OUT -.->|"field failures become new golden examples"| GOLD
+
+  %% Eval loop
+  GOLD --> RUNS --> CCHK --> JUDGE --> HUMAN --> GATE
+  GATE -->|"below bar: fix judge prompt or anchor, never the bar"| RUNS
+
+  %% Styling
+  classDef ai fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a
+  classDef rule fill:#ffedd5,stroke:#c2410c,color:#0f172a
+  classDef code fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#0f172a
+  classDef human fill:#f3e8ff,stroke:#7e22ce,color:#0f172a
+  classDef store fill:#f1f5f9,stroke:#475569,color:#0f172a
+  classDef user fill:#ffffff,stroke:#334155,color:#0f172a
+
+  class AI_SHAPE,AI_BIAS,AI_GAME,AI_THEME,AI_DASH,AI_CHAT,RUNS,JUDGE,L_AI ai
+  class R_RULES,R_PRIV,R_MECH,R_CHART,GUARD,REDACT,L_RULE rule
+  class COMPUTE,CCHK,PLAYER,PUB,OUT,L_CODE code
+  class FINAL,STYLE,HUMAN,GATE,L_HUMAN human
+  class DB_S,DB_R,DB_E,DB_D,GOLD,L_DB store
+  class CR,RS,AN,E1,E2,E3 user
