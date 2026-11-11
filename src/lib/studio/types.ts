@@ -1,4 +1,4 @@
-import type { BiasOutput, RulesReport, ShaperOutput, SurveyRequest } from "@/lib/ai/types";
+import type { BiasOutput, RulesReport, ShaperOutput, SurveyRequest, ThemeOutput } from "@/lib/ai/types";
 import type { Gamified, PlayerSurvey, PlayfulLevel, PresentationStyle, Shape, ThemeName } from "@/lib/player/types";
 import type { BuilderState } from "./builder";
 
@@ -37,6 +37,21 @@ export type StudioSurvey = {
   publishedAt?: number;
   /** Keep / Exclude decisions on flagged responses (Responses page). */
   review?: Record<string, "keep" | "exclude">;
+  /** Theme coding per open question (Themes page). */
+  themes?: Record<string, ThemeState>;
+};
+
+export type ThemeState = {
+  /** The AI's coding after code checks, plus the creator's renames and merges. */
+  result: ThemeOutput;
+  /** Responses already coded, so only new ones go through apply_codebook. */
+  coded: string[];
+  updatedAt: number;
+  engine: "demo" | "claude";
+  /** What the creator changed ("You approved"): theme id → note. */
+  approved: Record<string, string>;
+  /** Suggested new themes the creator chose to ignore (by label). */
+  ignored: string[];
 };
 
 export type PublishSettings = {

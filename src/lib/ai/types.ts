@@ -112,3 +112,34 @@ export type ShapeEvent =
   | { type: "stage"; stage: ShapeStage }
   | { type: "result"; engine: "demo" | "claude"; shaper: ShaperOutput; bias: BiasOutput; rules: RulesReport }
   | { type: "error"; message: string };
+
+/* ---------------- theme_extractor (combined.system.txt) ---------------- */
+
+export type Sentiment = "positive" | "negative" | "neutral" | "mixed";
+export type CodeStatus = "coded" | "minority" | "no_content" | "off_topic" | "flagged";
+export type ThemeFlagType = "suspected_manipulation" | "personal_data" | "abusive" | "spam" | "duplicate";
+
+export type Theme = {
+  theme_id: string;
+  label: string;
+  description: string;
+  quotes: { response_id: string; text: string }[];
+};
+
+export type ThemeOutput = {
+  question_id: string;
+  mode: "discover" | "apply_codebook";
+  themes: Theme[];
+  assignments: { response_id: string; theme_ids: string[]; sentiment: Sentiment; status: CodeStatus }[];
+  minority_mentions: { response_id: string; note: string; quote: string }[];
+  candidate_new_themes: { label: string; description: string; response_ids: string[] }[];
+  flags: { response_id: string; type: ThemeFlagType; note: string }[];
+  coding_notes: string[];
+};
+
+export type ThemeRequest = {
+  question: { id: string; text: string };
+  mode: "discover" | "apply_codebook";
+  responses: { id: string; text: string }[];
+  codebook?: Pick<Theme, "theme_id" | "label" | "description">[];
+};

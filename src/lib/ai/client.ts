@@ -1,7 +1,7 @@
 "use client";
 
 import type { Gamified, PlayfulLevel, PresentationStyle, Question } from "@/lib/player/types";
-import type { BiasOutput, ShapedQuestion, ShapeEvent, SurveyRequest } from "./types";
+import type { BiasOutput, ShapedQuestion, ShapeEvent, SurveyRequest, ThemeOutput, ThemeRequest } from "./types";
 
 /** Run the create pipeline once and return the final result (no stage display). */
 export async function shapeOnce(request: SurveyRequest): Promise<Extract<ShapeEvent, { type: "result" }> | null> {
@@ -60,6 +60,20 @@ export async function gamify(input: {
       body: JSON.stringify(input),
     });
     return res.ok ? ((await res.json()) as GamifyResult) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Run the theme_extractor stage (masking and quote checks happen on the server, in code). */
+export async function extractThemes(req: ThemeRequest): Promise<{ engine: "demo" | "claude"; result: ThemeOutput } | null> {
+  try {
+    const res = await fetch("/api/ai/themes", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(req),
+    });
+    return res.ok ? ((await res.json()) as { engine: "demo" | "claude"; result: ThemeOutput }) : null;
   } catch {
     return null;
   }
