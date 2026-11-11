@@ -41,4 +41,7 @@ Following `UI_UX_LAYOUT.md`, one page at a time:
 
 - [x] M1 Landing page (`/`), with sample data
 - [x] P1 Survey Player (`/s/:slug`): all 7 mechanics, 4 styles, 3 playful levels, 3 themes, sample surveys
-- [ ] Next: to be decided by the team
+- [x] Studio shell + S1 Home (`/app`): sidebar, top bar, step rail, results tabs, survey cards with Duplicate / Close / Delete
+- [ ] Next: Start chooser + the three ways to start (build step 4)
+
+The Studio keeps sample surveys in your browser until the backend exists. Preview Home's states with `/app?preview=loading|empty|error`; "Demo only: restore the sample surveys" is in Settings.

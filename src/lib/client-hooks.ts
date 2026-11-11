@@ -54,3 +54,15 @@ export function useSubmittedPoll(): DemoAnswers | null {
     () => null,
   );
 }
+
+/* ---- One query-string value, read without effects ("" during server rendering) ---- */
+
+function subscribeUrl(listener: () => void) {
+  window.addEventListener("popstate", listener);
+  return () => window.removeEventListener("popstate", listener);
+}
+
+export function useSearchParam(name: string): string {
+  const search = useSyncExternalStore(subscribeUrl, () => window.location.search, () => "");
+  return new URLSearchParams(search).get(name) ?? "";
+}

@@ -15,6 +15,9 @@ const KINDS = {
   warning: { label: "Check", Icon: Warning, className: "badge--warning" },
   success: { label: "Clear", Icon: Check, className: "badge--success" },
   sample: { label: "Sample data", Icon: null, className: "badge--sample" },
+  draft: { label: "Draft", Icon: null, className: "badge--draft" },
+  live: { label: "Live", Icon: null, className: "badge--live" },
+  closed: { label: "Closed", Icon: null, className: "badge--closed" },
 } as const;
 
 export type BadgeKind = keyof typeof KINDS;
@@ -25,6 +28,16 @@ export function Badge({ kind, children, className = "" }: { kind: BadgeKind; chi
     <span className={`badge ${kindClass} ${className}`}>
       {Icon && <Icon size={12} weight="bold" aria-hidden="true" />}
       {children ?? label}
+    </span>
+  );
+}
+
+/** Small teal mark after a number: it came from the compute engine, not the AI. */
+export function ComputedMark() {
+  return (
+    <span className="computed-mark" title="Computed from responses">
+      <Calculator size={12} weight="regular" />
+      <span className="sr-only">(computed)</span>
     </span>
   );
 }
