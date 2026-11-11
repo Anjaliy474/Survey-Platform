@@ -12,7 +12,7 @@ export interface SurveyStore {
   getResponse(id: string): Promise<ResponseRecord | null>;
   saveAnswer(responseId: string, questionId: string, answer: Answer): Promise<void>;
   markSwitched(responseId: string): Promise<void>;
-  /** Idempotent: a second call returns the first completion unchanged. */
+  /** Idempotent: completedAt is set once; enjoyment is set once, by the first call that gives one. */
   completeResponse(responseId: string, enjoyment: number | null): Promise<ResponseRecord>;
   listResponses(surveyId: string): Promise<ResponseRecord[]>;
   logEvent(e: StoryEvent): Promise<void>;

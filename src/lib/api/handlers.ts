@@ -219,7 +219,20 @@ async function liveOr404(store: SurveyStore, slug: string): Promise<Survey | nul
   return s && s.status === "live" ? s : null;
 }
 
-export const playStart = route(async (store, input, { slug }) => {
+/** Starts in flight per visitor, so a double request (or React's dev double effect) makes one response. */
+const starting = new Map<string, Promise<Result>>();
+
+export const playStart = route(async (store, input, params) => {
+  const { visitorId } = z.object({ visitorId: z.string().min(1).max(64) }).passthrough().parse(input);
+  const key = `${params.slug}:${visitorId}`;
+  const inFlight = starting.get(key);
+  if (inFlight) return inFlight;
+  const run = startOrResume(store, input, params).finally(() => starting.delete(key));
+  starting.set(key, run);
+  return run;
+});
+
+const startOrResume: Handler = async (store, input, { slug }) => {
   const { responseId, visitorId } = z.object({ responseId: z.string().optional(), visitorId: z.string().min(1).max(64) }).parse(input);
   const s = await liveOr404(store, slug);
   if (!s) return err(404, "We couldn't find that survey.");
@@ -242,7 +255,7 @@ export const playStart = route(async (store, input, { slug }) => {
     visitorId,
   });
   return ok({ survey: toPublic(s), response, alreadyAnswered: false }, 201);
-});
+};
 
 const answerValue: z.ZodType<Answer> = z.union([z.number(), z.array(z.number()), z.string().max(2000), z.null()]);
 

@@ -87,10 +87,8 @@ export class LocalStore implements SurveyStore {
   }
   completeResponse(responseId: string, enjoyment: number | null) {
     return this.withResponse(responseId, (r) => {
-      if (!r.completedAt) {
-        r.completedAt = new Date().toISOString();
-        r.enjoyment = enjoyment;
-      }
+      if (!r.completedAt) r.completedAt = new Date().toISOString();
+      if (r.enjoyment === null && enjoyment !== null) r.enjoyment = enjoyment;
       return { ...r };
     });
   }

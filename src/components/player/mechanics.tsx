@@ -14,7 +14,7 @@ import { useRef } from "react";
 type Size = "regular" | "compact";
 
 /** Arrow-key movement inside a radio group (roving focus). */
-function useRovingKeys(count: number, value: number | null, onChange: (i: number) => void) {
+export function useRovingKeys(count: number, value: number | null, onChange: (i: number) => void) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   function onKeyDown(e: KeyboardEvent) {
     const current = value ?? -1;
@@ -170,6 +170,186 @@ export function TapChipsMulti({
         );
       })}
     </div>
+  );
+}
+
+/* ---------------- tap_chips_single ---------------- */
+
+export function TapChipsSingle({
+  options,
+  value,
+  onChange,
+  labelledBy,
+  pop,
+}: {
+  options: readonly string[];
+  value: number | null;
+  onChange: (i: number) => void;
+  labelledBy: string;
+  pop?: boolean;
+}) {
+  const { refs, onKeyDown } = useRovingKeys(options.length, value, onChange);
+  const long = options.some((o) => o.length > 22);
+  return (
+    <div className={`pl-chips ${long ? "pl-chips--tiles" : ""}`} role="radiogroup" aria-labelledby={labelledBy} onKeyDown={onKeyDown}>
+      {options.map((label, i) => {
+        const selected = value === i;
+        return (
+          <button
+            key={`${i}-${label}`}
+            ref={(el) => {
+              refs.current[i] = el;
+            }}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            tabIndex={selected || (value === null && i === 0) ? 0 : -1}
+            className={`pl-option pl-chip ${selected ? "is-selected" : ""} ${selected && pop ? "is-pop" : ""}`}
+            onClick={() => onChange(i)}
+          >
+            <span className="pl-chip__tick" aria-hidden="true">
+              <Check size={12} weight="bold" />
+            </span>
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ---------------- segmented_scale (only the chosen point fills) ---------------- */
+
+export function SegmentedScale({
+  labels,
+  minLabel,
+  maxLabel,
+  value,
+  onChange,
+  labelledBy,
+  pop,
+}: {
+  labels: readonly string[];
+  minLabel: string;
+  maxLabel: string;
+  value: number | null;
+  onChange: (i: number) => void;
+  labelledBy: string;
+  pop?: boolean;
+}) {
+  const { refs, onKeyDown } = useRovingKeys(labels.length, value, onChange);
+  return (
+    <div className="pl-seg-wrap">
+      <div
+        className="pl-seg"
+        role="radiogroup"
+        aria-labelledby={labelledBy}
+        onKeyDown={onKeyDown}
+        style={{ gridTemplateColumns: `repeat(${labels.length}, minmax(0, 1fr))` }}
+      >
+        {labels.map((label, i) => {
+          const selected = value === i;
+          return (
+            <button
+              key={i}
+              ref={(el) => {
+                refs.current[i] = el;
+              }}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              aria-label={label}
+              tabIndex={selected || (value === null && i === 0) ? 0 : -1}
+              className={`pl-option pl-seg__point ${selected ? "is-selected" : ""} ${selected && pop ? "is-pop" : ""}`}
+              onClick={() => onChange(i)}
+            >
+              <span aria-hidden="true">{i + 1}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="pl-ends" aria-hidden="true">
+        <span>{minLabel}</span>
+        <span>{maxLabel}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- number_row_11 (always 0 to 10) ---------------- */
+
+export function NumberRow11({
+  minLabel,
+  maxLabel,
+  value,
+  onChange,
+  labelledBy,
+  pop,
+}: {
+  minLabel: string;
+  maxLabel: string;
+  value: number | null;
+  onChange: (i: number) => void;
+  labelledBy: string;
+  pop?: boolean;
+}) {
+  const { refs, onKeyDown } = useRovingKeys(11, value, onChange);
+  return (
+    <div className="pl-seg-wrap">
+      <div className="pl-nps" role="radiogroup" aria-labelledby={labelledBy} onKeyDown={onKeyDown}>
+        {Array.from({ length: 11 }, (_, i) => {
+          const selected = value === i;
+          const label = i === 0 ? `0, ${minLabel}` : i === 10 ? `10, ${maxLabel}` : String(i);
+          return (
+            <button
+              key={i}
+              ref={(el) => {
+                refs.current[i] = el;
+              }}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              aria-label={label}
+              tabIndex={selected || (value === null && i === 0) ? 0 : -1}
+              className={`pl-option pl-nps__n ${selected ? "is-selected" : ""} ${selected && pop ? "is-pop" : ""}`}
+              onClick={() => onChange(i)}
+            >
+              <span aria-hidden="true">{i}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="pl-ends" aria-hidden="true">
+        <span>{minLabel}</span>
+        <span>{maxLabel}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- text_box (always optional) ---------------- */
+
+export function TextBox({
+  value,
+  onChange,
+  labelledBy,
+  placeholder = "Type your answer (optional)",
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  labelledBy: string;
+  placeholder?: string;
+}) {
+  return (
+    <textarea
+      className="pl-text"
+      aria-labelledby={labelledBy}
+      value={value}
+      maxLength={2000}
+      rows={4}
+      placeholder={placeholder}
+      onChange={(e) => onChange(e.target.value)}
+    />
   );
 }
 

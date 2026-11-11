@@ -103,10 +103,14 @@ export class SupabaseStore implements SurveyStore {
   async completeResponse(responseId: string, enjoyment: number | null) {
     const { error } = await this.db
       .from("responses")
-      .update({ completed_at: new Date().toISOString(), enjoyment })
+      .update({ completed_at: new Date().toISOString() })
       .eq("id", responseId)
       .is("completed_at", null);
     if (error) throw error;
+    if (enjoyment !== null) {
+      const { error: e2 } = await this.db.from("responses").update({ enjoyment }).eq("id", responseId).is("enjoyment", null);
+      if (e2) throw e2;
+    }
     const r = await this.getResponse(responseId);
     if (!r) throw new NotFoundError(`Response ${responseId} not found`);
     return r;

@@ -92,6 +92,17 @@ describe("player routes", () => {
     expect((await store.listResponses(s.id)).length).toBe(1);
   });
 
+  it("creates one response when the same visitor starts twice at once", async () => {
+    const s = await published();
+    const [a, b] = await Promise.all([
+      h.playStart(store, { visitorId: "V1" }, { slug: s.slug }),
+      h.playStart(store, { visitorId: "V1" }, { slug: s.slug }),
+    ]);
+    const id = (r: typeof a) => (r.body as { response: { id: string } }).response.id;
+    expect(id(a)).toBe(id(b));
+    expect((await store.listResponses(s.id)).length).toBe(1);
+  });
+
   it("completes once and then reports already answered", async () => {
     const s = await published();
     const start = await h.playStart(store, { visitorId: "V1" }, { slug: s.slug });

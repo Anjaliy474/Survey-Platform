@@ -99,6 +99,16 @@ describe("LocalStore", () => {
     expect(second.enjoyment).toBe(4);
   });
 
+  it("fills enjoyment once after an early completion", async () => {
+    await store.startResponse(response("R1"));
+    const first = await store.completeResponse("R1", null);
+    const second = await store.completeResponse("R1", 3);
+    const third = await store.completeResponse("R1", 0);
+    expect(second.completedAt).toBe(first.completedAt);
+    expect(second.enjoyment).toBe(3);
+    expect(third.enjoyment).toBe(3);
+  });
+
   it("marks a switch without changing the arm", async () => {
     await store.startResponse(response("R1"));
     await store.markSwitched("R1");
