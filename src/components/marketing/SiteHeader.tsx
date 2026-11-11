@@ -3,6 +3,7 @@
 import { List, X } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { smoothScroll } from "@/lib/smooth-scroll";
 import { Logo } from "./Logo";
 
 export const NAV_LINKS = [
@@ -25,14 +26,37 @@ export function SiteHeader() {
     () => false,
   );
   const [open, setOpen] = useState(false);
+  const [current, setCurrent] = useState<string | null>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
+
+  // Highlight the nav link of the section in the middle of the screen.
+  useEffect(() => {
+    // Every section is watched, so a section without a nav link clears the highlight.
+    const sections = Array.from(document.querySelectorAll<HTMLElement>("main section[id]"));
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) if (e.isIntersecting) setCurrent(`#${e.target.id}`);
+      },
+      { rootMargin: "-50% 0px -50% 0px" },
+    );
+    sections.forEach((s) => io.observe(s));
+    const onTop = () => {
+      if (window.scrollY < window.innerHeight * 0.5) setCurrent(null);
+    };
+    window.addEventListener("scroll", onTop, { passive: true });
+    return () => {
+      io.disconnect();
+      window.removeEventListener("scroll", onTop);
+    };
+  }, []);
 
   // Menu sheet: lock page scroll, focus the first link, close on Escape.
   useEffect(() => {
     if (!open) return;
     const toggle = toggleRef.current;
     document.body.style.overflow = "hidden";
+    smoothScroll.get()?.stop();
     sheetRef.current?.querySelector<HTMLElement>("a")?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
@@ -40,6 +64,7 @@ export function SiteHeader() {
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
+      smoothScroll.get()?.start();
       window.removeEventListener("keydown", onKey);
       toggle?.focus();
     };
@@ -53,7 +78,7 @@ export function SiteHeader() {
         <Logo onClick={close} />
         <nav className="site-nav" aria-label="Main">
           {NAV_LINKS.map((l) => (
-            <a key={l.href} href={l.href}>
+            <a key={l.href} href={l.href} aria-current={current === l.href ? "true" : undefined}>
               {l.label}
             </a>
           ))}
@@ -76,6 +101,8 @@ export function SiteHeader() {
         </div>
       </div>
 
+      <span className="scroll-progress" aria-hidden="true" />
+
       {open && (
         <div
           id="menu-sheet"
@@ -84,6 +111,7 @@ export function SiteHeader() {
           role="dialog"
           aria-modal="true"
           aria-label="Menu"
+          data-lenis-prevent
         >
           <nav aria-label="Main">
             {NAV_LINKS.map((l, i) => (

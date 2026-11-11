@@ -8,28 +8,28 @@ const ITEMS: { badge: BadgeKind; Icon: typeof Calculator; tone: string; title: s
     Icon: Calculator,
     tone: "computed",
     title: "Numbers from code",
-    body: "AI never invents a statistic. Every number is calculated from your responses, and says so.",
+    body: "Calculated from your responses. Never invented.",
   },
   {
     badge: "ai",
     Icon: Quotes,
     tone: "ai",
     title: "Quotes you can trace",
-    body: "Every theme shows real quotes with response IDs, so you can check the grouping yourself.",
+    body: "Every theme links to real quotes.",
   },
   {
     badge: "human",
     Icon: CheckCircle,
     tone: "human",
     title: "You decide",
-    body: "Questions, styles and dashboards stay suggestions until you accept them.",
+    body: "Nothing changes until you accept.",
   },
   {
     badge: "dpdp",
     Icon: ShieldCheck,
     tone: "rule",
     title: "Consent built in",
-    body: "Minimal personal data, a clear purpose line, and deletion on request, in line with India’s DPDP rules.",
+    body: "Minimal data, clear consent, DPDP-ready.",
   },
 ];
 

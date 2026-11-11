@@ -3,27 +3,27 @@ import { Plus } from "@phosphor-icons/react/dist/ssr";
 const FAQS = [
   {
     q: "Will the playful format change my results?",
-    a: "No. The wording, options and scale of every question stay exactly as you approved them. We only change how they’re shown. There are no points, prizes or timers, because those push people toward certain answers or make them rush.",
+    a: "No. Wording, options and scales stay exactly as approved. Only the look changes, and there are no points, prizes or timers.",
   },
   {
     q: "Where do the numbers come from?",
-    a: "From code that counts and calculates your real responses. The AI writes words, like theme names and explanations, and every number carries a “Computed” tag so you can tell the difference.",
+    a: "From code, counting your real responses. AI only writes words. Every number carries a “Computed” tag.",
   },
   {
     q: "Do respondents need an app?",
-    a: "No. They open a link in any phone browser, including straight from WhatsApp.",
+    a: "No. Any phone browser works, straight from WhatsApp.",
   },
   {
     q: "What about personal data?",
-    a: "We ask only for what your goal needs, make it optional, and show a clear purpose and consent line, in line with India’s DPDP rules. Responses can be deleted on request.",
+    a: "Only what your goal needs, always optional, with clear consent under India’s DPDP rules. Deletable on request.",
   },
   {
     q: "Can I bring my Google Form?",
-    a: "For now, paste your questions and we’ll suggest improvements. Direct import from Google Forms is on our roadmap.",
+    a: "Paste your questions for now. Direct import is on the roadmap.",
   },
   {
     q: "Hindi and regional languages?",
-    a: "Planned for a later version. The design and copy are already written so they translate cleanly.",
+    a: "Coming later. The copy is written to translate cleanly.",
   },
 ];
 

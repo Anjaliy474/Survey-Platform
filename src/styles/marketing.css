@@ -223,6 +223,7 @@
 }
 .hero__sub {
   max-width: 560px;
+  text-wrap: balance;
   color: var(--ps-ink-500);
   font-size: clamp(1.0625rem, 2vw, 1.1875rem);
   line-height: 1.6;

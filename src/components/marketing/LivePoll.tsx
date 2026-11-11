@@ -266,7 +266,7 @@ export function LivePoll({ stats }: { stats: PollStats }) {
                       </span>
                     ))}
                   </div>
-                  <p className="reveal-caveat">People could pick several, so these don’t add up to 100%.</p>
+                  <p className="reveal-caveat">Multi-select, so these don’t add up to 100%.</p>
                 </div>
               )}
             </>
@@ -275,8 +275,7 @@ export function LivePoll({ stats }: { stats: PollStats }) {
             <p className="reveal-title">Results appear here once 20 people have answered. Thanks for being early!</p>
           )}
           <p className="reveal-foot">
-            In the product, this reveal shows only after a survey has 20 or more responses, and only as group
-            totals.
+            In the product: shown after 20+ responses, as group totals only.
           </p>
           <div className="pl-nav">
             <button type="button" className="pl-back" aria-label="Play the poll again" onClick={replay}>

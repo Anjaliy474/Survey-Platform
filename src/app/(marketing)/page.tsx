@@ -3,6 +3,7 @@ import { CreatorView } from "@/components/marketing/CreatorView";
 import { Faq } from "@/components/marketing/Faq";
 import { FinalCta } from "@/components/marketing/FinalCta";
 import { Hero } from "@/components/marketing/Hero";
+import { MotionEffects } from "@/components/marketing/MotionEffects";
 import { PickTheVibe } from "@/components/marketing/PickTheVibe";
 import { ScrollReveal } from "@/components/marketing/ScrollReveal";
 import { SiteFooter } from "@/components/marketing/SiteFooter";
@@ -37,6 +38,7 @@ export default function LandingPage() {
       </main>
       <SiteFooter />
       <ScrollReveal />
+      <MotionEffects />
     </>
   );
 }
