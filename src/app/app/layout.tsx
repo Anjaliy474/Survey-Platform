@@ -8,6 +8,7 @@ import "@/styles/builder.css";
 import "@/styles/player-shell.css";
 import "@/styles/style-page.css";
 import "@/styles/publish.css";
+import "@/styles/results.css";
 
 export const metadata: Metadata = {
   title: { default: "Studio", template: "%s · PlaySurvey Studio" },

@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { useNowMinute } from "@/lib/client-hooks";
 import { useProgress } from "@/lib/player/progress-store";
+import { aggregatesFrom } from "@/lib/player/reveal";
 import { checkSurvey } from "@/lib/player/rules";
 import { usePublished, useResponses } from "@/lib/player/published-store";
 import { Player } from "./Player";
@@ -16,6 +18,11 @@ export function LocalSurvey({ slug }: { slug: string }) {
   const responses = useResponses(slug);
   const now = useNowMinute();
   const { progress } = useProgress(slug);
+  // The reveal counts what this browser has collected (the respondent's own answer is added on top).
+  const withCounts = useMemo(
+    () => (survey ? { ...survey, aggregates: aggregatesFrom(survey, responses, progress.responseId) } : survey),
+    [survey, responses, progress.responseId],
+  );
 
   if (survey === undefined) {
     return (
@@ -64,5 +71,5 @@ export function LocalSurvey({ slug }: { slug: string }) {
       />
     );
   }
-  return <Player survey={survey} />;
+  return <Player survey={withCounts ?? survey} />;
 }

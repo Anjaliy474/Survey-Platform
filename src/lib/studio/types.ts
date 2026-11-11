@@ -35,6 +35,8 @@ export type StudioSurvey = {
   /** What respondents get: the survey as published (build step 7). */
   player?: PlayerSurvey;
   publishedAt?: number;
+  /** Keep / Exclude decisions on flagged responses (Responses page). */
+  review?: Record<string, "keep" | "exclude">;
 };
 
 export type PublishSettings = {

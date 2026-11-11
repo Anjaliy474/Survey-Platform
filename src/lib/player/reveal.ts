@@ -41,3 +41,23 @@ export function computePlayerReveal(survey: PlayerSurvey, answers: Answers): Pla
     isSample: survey.aggregates.isSample,
   };
 }
+
+/**
+ * Reveal counts from raw responses (surveys published in this browser). The respondent's own
+ * response is left out, because the reveal adds it back on top (`completed + 1`).
+ */
+export function aggregatesFrom(
+  survey: PlayerSurvey,
+  responses: readonly { id: string; answers: Answers }[],
+  ownId?: string,
+): PlayerSurvey["aggregates"] {
+  const others = responses.filter((r) => r.id !== ownId);
+  const counts: Record<string, number[]> = {};
+  for (const id of survey.gamified.reveal.question_ids) {
+    const q = survey.questions.find((x) => x.id === id);
+    if (!q) continue;
+    const labels = q.type === "rating_scale" ? scaleLabels(q) : optionsFor(q);
+    counts[id] = labels.map((_, i) => others.filter((r) => (Array.isArray(r.answers[id]) ? (r.answers[id] as number[]).includes(i) : r.answers[id] === i)).length);
+  }
+  return { completed: others.length, counts, isSample: false };
+}

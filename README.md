@@ -46,7 +46,8 @@ Following `UI_UX_LAYOUT.md`, one page at a time:
 - [x] S4 Question builder + review (`/app/s/:id/build`): accept / edit / keep mine, bias flags, rules meter, preview
 - [x] S5 Style and gamify (`/app/s/:id/style`): style, playful level, theme with contrast check, words on screen, mechanics, reveal, live phone preview
 - [x] S6 Publish and share (`/app/s/:id/publish`): checklist, close / one-response settings, share sheet with copy, WhatsApp, QR (PNG) and embed
-- [ ] Next: Results overview (build step 8)
+- [x] R1 Results overview (`/app/s/:id/results`): caveat banner, KPIs, responses over time, drop-off, a chart per question (bars, diverging Likert, NPS), data quality flags, View as table
+- [ ] Next: Themes (build step 9)
 
 **AI in demo mode.** `POST /api/ai/shape` runs the create pipeline (question shaper → bias checker → rules engine) and streams each stage; `POST /api/ai/gamify` runs the gamifier and then the Player's schema check. The AI stages are built-in stand-ins in `src/lib/ai/demo-*.ts` that return the exact `combined.system.txt` JSON schemas; the rules engine (`src/lib/ai/rules-engine.ts`) and every check in code are real. Connecting Claude replaces the demo files, not their callers.
 

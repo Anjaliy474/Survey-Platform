@@ -5,7 +5,9 @@ import type { CSSProperties } from "react";
 import { Copy, StopCircle, Trash } from "@/components/icons";
 import { Badge, ComputedMark } from "@/components/ui/Badge";
 import { Menu, type MenuItem } from "@/components/ui/Menu";
+import { useNowMinute } from "@/lib/client-hooks";
 import { estimateSeconds, formatAbout, formatCount, percent, sum } from "@/lib/compute";
+import { type StoredResponse, useResponses } from "@/lib/player/published-store";
 import { STEPS, cardHref } from "@/lib/studio/sections";
 import type { StudioSurvey } from "@/lib/studio/types";
 
@@ -35,6 +37,17 @@ function Sparkline({ days }: { days: number[] }) {
  * surveys, or length and current step for drafts. The whole card opens the survey; the ⋯ menu
  * holds Duplicate, Close survey and Delete.
  */
+const DAY = 24 * 60 * 60 * 1000;
+function localStats(list: readonly StoredResponse[], now: number) {
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const lastSevenDays = Array.from({ length: 7 }, (_, i) => {
+    const from = today.getTime() - (6 - i) * DAY;
+    return list.filter((r) => r.submittedAt >= from && r.submittedAt < from + DAY).length;
+  });
+  return { started: list.length, finished: list.length, lastSevenDays };
+}
+
 export function SurveyCard({
   survey: s,
   onDuplicate,
@@ -47,6 +60,10 @@ export function SurveyCard({
   onDelete: () => void;
 }) {
   const titleId = `card-${s.id}`;
+  // Surveys published in this browser count the answers collected here; samples use sample stats.
+  const local = useResponses(s.player ? s.slug : null);
+  const now = useNowMinute();
+  const stats = s.player ? localStats(local, now) : s.stats;
   const items: MenuItem[] = [{ label: "Duplicate", Icon: Copy, onSelect: onDuplicate }];
   if (s.status === "live") items.push({ label: "Close survey", Icon: StopCircle, onSelect: onClose });
   items.push({ label: "Delete…", Icon: Trash, danger: true, onSelect: onDelete });
@@ -64,26 +81,26 @@ export function SurveyCard({
         </Link>
       </h3>
 
-      {s.stats && s.status !== "draft" ? (
+      {stats && s.status !== "draft" ? (
         <>
           <dl className="survey-card__stats">
             <div>
               <dt>Responses</dt>
               <dd>
-                {formatCount(s.stats.finished)}
+                {formatCount(stats.finished)}
                 <ComputedMark />
               </dd>
             </div>
             <div>
               <dt>Completion</dt>
               <dd>
-                {percent(s.stats.finished, s.stats.started)}%
+                {stats.started ? `${percent(stats.finished, stats.started)}%` : "–"}
                 <ComputedMark />
               </dd>
             </div>
           </dl>
           {s.status === "live" ? (
-            <Sparkline days={s.stats.lastSevenDays} />
+            <Sparkline days={stats.lastSevenDays} />
           ) : (
             <p className="survey-card__note">Closed on {s.closedAt ? formatDate(s.closedAt) : "—"}. Results stay available.</p>
           )}
