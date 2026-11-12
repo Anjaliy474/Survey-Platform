@@ -2,8 +2,9 @@
 
 import type { Gamified, PlayfulLevel, PresentationStyle, Question } from "@/lib/player/types";
 import type { ToolResult } from "@/lib/results/tools";
+import type { AnalysisPack } from "@/lib/results/pack";
 import type { AskPlan } from "./demo-ask";
-import type { AskAnswer, BiasOutput, DashboardRequest, DashboardSpec, SchemaField, ShapedQuestion, ShapeEvent, SurveyRequest, ThemeOutput, ThemeRequest } from "./types";
+import type { AskAnswer, Reader, ReportOutput, BiasOutput, DashboardRequest, DashboardSpec, SchemaField, ShapedQuestion, ShapeEvent, SurveyRequest, ThemeOutput, ThemeRequest } from "./types";
 
 /** Run the create pipeline once and return the final result (no stage display). */
 export async function shapeOnce(request: SurveyRequest): Promise<Extract<ShapeEvent, { type: "result" }> | null> {
@@ -110,6 +111,16 @@ export async function askAnswer(question: string, fields: SchemaField[], plan: A
   try {
     const res = await fetch("/api/ai/ask", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ phase: "answer", question, fields, plan, results }) });
     return res.ok ? ((await res.json()) as { answer: AskAnswer; removed: boolean }) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** insight_report on the code-built analysis pack (numbers are checked against it on the server). */
+export async function generateReport(reader: Reader, pack: AnalysisPack): Promise<{ report: ReportOutput; dropped: string[] } | null> {
+  try {
+    const res = await fetch("/api/ai/report", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ reader, pack }) });
+    return res.ok ? ((await res.json()) as { report: ReportOutput; dropped: string[] }) : null;
   } catch {
     return null;
   }

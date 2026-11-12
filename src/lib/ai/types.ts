@@ -202,3 +202,40 @@ export type AskAnswer = {
   follow_up_suggestions: string[];
   declined: { request: string; reason: string };
 };
+
+/* ---------------- insight_report (combined.system.txt) ---------------- */
+
+export type Reader = "creator" | "analyst" | "leadership";
+export type Level = "high" | "medium" | "low";
+export type Finding = {
+  finding_id: string;
+  title: string;
+  statement: string;
+  evidence_type: "observed" | "association" | "model_based";
+  evidence_ids: string[];
+  who_it_affects: string;
+  counter_evidence: string;
+  interpretation: { hypothesis: string; how_to_test: string };
+  practical_importance: string;
+  implication: string;
+  confidence: Level;
+  confidence_reason: string;
+  chart: DashChart | null;
+};
+export type ReportOutput = {
+  reader: Reader;
+  headline: string;
+  executive_summary: { finding_id: string; statement: string; evidence_ids: string[] }[];
+  decision_answers: { decision: string; what_the_data_says: string; finding_ids: string[]; confidence: Level }[];
+  data_quality: { summary: string; evidence_ids: string[]; could_change_conclusions: string };
+  findings: Finding[];
+  segments: { status: "available" | "not_run"; note: string; profiles: { name: string; description: string; evidence_ids: string[] }[] };
+  say_vs_do_gaps: { statement: string; evidence_ids: string[] }[];
+  contradictions_and_surprises: { statement: string; evidence_ids: string[] }[];
+  minority_views: { statement: string; quote: { response_id: string; text: string } }[];
+  priorities: { finding_id: string; frequency: Level; severity: Level; evidence_strength: Level; feasibility: Level | "unknown"; why_this_rank: string }[];
+  recommendations: { horizon: "now" | "next" | "later"; action: string; finding_ids: string[]; metric_to_watch: string }[];
+  limitations: string[];
+  unanswered_questions: { question: string; why_it_matters: string; suggested_survey_question: string }[];
+  flags: string[];
+};

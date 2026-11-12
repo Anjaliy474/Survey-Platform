@@ -34,7 +34,8 @@ type Msg =
 
 /** Numbers in an answer show as Computed chips (they were all checked against the tool results). */
 function ChippedText({ text }: { text: string }) {
-  const parts = text.split(/((?:[+-])?\d+(?:\.\d+)?%?(?: out of \d+)?)/g);
+  // IDs such as Q5 or R-0004 stay plain text; only standalone figures become chips.
+  const parts = text.split(/((?<![\w-])[+-]?\d+(?:\.\d+)?%?(?: out of \d+)?)/g);
   return (
     <>
       {parts.map((p, i) =>

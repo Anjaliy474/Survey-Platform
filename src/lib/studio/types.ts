@@ -1,4 +1,4 @@
-import type { BiasOutput, Dashboard, DashboardSpec, RulesReport, ShaperOutput, SurveyRequest, ThemeOutput } from "@/lib/ai/types";
+import type { BiasOutput, Dashboard, DashboardSpec, Reader, ReportOutput, RulesReport, ShaperOutput, SurveyRequest, ThemeOutput } from "@/lib/ai/types";
 import type { Gamified, PlayerSurvey, PlayfulLevel, PresentationStyle, Shape, ThemeName } from "@/lib/player/types";
 import type { BuilderState } from "./builder";
 
@@ -44,6 +44,8 @@ export type StudioSurvey = {
   deletedResponses?: string[];
   /** The dashboard built from the creator's request (Dashboard page). */
   dashboard?: DashboardState;
+  /** Insight reports, one per reader (Report page). */
+  report?: Partial<Record<Reader, { output: ReportOutput; generatedAt: number; dropped: string[] }>>;
 };
 
 export type DashboardState = {
