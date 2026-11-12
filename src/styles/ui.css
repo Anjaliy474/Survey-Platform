@@ -383,10 +383,6 @@
   gap: var(--ps-space-2);
   color: var(--ps-ink-500);
 }
-.empty__spec {
-  font-family: var(--ps-font-mono);
-  font-size: 0.75rem;
-}
 .empty__actions {
   display: grid;
   justify-items: center;

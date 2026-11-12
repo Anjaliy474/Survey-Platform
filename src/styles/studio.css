@@ -881,3 +881,28 @@
     flex-direction: column;
   }
 }
+
+/* A live survey's questions, read-only */
+.livequestions {
+  display: grid;
+  gap: var(--ps-space-4);
+  max-width: 760px;
+}
+.livequestions .status-banner .btn {
+  justify-self: start;
+}
+.livequestions__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.livequestions__list li {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--ps-sand-200);
+  border-radius: var(--ps-r-lg);
+  background: var(--ps-white);
+}
