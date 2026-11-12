@@ -21,9 +21,19 @@ import { findPrepared } from "./prepared";
 
 export { aiAvailable } from "./gemini";
 
+/** Same questions as shown to respondents: wording, type, options and scale all unchanged. */
 const sameQuestions = (a: QuestionSet, b: QuestionSet) =>
   a.questions.length === b.questions.length &&
-  a.questions.every((q, i) => q.id === b.questions[i].id && q.text === b.questions[i].text && q.type === b.questions[i].type);
+  a.questions.every((q, i) => {
+    const o = b.questions[i];
+    return (
+      q.id === o.id &&
+      q.text === o.text &&
+      q.type === o.type &&
+      JSON.stringify(q.options) === JSON.stringify(o.options) &&
+      JSON.stringify(q.scale) === JSON.stringify(o.scale)
+    );
+  });
 
 /* ---------------- question_shaper ---------------- */
 
@@ -122,7 +132,7 @@ function sanitiseGamifier(g: Gamifier, set: QuestionSet): Gamifier {
 
 export async function gamify(set: QuestionSet, picks: QuickPicks): Promise<Gamifier> {
   const prepared = findPrepared(picks.concept);
-  if (prepared && sameQuestions(prepared.set, set)) return structuredClone(prepared.gamifier);
+  if (prepared && sameQuestions(prepared.set, set)) return sanitiseGamifier(structuredClone(prepared.gamifier), set);
   if (!aiAvailable()) return defaultGamifier(set);
   try {
     const g = await callGemini(

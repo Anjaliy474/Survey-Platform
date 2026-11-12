@@ -4,7 +4,7 @@ import { gamifierFor, sixQuestions, validWorld } from "@/lib/survey/fixtures";
 import { gamifierSchema, questionSetSchema, worldSpecSchema, type QuestionSet, type QuickPicks } from "@/lib/survey/types";
 import { AiError } from "./gemini";
 import { PREPARED, findPrepared } from "./prepared";
-import { buildWorld, shapeQuestions } from "./stages";
+import { buildWorld, gamify, shapeQuestions } from "./stages";
 
 const picks = (concept: string): QuickPicks => ({
   concept,
@@ -96,6 +96,25 @@ describe("with a Gemini key", () => {
     const out = await buildWorld({ set: fest.set, gamifier: fest.gamifier, picks: fest.picks });
     expect(out.prepared).toBe(true);
     expect(out.world.world.title).toBe(fest.world.world.title);
+  });
+});
+
+describe("gamify after creator edits", () => {
+  beforeEach(() => vi.stubEnv("GEMINI_API_KEY", ""));
+
+  it("never reuses a prepared mechanic that no longer fits edited options", async () => {
+    const fest = PREPARED.fest;
+    const edited = structuredClone(fest.set);
+    const q4 = edited.questions.find((q) => q.id === "Q4")!;
+    q4.options = [...q4.options, "Both"];
+    const g = await gamify(edited, fest.picks);
+    expect(g.items.find((i) => i.question_id === "Q4")!.mechanic).toBe("tap_chips_single");
+  });
+
+  it("still uses the prepared gamifier when nothing changed", async () => {
+    const fest = PREPARED.fest;
+    const g = await gamify(structuredClone(fest.set), fest.picks);
+    expect(g.items.find((i) => i.question_id === "Q4")!.lead_in).toBe(fest.gamifier.items.find((i) => i.question_id === "Q4")!.lead_in);
   });
 });
 
