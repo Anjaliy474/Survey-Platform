@@ -16,7 +16,7 @@ import {
   type QuickPicks,
   type WorldSpec,
 } from "@/lib/survey/types";
-import { AiError, NOT_CONNECTED, aiAvailable, callGemini } from "./gemini";
+import { AiError, NOT_CONNECTED, aiAvailable, aiDeadline, callGemini } from "./gemini";
 import { findPrepared } from "./prepared";
 
 export { aiAvailable } from "./gemini";
@@ -37,7 +37,7 @@ const sameQuestions = (a: QuestionSet, b: QuestionSet) =>
 
 /* ---------------- question_shaper ---------------- */
 
-export async function shapeQuestions(picks: QuickPicks): Promise<{ result: QuestionSet; prepared: boolean }> {
+export async function shapeQuestions(picks: QuickPicks, deadline = aiDeadline()): Promise<{ result: QuestionSet; prepared: boolean }> {
   const prepared = findPrepared(picks.concept);
   if (!aiAvailable()) {
     if (prepared) return { result: structuredClone(prepared.set), prepared: true };
@@ -55,6 +55,7 @@ export async function shapeQuestions(picks: QuickPicks): Promise<{ result: Quest
         time_limit_seconds: picks.timeLimitSec ?? "not given",
       },
       questionSetSchema,
+      deadline,
     );
     return { result, prepared: false };
   } catch (e) {
@@ -74,7 +75,7 @@ function biasNotRun(set: QuestionSet): BiasReport {
   };
 }
 
-export async function checkBias(set: QuestionSet, picks: QuickPicks): Promise<BiasReport> {
+export async function checkBias(set: QuestionSet, picks: QuickPicks, deadline = aiDeadline()): Promise<BiasReport> {
   const prepared = findPrepared(picks.concept);
   const fallback = () => (prepared && sameQuestions(prepared.set, set) ? structuredClone(prepared.bias) : biasNotRun(set));
   if (!aiAvailable()) return fallback();
@@ -83,6 +84,7 @@ export async function checkBias(set: QuestionSet, picks: QuickPicks): Promise<Bi
       "bias_check_request",
       { audience: picks.audience, purpose: set.purpose_line, questions: set.questions },
       biasReportSchema,
+      deadline,
     );
   } catch {
     return fallback();
@@ -130,7 +132,7 @@ function sanitiseGamifier(g: Gamifier, set: QuestionSet): Gamifier {
   return { ...g, items };
 }
 
-export async function gamify(set: QuestionSet, picks: QuickPicks): Promise<Gamifier> {
+export async function gamify(set: QuestionSet, picks: QuickPicks, deadline = aiDeadline()): Promise<Gamifier> {
   const prepared = findPrepared(picks.concept);
   if (prepared && sameQuestions(prepared.set, set)) return sanitiseGamifier(structuredClone(prepared.gamifier), set);
   if (!aiAvailable()) return defaultGamifier(set);
@@ -144,6 +146,7 @@ export async function gamify(set: QuestionSet, picks: QuickPicks): Promise<Gamif
         questions: set.questions.map((q) => ({ id: q.id, text: q.text, type: q.type, options: q.options, sensitive: q.sensitive })),
       },
       gamifierSchema,
+      deadline,
     );
     return sanitiseGamifier(g, set);
   } catch {
@@ -185,6 +188,7 @@ function pinPicks(w: WorldSpec, picks: QuickPicks): WorldSpec {
 export async function buildWorld(
   input: WorldInput,
   edit?: WorldEdit,
+  deadline = aiDeadline(),
 ): Promise<{ world: WorldSpec; failures: ValidationFailure[]; prepared: boolean }> {
   const { set, gamifier, picks } = input;
   const ctx = { questions: set.questions, gamifier, level: picks.level, timeLimitSec: picks.timeLimitSec };
@@ -202,7 +206,7 @@ export async function buildWorld(
   let failures: ValidationFailure[] = [];
   try {
     for (let attempt = 0; attempt < 2; attempt++) {
-      last = pinPicks(await callGemini("world_request", worldPayload(input, edit, failures), worldSpecSchema), picks);
+      last = pinPicks(await callGemini("world_request", worldPayload(input, edit, failures), worldSpecSchema, deadline), picks);
       failures = validateWorld(last, ctx);
       if (failures.length === 0) return { world: last, failures, prepared: false };
     }

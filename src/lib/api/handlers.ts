@@ -3,7 +3,7 @@
  * parses the request, calls one of these, and returns `Response.json(body, { status })`.
  */
 import { z } from "zod";
-import { AiError } from "@/lib/ai/gemini";
+import { AiError, aiDeadline } from "@/lib/ai/gemini";
 import { buildWorld, checkBias, gamify, shapeQuestions } from "@/lib/ai/stages";
 import { validateWorld } from "@/lib/story/validate-world";
 import { NotFoundError, newId, newSlug, type SurveyStore } from "@/lib/store";
@@ -68,8 +68,10 @@ async function surveyOr404(store: SurveyStore, id: string): Promise<Survey> {
 
 export const createSurvey = route(async (store, input) => {
   const picks = picksSchema.parse((input as { picks?: unknown })?.picks) as QuickPicks;
-  const { result: set, prepared } = await shapeQuestions(picks);
-  const bias = await checkBias(set, picks);
+  // Shaping and the bias check share one time budget, so the fallback still runs within 60 s.
+  const deadline = aiDeadline();
+  const { result: set, prepared } = await shapeQuestions(picks, deadline);
+  const bias = await checkBias(set, picks, deadline);
   const survey: Survey = {
     id: newId("S"),
     slug: newSlug(picks.concept),

@@ -6,6 +6,14 @@ import type { z } from "zod";
 const MODEL = "gemini-2.5-flash";
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 const TIMEOUT_MS = 45_000;
+/** Route handlers have 60 s; every AI chain shares this budget so fallbacks run in time. */
+export const AI_BUDGET_MS = 50_000;
+const MIN_CALL_MS = 5_000;
+const MARGIN_MS = 1_000;
+
+export function aiDeadline(): number {
+  return Date.now() + AI_BUDGET_MS;
+}
 
 export class AiError extends Error {}
 
@@ -22,7 +30,7 @@ function system(): string {
   return systemPrompt;
 }
 
-async function once(rootTag: string, payload: unknown): Promise<string> {
+async function once(rootTag: string, payload: unknown, timeoutMs: number): Promise<string> {
   const res = await fetch(ENDPOINT, {
     method: "POST",
     headers: { "content-type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY ?? "" },
@@ -31,7 +39,7 @@ async function once(rootTag: string, payload: unknown): Promise<string> {
       contents: [{ role: "user", parts: [{ text: `<${rootTag}>\n${JSON.stringify(payload)}\n</${rootTag}>` }] }],
       generationConfig: { responseMimeType: "application/json", temperature: 0.7 },
     }),
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   if (!res.ok) throw new AiError(`${NO_RESPONSE} (HTTP ${res.status})`);
   const body = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
@@ -42,12 +50,19 @@ async function once(rootTag: string, payload: unknown): Promise<string> {
  * Calls one stage and parses its JSON through `schema`. A reply that isn't valid JSON
  * or doesn't match the schema is retried once; a second failure throws AiError.
  */
-export async function callGemini<T>(rootTag: string, payload: unknown, schema: z.ZodType<T>): Promise<T> {
+export async function callGemini<T>(
+  rootTag: string,
+  payload: unknown,
+  schema: z.ZodType<T>,
+  deadline: number = aiDeadline(),
+): Promise<T> {
   if (!aiAvailable()) throw new AiError(NOT_CONNECTED);
   let lastError = "";
   for (let attempt = 0; attempt < 2; attempt++) {
+    const left = deadline - Date.now() - MARGIN_MS;
+    if (left < MIN_CALL_MS) throw new AiError(`${NO_RESPONSE} (out of time)`);
     try {
-      const text = await once(rootTag, payload);
+      const text = await once(rootTag, payload, Math.min(TIMEOUT_MS, left));
       const parsed = schema.safeParse(JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, "")));
       if (parsed.success) return parsed.data;
       lastError = parsed.error.message;

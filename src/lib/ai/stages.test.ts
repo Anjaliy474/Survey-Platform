@@ -99,6 +99,27 @@ describe("with a Gemini key", () => {
   });
 });
 
+describe("time budget", () => {
+  beforeEach(() => vi.stubEnv("GEMINI_API_KEY", "test-key"));
+
+  it("skips Gemini and uses the prepared example when the deadline is too close", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const out = await shapeQuestions(picks("Feedback for our college fest"), Date.now() + 2_000);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(out.prepared).toBe(true);
+  });
+
+  it("never waits longer than the time left", async () => {
+    const timeout = vi.spyOn(AbortSignal, "timeout");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(geminiReply(set)));
+    await shapeQuestions(picks("Gym timings survey"), Date.now() + 20_000);
+    expect(timeout).toHaveBeenCalled();
+    expect(Math.max(...timeout.mock.calls.map((c) => c[0] as number))).toBeLessThanOrEqual(20_000);
+    timeout.mockRestore();
+  });
+});
+
 describe("gamify after creator edits", () => {
   beforeEach(() => vi.stubEnv("GEMINI_API_KEY", ""));
 
