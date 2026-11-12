@@ -19,8 +19,8 @@ const StoryPlayer = dynamic(() => import("@/components/story/StoryPlayer").then(
 
 type Phase = "title" | "playing" | "thanks";
 
-export function PlayerApp({ slug, preview }: { slug: string; preview?: PublicSurvey }) {
-  const session = usePlayerSession(slug, preview);
+export function PlayerApp({ slug, preview, previewArm }: { slug: string; preview?: PublicSurvey; previewArm?: "story" | "plain" }) {
+  const session = usePlayerSession(slug, preview, previewArm);
   const [phase, setPhase] = useState<Phase>("title");
   const [plainFrom, setPlainFrom] = useState<number | null>(null);
   const [reveal, setReveal] = useState<RevealData | null>(null);

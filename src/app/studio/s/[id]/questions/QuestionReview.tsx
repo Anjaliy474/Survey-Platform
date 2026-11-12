@@ -75,7 +75,8 @@ export function QuestionReview({ id }: { id: string }) {
   const blocked = !storyAllowed({ questionSet: set });
   const placeholders = set.questions.filter((q) => PLACEHOLDER.test(q.text) || q.options.some((o) => PLACEHOLDER.test(o)));
   const allAccepted = set.questions.every((q) => accepted.has(q.id));
-  const canNext = allAccepted && openCritical.length === 0 && placeholders.length === 0 && set.questions.length <= 15;
+  const noPurpose = !set.purpose_line.trim();
+  const canNext = allAccepted && openCritical.length === 0 && placeholders.length === 0 && set.questions.length <= 15 && !noPurpose;
   const live = survey.status === "live";
 
   function updateQuestion(qid: string, patch: Partial<Question>) {
@@ -265,7 +266,9 @@ export function QuestionReview({ id }: { id: string }) {
           <span className="s-help">
             {!allAccepted
               ? `${set.questions.filter((q) => !accepted.has(q.id)).length} still to accept`
-              : placeholders.length
+              : noPurpose
+                ? "Add a purpose line first"
+                : placeholders.length
                 ? "Fill every marked blank first"
                 : openCritical.length
                   ? "Fix or dismiss the critical flag first"

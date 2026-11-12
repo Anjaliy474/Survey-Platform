@@ -42,12 +42,12 @@ async function post<T>(url: string, body: unknown): Promise<{ status: number; da
  * given, queues answers while offline and resends them, and completes the response.
  * `preview` runs entirely in memory (Studio preview) and never writes.
  */
-export function usePlayerSession(slug: string, preview?: PublicSurvey) {
+export function usePlayerSession(slug: string, preview?: PublicSurvey, previewArm: "story" | "plain" = "story") {
   const [state, setState] = useState<SessionState>(preview ? "ready" : "loading");
   const [survey, setSurvey] = useState<PublicSurvey | null>(preview ?? null);
   const [response, setResponse] = useState<ResponseRecord | null>(
     preview
-      ? { id: "preview", surveyId: preview.id, arm: "story", switchedToPlain: false, answers: {}, startedAt: "", completedAt: null, enjoyment: null, visitorId: "preview" }
+      ? { id: "preview", surveyId: preview.id, arm: previewArm, switchedToPlain: false, answers: {}, startedAt: "", completedAt: null, enjoyment: null, visitorId: "preview" }
       : null,
   );
   const [offline, setOffline] = useState(false);
