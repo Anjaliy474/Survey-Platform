@@ -43,6 +43,14 @@ describe("studio routes", () => {
     expect(s.prepared).toBe(true);
   });
 
+  it("lists surveys as summaries without full bodies", async () => {
+    const s = await created();
+    const res = await h.listSurveys(store, {}, {});
+    const body = JSON.stringify(res.body);
+    expect(body).toContain(s.id);
+    for (const heavy of ["questionSet", "logoDataUrl", "overall_note", "gamifier"]) expect(body).not.toContain(heavy);
+  });
+
   it("won't build a world before the questions are approved", async () => {
     const s = await created();
     expect((await h.buildWorldRoute(store, {}, { id: s.id })).status).toBe(409);

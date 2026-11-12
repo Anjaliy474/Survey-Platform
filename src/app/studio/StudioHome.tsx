@@ -2,16 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { studioApi, surveyName, surveyStep } from "@/components/studio/api";
+import { studioApi } from "@/components/studio/api";
 import { Badge } from "@/components/ui/Badge";
-import { storyAllowed } from "@/lib/survey/public";
-import type { Survey } from "@/lib/survey/types";
+import type { SurveySummary } from "@/lib/survey/public";
 
 const STEP_LABEL = { questions: "Questions", story: "Story", publish: "Publish", results: "Results" } as const;
 
 /** S1 Home: every survey with its status and next step. */
 export function StudioHome() {
-  const [surveys, setSurveys] = useState<Survey[] | null>(null);
+  const [surveys, setSurveys] = useState<SurveySummary[] | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -46,16 +45,16 @@ export function StudioHome() {
       {surveys && surveys.length > 0 && (
         <div className="s-grid">
           {surveys.map((s) => {
-            const step = surveyStep(s, !storyAllowed(s));
+            const step = s.step;
             return (
               <Link key={s.id} href={`/studio/s/${s.id}/${step}`} className="s-card" style={{ color: "inherit", textDecoration: "none" }}>
                 <div className="s-row">
                   <span className={`badge ${s.status === "live" ? "badge--success" : "badge--sample"}`}>{s.status === "live" ? "Live" : "Draft"}</span>
                   {s.prepared && <Badge kind="sample">Prepared example</Badge>}
                 </div>
-                <h3>{surveyName(s)}</h3>
+                <h3>{s.title}</h3>
                 <p className="s-help">
-                  {s.questionSet?.questions.length ?? 0} questions · {s.status === "live" ? "Open results" : `Next: ${STEP_LABEL[step]}`}
+                  {s.questionCount} questions · {s.status === "live" ? "Open results" : `Next: ${STEP_LABEL[step]}`}
                 </p>
               </Link>
             );

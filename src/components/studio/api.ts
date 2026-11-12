@@ -2,6 +2,7 @@
 
 import type { ValidationFailure } from "@/lib/story/validate-world";
 import type { Comparison } from "@/lib/survey/compare";
+import type { SurveySummary } from "@/lib/survey/public";
 import type { QuickPicks, Survey } from "@/lib/survey/types";
 
 export type ApiResult<T> = { ok: true; data: T } | { ok: false; status: number; error: string };
@@ -25,7 +26,7 @@ type SurveyBody = { survey: Survey; storyBlocked?: boolean; sensitiveHint?: bool
 type WorldBody = { survey: Survey; failures: ValidationFailure[]; prepared?: boolean };
 
 export const studioApi = {
-  list: () => call<{ surveys: Survey[] }>("/api/surveys"),
+  list: () => call<{ surveys: SurveySummary[] }>("/api/surveys"),
   create: (picks: Partial<QuickPicks>) => call<SurveyBody>("/api/surveys", "POST", { picks }),
   get: (id: string) => call<SurveyBody>(`/api/surveys/${id}`),
   patch: (id: string, patch: Record<string, unknown>) => call<SurveyBody>(`/api/surveys/${id}`, "PATCH", patch),

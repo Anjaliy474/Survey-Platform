@@ -10,7 +10,7 @@ import { NotFoundError, newId, newSlug, type SurveyStore } from "@/lib/store";
 import { assignArm } from "@/lib/survey/ab";
 import { compareArms } from "@/lib/survey/compare";
 import { sensitiveBriefHint } from "@/lib/survey/contrast";
-import { computeReveal, storyAllowed, toPublic } from "@/lib/survey/public";
+import { computeReveal, storyAllowed, toPublic, toSummary } from "@/lib/survey/public";
 import {
   FORMATS,
   LEVELS,
@@ -92,7 +92,7 @@ export const createSurvey = route(async (store, input) => {
   return ok({ survey, storyBlocked: !storyAllowed(survey), sensitiveHint: sensitiveBriefHint(picks.concept) }, 201);
 });
 
-export const listSurveys = route(async (store) => ok({ surveys: await store.listSurveys() }));
+export const listSurveys = route(async (store) => ok({ surveys: (await store.listSurveys()).map(toSummary) }));
 
 export const getSurvey = route(async (store, _input, { id }) => {
   const survey = await surveyOr404(store, id);

@@ -25,6 +25,31 @@ export type RevealData = {
   questions: { questionId: string; text: string; multi: boolean; options: { label: string; pct: number; you: boolean }[] }[];
 };
 
+/** One survey as the Studio home lists it: no question bodies, logos or AI reports. */
+export type SurveySummary = {
+  id: string;
+  slug: string;
+  status: Survey["status"];
+  title: string;
+  questionCount: number;
+  prepared: boolean;
+  step: "questions" | "story" | "publish" | "results";
+};
+
+export function toSummary(s: Survey): SurveySummary {
+  const blocked = !storyAllowed(s);
+  const step = s.status === "live" ? "results" : !s.questionsApproved ? "questions" : !blocked && !s.worldAccepted ? "story" : "publish";
+  return {
+    id: s.id,
+    slug: s.slug,
+    status: s.status,
+    title: s.world?.world.title || s.picks.concept,
+    questionCount: s.questionSet?.questions.length ?? 0,
+    prepared: s.prepared,
+    step,
+  };
+}
+
 export function storyAllowed(s: Pick<Survey, "questionSet">): boolean {
   return !(s.questionSet?.questions ?? []).some((q) => q.sensitive);
 }
