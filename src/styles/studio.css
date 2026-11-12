@@ -533,3 +533,8 @@
   color: var(--ps-white);
   font-weight: 600;
 }
+
+.s-pick__thumb.story {
+  min-height: 0;
+  display: block;
+}
