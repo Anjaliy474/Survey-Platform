@@ -366,6 +366,7 @@ The website (landing, pricing, auth) should feel **professional first, playful s
 
   Built from HTML/CSS plus SVG, using `--ps-clay-highlight`, `--ps-clay-inner` and `--ps-clay-drop`.
 - **Never** put illustrations inside questions. They can bias answers.
+  - **Story Mode exception (team decision, 12 Nov 2026):** neutral scenes may sit *around* the question card. They never depict an option or an outcome, every option renders as the same object, and only the chosen object changes. See section 14.
 - **Emoji:**
   - inside `emoji_scale` (satisfaction or feelings questions only), always with a text label
   - as decoration in AI copy: at most one per line, never meaningful on its own
@@ -896,7 +897,8 @@ Under 768px the meter collapses to "8/10 · 2 min ▾".
 
 ## 12. Performance budgets
 
-- **Player:** under 150 KB JS+CSS before fonts. Fonts use `font-display: swap`. No video, no WebGL. Works at 360px and inside WhatsApp's in-app browser.
+- **Story Mode Player:** under 300 KB JS+CSS+art before fonts, gzipped, measured on first load of `/s/:slug` (team decision, 12 Nov 2026). Only the survey's own template loads. Measured on the first production build: story 181 KB, plain 169 KB.
+- **Player:** under 150 KB JS+CSS before fonts. (Currently 169 KB: the Next.js/React runtime plus one global stylesheet. Moving landing-page CSS out of the global sheet is the first saving to make.) Fonts use `font-display: swap`. No video, no WebGL. Works at 360px and inside WhatsApp's in-app browser.
 - **Landing:** first screen under 200 KB before fonts. LCP under 2.5s on a mid-range Android over 4G. Clay objects are CSS/SVG, not images.
 - **Studio:** skeletons appear within 100ms. AI calls stream their stage progress into the AI working panel.
 
@@ -914,3 +916,28 @@ Under 768px the meter collapses to "8/10 · 2 min ▾".
 | Website look | New "Professional play" direction [3.12]: white space, dark pill CTA, glossy pastel survey pieces |
 | Display font | Bricolage Grotesque → **Plus Jakarta Sans** (cleaner, more professional) across the product |
 | Player | Added a **quality bar** for client surveys [7.5], benchmarked against our gamified survey video |
+| Story Mode | Section 14 added: scenes around questions, mood palettes, Clay and Paper-cut looks, a 300 KB Story Mode budget |
+
+---
+
+## 14. Story Mode
+
+Spec: `docs/superpowers/specs/2026-11-12-story-mode-design.md`. A survey can be played as a small story world (Journey Map, Stations Room or Chat Story) built from the creator's concept. **The story changes the stage, never the question.**
+
+**Integrity rules (enforced in code by `src/lib/story/validate-world.ts`):**
+1. Question text, options and scale labels render word for word, as real text on a solid card.
+2. The story never reorders questions; it only places chapter breaks.
+3. No answer changes the path, scene, reaction or ending. Acknowledgements are identical for every answer.
+4. All options of a question render as the same object (one prop family); only the chosen one changes.
+5. No points, prizes, timers or skill. Progress is the story itself.
+6. The title card shows question count and time including scene time.
+7. "Plain form" is one tap away on every screen, keeping answers.
+8. Purpose and consent show word for word on the title card, first.
+
+**Visual system:**
+- **Scenes** are SVG in a 400×700 portrait box behind the column; the question card is always a solid `--story-card` surface.
+- **Moods** recolour every template through `--st-*` variables (`.mood-festive`, `.mood-cosy`, and so on, in `tokens.css`).
+- **Looks:** `.look-clay` (soft drop shadows and gloss) and `.look-paper_cut` (flat fills, hard offset shadows, paper grain).
+- **Narrator:** voice only, no face or character (rule 11 unchanged).
+- **Motion:** scenes slide in and ambient effects drift; everything stops with reduced motion (still scenes, 120 ms crossfades).
+- **Sound:** optional synthesised ambient loop per mood, off by default, started only by the speaker button.

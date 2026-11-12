@@ -13,7 +13,7 @@ export type TemplateDef = {
   scenes: SceneDef[];
   endingSceneId: string;
   propFamilies: Record<Mechanic, string[]>;
-  /** Gzipped KB this template × look adds on top of the plain Player (measured in CI, Task 17). */
+  /** Compressed KB this template × look adds on top of the plain Player (measured on the production build, 12 Nov 2026: plain 169 KB, story 181 KB). */
   sizeKb: Record<Look, number>;
 };
 
@@ -42,7 +42,7 @@ export const CATALOGUE: Record<Format, TemplateDef> = {
       number_row_11: ["star_row"],
       text_box: ["postcard"],
     },
-    sizeKb: { clay: 0, paper_cut: 0 },
+    sizeKb: { clay: 12, paper_cut: 12 },
   },
   stations_room: {
     id: "stations_room",
@@ -65,7 +65,7 @@ export const CATALOGUE: Record<Format, TemplateDef> = {
       number_row_11: ["shelf_numbers"],
       text_box: ["notebook"],
     },
-    sizeKb: { clay: 0, paper_cut: 0 },
+    sizeKb: { clay: 12, paper_cut: 12 },
   },
   chat_story: {
     id: "chat_story",
@@ -81,7 +81,7 @@ export const CATALOGUE: Record<Format, TemplateDef> = {
       number_row_11: ["reply_chips"],
       text_box: ["reply_chips"],
     },
-    sizeKb: { clay: 0, paper_cut: 0 },
+    sizeKb: { clay: 12, paper_cut: 12 },
   },
 };
 
