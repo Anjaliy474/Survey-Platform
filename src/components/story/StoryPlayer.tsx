@@ -45,11 +45,13 @@ export function StoryPlayer({ survey, session, onSwitchPlain }: StoryPlayerProps
 
   useEffect(() => {
     let live = true;
-    void loadTemplate(world.world.template).then((t) => live && setTemplate(t));
+    loadTemplate(world.world.template)
+      .then((t) => live && setTemplate(t))
+      .catch(() => live && onSwitchPlain(0));
     return () => {
       live = false;
     };
-  }, [world.world.template]);
+  }, [world.world.template, onSwitchPlain]);
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
   const byId = useMemo(() => new Map(survey.questions.map((q) => [q.id, q])), [survey.questions]);

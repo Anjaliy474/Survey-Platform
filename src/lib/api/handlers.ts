@@ -175,10 +175,23 @@ export const editWorld = route(async (store, input, { id }) => {
 });
 
 export const publish = route(async (store, input, { id }) => {
-  const { splitAB } = z.object({ splitAB: z.boolean().default(true) }).parse(input ?? {});
+  const { splitAB, plainOnly } = z
+    .object({ splitAB: z.boolean().default(true), plainOnly: z.boolean().default(false) })
+    .parse(input ?? {});
   const s = await surveyOr404(store, id);
   if (s.status === "live") return ok({ survey: s, url: surveyUrl(s.slug) });
   if (!s.questionsApproved || !s.gamifier) return err(409, "Approve the questions first.");
+  // The way out when a world can't pass its checks: publish the plain form for everyone.
+  if (plainOnly) {
+    const survey = await store.updateSurvey(id, {
+      status: "live",
+      world: null,
+      worldAccepted: false,
+      splitAB: false,
+      publishedAt: new Date().toISOString(),
+    });
+    return ok({ survey, url: surveyUrl(survey.slug) });
+  }
   if (storyAllowed(s)) {
     if (!s.world || !s.worldAccepted) return err(409, "Accept the story world first.");
     const failures = validateWorld(s.world, {

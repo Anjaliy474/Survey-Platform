@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ComponentType } from "react";
+import { Component, useState, type ComponentType, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { PlainPlayer } from "@/components/player/PlainPlayer";
 import { Reveal, SendRetry, StateScreen, ThankYou, TitleCard } from "@/components/player/Screens";
@@ -16,6 +16,21 @@ const StoryPlayer = dynamic(() => import("@/components/story/StoryPlayer").then(
   ssr: false,
   loading: () => <div className="player-state" aria-busy="true" />,
 }) as ComponentType<StoryPlayerProps>;
+
+/** Any error inside a story template hands the respondent to the plain form (spec §9), answers kept. */
+class StoryBoundary extends Component<{ onError: () => void; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error: unknown) {
+    console.error("Story Mode failed; switching to the plain form.", error);
+    this.props.onError();
+  }
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
+}
 
 type Phase = "title" | "playing" | "thanks";
 
@@ -46,15 +61,22 @@ export function PlayerApp({ slug, preview, previewArm }: { slug: string; preview
   if (story && plainFrom === null) {
     return (
       <main className={`player theme-marigold story-root`} style={style}>
-        <StoryPlayer
-          survey={survey}
-          session={session}
-          onSwitchPlain={(at) => {
-            session.switchToPlain();
-            setPlainFrom(at);
+        <StoryBoundary
+          onError={() => {
+            setPlainFrom(0);
             setPhase("playing");
           }}
-        />
+        >
+          <StoryPlayer
+            survey={survey}
+            session={session}
+            onSwitchPlain={(at) => {
+              session.switchToPlain();
+              setPlainFrom(at);
+              setPhase("playing");
+            }}
+          />
+        </StoryBoundary>
       </main>
     );
   }

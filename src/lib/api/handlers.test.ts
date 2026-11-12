@@ -68,6 +68,19 @@ describe("studio routes", () => {
     expect(edit.status).toBe(409);
   });
 
+  it("can publish as a plain survey when the story isn't accepted", async () => {
+    const s = await created();
+    await h.patchSurvey(store, { questionsApproved: true }, { id: s.id });
+    await h.buildWorldRoute(store, {}, { id: s.id });
+    const pub = await h.publish(store, { splitAB: true, plainOnly: true }, { id: s.id });
+    expect(pub.status).toBe(200);
+    const live = (pub.body as { survey: Survey }).survey;
+    expect(live.world).toBeNull();
+    expect(live.splitAB).toBe(false);
+    const start = await h.playStart(store, { visitorId: "V9" }, { slug: live.slug });
+    expect((start.body as { response: { arm: string } }).response.arm).toBe("plain");
+  });
+
   it("blocks Story Mode when a question is sensitive", async () => {
     const s = await created();
     const set = structuredClone(s.questionSet!);

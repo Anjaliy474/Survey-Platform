@@ -14,6 +14,7 @@ import type { Survey } from "@/lib/survey/types";
 export function PublishStep({ id }: { id: string }) {
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [split, setSplit] = useState(true);
+  const [plainOnly, setPlainOnly] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState("");
@@ -36,7 +37,7 @@ export function PublishStep({ id }: { id: string }) {
   if (error && !survey) return <p className="banner banner--danger">{error}</p>;
   if (!survey) return <p className="muted">Loading…</p>;
 
-  const story = storyAllowed(survey);
+  const story = storyAllowed(survey) && !plainOnly;
   const failures =
     story && survey.world && survey.gamifier
       ? validateWorld(survey.world, {
@@ -63,7 +64,7 @@ export function PublishStep({ id }: { id: string }) {
   async function publish() {
     setBusy(true);
     setError("");
-    const r = await studioApi.publish(id, split);
+    const r = await studioApi.publish(id, split, plainOnly);
     setBusy(false);
     if (!r.ok) return setError(r.error);
     setSurvey(r.data.survey);
@@ -81,7 +82,7 @@ export function PublishStep({ id }: { id: string }) {
 
   return (
     <>
-      <StepRail surveyId={id} current="publish" reached={surveyStep(survey, !story)} storyBlocked={!story} />
+      <StepRail surveyId={id} current="publish" reached={surveyStep(survey, !storyAllowed(survey))} storyBlocked={!storyAllowed(survey)} />
       {!live ? (
         <>
           <h1>Ready to publish?</h1>
@@ -121,7 +122,18 @@ export function PublishStep({ id }: { id: string }) {
               </label>
             </section>
           ) : (
-            <p className="banner banner--info">Story Mode is off for sensitive topics. Everyone gets a calm, plain survey.</p>
+            !plainOnly && <p className="banner banner--info">Story Mode is off for sensitive topics. Everyone gets a calm, plain survey.</p>
+          )}
+          {storyAllowed(survey) && (
+            <label className="s-row s-card" style={{ alignItems: "flex-start" }}>
+              <input type="checkbox" checked={plainOnly} onChange={(e) => setPlainOnly(e.target.checked)} style={{ width: 20, height: 20, marginTop: 2 }} />
+              <span>
+                <strong>Publish without the story.</strong>
+                <span className="s-help" style={{ display: "block" }}>
+                  Everyone gets the plain form. Use this if the story world can&apos;t pass its checks in time.
+                </span>
+              </span>
+            </label>
           )}
           {error && <p className="banner banner--danger">{error}</p>}
           <div className="sticky-actions">

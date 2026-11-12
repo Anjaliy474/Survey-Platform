@@ -31,7 +31,8 @@ export const studioApi = {
   patch: (id: string, patch: Record<string, unknown>) => call<SurveyBody>(`/api/surveys/${id}`, "PATCH", patch),
   buildWorld: (id: string) => call<WorldBody>(`/api/surveys/${id}/world`, "POST"),
   editWorld: (id: string, body: Record<string, unknown>) => call<WorldBody>(`/api/surveys/${id}/world`, "PATCH", body),
-  publish: (id: string, splitAB: boolean) => call<{ survey: Survey; url: string }>(`/api/surveys/${id}/publish`, "POST", { splitAB }),
+  publish: (id: string, splitAB: boolean, plainOnly = false) =>
+    call<{ survey: Survey; url: string }>(`/api/surveys/${id}/publish`, "POST", { splitAB, plainOnly }),
   results: (id: string) =>
     call<{ total: number; completed: number; splitAB: boolean; comparison: Comparison }>(`/api/surveys/${id}/results`),
 };

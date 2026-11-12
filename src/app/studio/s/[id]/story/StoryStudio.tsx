@@ -79,9 +79,14 @@ export function StoryStudio({ id }: { id: string }) {
     return (
       <>
         <p className="banner banner--danger">{error}</p>
-        <button type="button" className="btn btn--md btn--secondary" onClick={() => void build()}>
-          Try again
-        </button>
+        <div className="s-row">
+          <button type="button" className="btn btn--md btn--secondary" onClick={() => void build()}>
+            Try again
+          </button>
+          <a className="btn btn--md btn--ghost" href={`/studio/s/${id}/publish`}>
+            Publish as a plain survey instead
+          </a>
+        </div>
       </>
     );
   }
@@ -291,6 +296,11 @@ export function StoryStudio({ id }: { id: string }) {
       />
 
       {error && <p className="banner banner--danger">{error}</p>}
+      {!live && failures.length > 0 && (
+        <p className="s-help">
+          Can&apos;t fix these? <a href={`/studio/s/${id}/publish`}>Publish as a plain survey instead</a>.
+        </p>
+      )}
       {!live && (
         <div className="sticky-actions">
           <span className="s-help">{failures.length ? `${failures.length} check${failures.length > 1 ? "s" : ""} to fix` : dirty ? "Unsaved changes" : "All checks pass"}</span>
