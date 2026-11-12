@@ -199,3 +199,44 @@
   --theme-selected: rgba(255, 194, 51, 0.16);
   --theme-pill: rgba(255, 194, 51, 0.2);
 }
+
+/* ================= Story Mode mood palettes (spec §5.2) =================
+ * Scenes read only these variables, so every template recolours per mood.
+ * The question card stays a solid --story-card surface for contrast on any scene. */
+.story {
+  --story-card: #ffffff;
+  --story-card-text: #22192e;
+  --story-card-shadow: 0 24px 48px -24px rgba(34, 25, 46, 0.45);
+  --story-chip-bg: rgba(255, 255, 255, 0.88);
+  --story-chip-text: #22192e;
+  --story-paper-shadow: rgba(34, 25, 46, 0.28);
+  --story-white: #ffffff;
+}
+.mood-festive {
+  --st-sky-top: #2b2350; --st-sky-bottom: #c96f4a; --st-far: #5b3a7d; --st-mid: #7a4b8f;
+  --st-near: #3b2a57; --st-ground: #2a1f3d; --st-accent: #ffc233; --st-glow: #ffe3a1; --st-detail: #f0643c;
+}
+.mood-cosy {
+  --st-sky-top: #f7d9b8; --st-sky-bottom: #fff3e3; --st-far: #e8b98f; --st-mid: #c98b5b;
+  --st-near: #8f5b3a; --st-ground: #6e4329; --st-accent: #c4461b; --st-glow: #ffe9c7; --st-detail: #14a39a;
+}
+.mood-adventure {
+  --st-sky-top: #8fc3e8; --st-sky-bottom: #e7f1ff; --st-far: #9cbf9a; --st-mid: #5f9a6a;
+  --st-near: #3c6b4a; --st-ground: #2f523a; --st-accent: #f2a900; --st-glow: #fff3d1; --st-detail: #c4461b;
+}
+.mood-space {
+  --st-sky-top: #0f0c1f; --st-sky-bottom: #2b2350; --st-far: #3a2f66; --st-mid: #4c3f86;
+  --st-near: #241d44; --st-ground: #17122e; --st-accent: #9cc3f5; --st-glow: #e6deff; --st-detail: #ff8fb3;
+}
+.mood-nature {
+  --st-sky-top: #c9f1e8; --st-sky-bottom: #f2fbf5; --st-far: #a9d8b8; --st-mid: #6fb487;
+  --st-near: #3f8a5c; --st-ground: #2e6b46; --st-accent: #f0643c; --st-glow: #fff3d1; --st-detail: #ffc233;
+}
+.mood-retro {
+  --st-sky-top: #ff9a6b; --st-sky-bottom: #ffe3a1; --st-far: #e06a8b; --st-mid: #9a4b8f;
+  --st-near: #4c2f6b; --st-ground: #2b2350; --st-accent: #37e2d5; --st-glow: #fff3d1; --st-detail: #ffc233;
+}
+.mood-everyday_india {
+  --st-sky-top: #ffd27a; --st-sky-bottom: #fff4dc; --st-far: #f2a95b; --st-mid: #d9723a;
+  --st-near: #9b4a24; --st-ground: #6e3418; --st-accent: #0b7a73; --st-glow: #fff3d1; --st-detail: #c4461b;
+}

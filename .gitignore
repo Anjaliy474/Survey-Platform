@@ -42,3 +42,8 @@ next-env.d.ts
 
 # course submission with team members' personal details, kept local only
 3_activity.pdf
+
+# local data and tool state
+.data/
+.omc/
+.superpowers/

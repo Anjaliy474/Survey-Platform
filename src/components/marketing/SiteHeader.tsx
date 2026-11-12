@@ -84,7 +84,7 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="site-header__actions">
-          <Link className="btn btn--md btn--marketing site-header__cta" href="/signup" prefetch={false}>
+          <Link className="btn btn--md btn--marketing site-header__cta" href="/studio/new" prefetch={false}>
             Create a survey, free
           </Link>
           <button
@@ -120,7 +120,7 @@ export function SiteHeader() {
               </a>
             ))}
           </nav>
-          <Link className="btn btn--lg btn--marketing" href="/signup" prefetch={false} onClick={close}>
+          <Link className="btn btn--lg btn--marketing" href="/studio/new" prefetch={false} onClick={close}>
             Create a survey, free
           </Link>
         </div>

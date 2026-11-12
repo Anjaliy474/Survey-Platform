@@ -13,7 +13,7 @@ export function FinalCta() {
           Ready to make your first one?
         </h2>
         <MiniPoll />
-        <Link className="btn btn--lg btn--marketing" href="/signup" prefetch={false}>
+        <Link className="btn btn--lg btn--marketing" href="/studio/new" prefetch={false}>
           Create a survey, free
         </Link>
       </div>

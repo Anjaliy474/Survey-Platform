@@ -37,7 +37,7 @@ export function Hero({ stats }: { stats: PollStats }) {
           Two-minute, game-like surveys. Insight you can act on. Try one below.
         </p>
         <div className="hero__cta">
-          <Link className="btn btn--lg btn--marketing" href="/signup" prefetch={false}>
+          <Link className="btn btn--lg btn--marketing" href="/studio/new" prefetch={false}>
             Create a survey, free
           </Link>
           <a className="btn btn--lg btn--marketing-secondary" href="#creator">

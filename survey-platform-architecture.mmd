@@ -31,6 +31,9 @@ flowchart TB
     direction TB
     STYLE["Creator picks style<br/>one-per-screen · pages · chat · classic<br/>playful layer level"]
     AI_GAME["AI Gamifier<br/>maps each question to a mechanic<br/>writes neutral microcopy"]
+    AI_WORLD["AI World Builder<br/>Story Mode: premise, chapters,<br/>scenes, narration, ending"]
+    R_WORLD["World Validator<br/>8 integrity rules · copy limits<br/>time and size budgets"]
+    TPL["Template Library<br/>Journey Map · Stations Room · Chat Story<br/>Clay · Paper-cut"]
     R_MECH["Mechanics Library + Schema Check<br/>same scale points and options<br/>no points, prizes or avatars"]
     PUB["Published survey link"]
   end
@@ -89,6 +92,9 @@ flowchart TB
 
   %% Step 2: gamify and publish
   STYLE --> AI_GAME --> R_MECH --> PUB
+  R_MECH -->|"Story Mode"| AI_WORLD --> R_WORLD --> PUB
+  TPL -.-> AI_WORLD
+  TPL -.-> PLAYER
 
   %% Step 3: collect
   PUB --> RS
@@ -125,7 +131,9 @@ flowchart TB
   classDef store fill:#f1f5f9,stroke:#475569,color:#0f172a
   classDef user fill:#ffffff,stroke:#334155,color:#0f172a
 
-  class AI_SHAPE,AI_BIAS,AI_GAME,AI_THEME,AI_DASH,AI_CHAT,RUNS,JUDGE,L_AI ai
+  class AI_SHAPE,AI_BIAS,AI_GAME,AI_WORLD,AI_THEME,AI_DASH,AI_CHAT,RUNS,JUDGE,L_AI ai
+  class R_WORLD rule
+  class TPL code
   class R_RULES,R_PRIV,R_MECH,R_CHART,GUARD,REDACT,L_RULE rule
   class COMPUTE,CCHK,PLAYER,PUB,OUT,L_CODE code
   class FINAL,STYLE,HUMAN,GATE,L_HUMAN human

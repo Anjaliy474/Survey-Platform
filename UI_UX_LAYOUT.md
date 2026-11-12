@@ -81,6 +81,10 @@ PlaySurvey
 │   └── /app/settings          Profile, data and privacy       P0
 ├── Player (public, no login)
 │   └── /s/:slug               Welcome → questions → thank-you → reveal   P0
+├── Story Mode (demo build, no sign-in)
+│   ├── /studio                Your surveys
+│   ├── /studio/new            S3d Start from a concept (quick picks)
+│   └── /studio/s/:id/{questions,story,publish,results}
 └── System
     └── 404, error, offline
 ```
@@ -908,6 +912,24 @@ Welcome ─► Q1 ─► Q2 ─► … (milestone lines between) ─► Submit �
 - [ ] Full keyboard support.
 
 ---
+
+### S3d. Start from a concept `/studio/new`  (Story Mode)
+
+**Purpose:** one line in, a survey and a story world out, in under a minute of creator effort.
+
+**Sections:** concept (required) with three example chips · **Make it for me** · who will play it + age band · how it should feel (Journey Map / Stations Room / Chat Story, with a suggested one and its reason) · world mood · look (Clay / Paper-cut) · playful level (Light / Medium / Full story) · brand colour (contrast-adjusted) and logo · time limit.
+
+**States:** a sensitive-sounding brief shows a one-line reminder; submit shows the AI working panel; errors keep the input and show the message.
+
+### S4s. Story step `/studio/s/:id/story`
+
+**Sections:** world card (title, premise, format, mood, look, narrator; Regenerate, Preview) · storyboard (one card per chapter: scene thumbnail and swap, title, intro line, the chapter's questions read-only, acknowledgement per question, interlude line, Regenerate lines, Merge with next, Split here) · integrity panel (13 checks with Fix) · **Accept world · Next: Publish** (disabled until every check passes).
+
+**Preview:** phone frame playing the whole story, with a Story / Plain view switch.
+
+### R1s. Story vs plain `/studio/s/:id/results`
+
+Sample caveat with total n (Computed) · per-version table (started, finished, completion, median time, enjoyment, switches to plain) · "Too few responses to compare" until 30 finished per version · then one row per closed question: "answers look the same" or "Answers to Q3 differ between story and plain. Review its scene." · "N new responses · Refresh" pill.
 
 ### E1. System pages  (P0)
 
