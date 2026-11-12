@@ -149,6 +149,18 @@ export function Reveal({ data, teaser }: { data: RevealData | null; teaser: stri
   );
 }
 
+/** Shown when the answers haven't reached the server yet. They stay saved on the device. */
+export function SendRetry({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="player-offline" role="alert" style={{ display: "grid", gap: 8, width: "100%" }}>
+      <span>We couldn&apos;t send your answers yet. They&apos;re saved on this device.</span>
+      <button type="button" className="pl-next" onClick={onRetry}>
+        Try again
+      </button>
+    </div>
+  );
+}
+
 export function StateScreen({ title, body }: { title: string; body: string }) {
   return (
     <main className="player-state theme-marigold">

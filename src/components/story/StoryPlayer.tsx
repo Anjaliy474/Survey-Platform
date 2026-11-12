@@ -3,7 +3,7 @@
 import { ArrowLeft, ArrowRight, Rows } from "@phosphor-icons/react/dist/ssr";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { StoryPlayerProps } from "@/app/s/[slug]/PlayerApp";
-import { Reveal, ThankYou, TitleCard } from "@/components/player/Screens";
+import { Reveal, SendRetry, ThankYou, TitleCard } from "@/components/player/Screens";
 import { usePrefersReducedMotion } from "@/lib/client-hooks";
 import { hasAnswer } from "@/lib/survey/answers";
 import { isOpen } from "@/lib/survey/mechanics";
@@ -39,6 +39,7 @@ export function StoryPlayer({ survey, session, onSwitchPlain }: StoryPlayerProps
   const [phase, setPhase] = useState<Phase>({ kind: "title" });
   const [limitNote, setLimitNote] = useState("");
   const [reveal, setReveal] = useState<RevealData | null>(null);
+  const [unsent, setUnsent] = useState(false);
   const timer = useRef<number | undefined>(undefined);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
@@ -66,10 +67,16 @@ export function StoryPlayer({ survey, session, onSwitchPlain }: StoryPlayerProps
     return formatAbout(plainSeconds(restQs) + restInterludes * INTERLUDE_SECONDS + ENDING_SECONDS);
   };
 
+  const send = useCallback(async () => {
+    const result = await session.complete(null);
+    setUnsent(!result.ok);
+    if (result.ok) setReveal(result.reveal);
+  }, [session]);
+
   const finish = useCallback(async () => {
     setPhase({ kind: "ending" });
-    setReveal(await session.complete(null));
-  }, [session]);
+    await send();
+  }, [send]);
 
   const go = useCallback(
     (next: Phase) => {
@@ -198,7 +205,7 @@ export function StoryPlayer({ survey, session, onSwitchPlain }: StoryPlayerProps
           ) : (
             <div className="story-card">
               <ThankYou thankYou={g.closing.thank_you} prompt={g.closing.enjoyment_prompt} onEnjoyment={(i) => void session.complete(i)}>
-                <Reveal data={reveal} teaser={g.closing.reveal_teaser} />
+                {unsent ? <SendRetry onRetry={() => void send()} /> : <Reveal data={reveal} teaser={g.closing.reveal_teaser} />}
                 <Postcard title={world.ending.postcard_title || world.world.title} chapters={chapters.map((ch) => ch.title)} look={look} mood={mood} />
               </ThankYou>
             </div>

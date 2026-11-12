@@ -3,7 +3,7 @@
 import { useState, type ComponentType } from "react";
 import dynamic from "next/dynamic";
 import { PlainPlayer } from "@/components/player/PlainPlayer";
-import { Reveal, StateScreen, ThankYou, TitleCard } from "@/components/player/Screens";
+import { Reveal, SendRetry, StateScreen, ThankYou, TitleCard } from "@/components/player/Screens";
 import { usePlayerSession, type PlayerSession } from "@/components/player/usePlayerSession";
 import { passingShade } from "@/lib/survey/contrast";
 import type { PublicSurvey, RevealData } from "@/lib/survey/public";
@@ -24,6 +24,7 @@ export function PlayerApp({ slug, preview, previewArm }: { slug: string; preview
   const [phase, setPhase] = useState<Phase>("title");
   const [plainFrom, setPlainFrom] = useState<number | null>(null);
   const [reveal, setReveal] = useState<RevealData | null>(null);
+  const [unsent, setUnsent] = useState(false);
   const { state, survey, response } = session;
 
   if (state === "loading") return <main className="player theme-marigold" aria-busy="true" />;
@@ -37,7 +38,9 @@ export function PlayerApp({ slug, preview, previewArm }: { slug: string; preview
 
   async function finish() {
     setPhase("thanks");
-    setReveal(await session.complete(null));
+    const result = await session.complete(null);
+    setUnsent(!result.ok);
+    if (result.ok) setReveal(result.reveal);
   }
 
   if (story && plainFrom === null) {
@@ -75,7 +78,7 @@ export function PlayerApp({ slug, preview, previewArm }: { slug: string; preview
         <div className="player__col">
           <div />
           <ThankYou thankYou={g.closing.thank_you} prompt={g.closing.enjoyment_prompt} onEnjoyment={(i) => void session.complete(i)}>
-            <Reveal data={reveal} teaser={g.closing.reveal_teaser} />
+            {unsent ? <SendRetry onRetry={() => void finish()} /> : <Reveal data={reveal} teaser={g.closing.reveal_teaser} />}
           </ThankYou>
           <div />
         </div>

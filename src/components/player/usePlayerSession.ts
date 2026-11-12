@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PublicSurvey, RevealData } from "@/lib/survey/public";
+import { AnswerQueue } from "@/lib/survey/answer-queue";
 import type { Answer, ResponseRecord, StoryEventType } from "@/lib/survey/types";
+
+export type CompleteResult = { ok: true; reveal: RevealData | null } | { ok: false };
 
 export type SessionState = "loading" | "ready" | "not_found" | "already" | "error";
 
@@ -51,7 +54,7 @@ export function usePlayerSession(slug: string, preview?: PublicSurvey, previewAr
       : null,
   );
   const [offline, setOffline] = useState(false);
-  const queue = useRef<Pending[]>([]);
+  const queue = useRef<AnswerQueue | null>(null);
 
   useEffect(() => {
     if (preview) return;
@@ -66,14 +69,45 @@ export function usePlayerSession(slug: string, preview?: PublicSurvey, previewAr
         if (cancelled) return;
         if (status === 404) return setState("not_found");
         if (status >= 400) return setState("error");
-        writeLocal(key(slug, "response"), data.response.id);
-        const pending = readLocal(key(slug, "queue"));
-        queue.current = pending ? (JSON.parse(pending) as Pending[]) : [];
+        const responseId = data.response.id;
+        writeLocal(key(slug, "response"), responseId);
+        const stored = readLocal(key(slug, "queue"));
+        let initial: [string, Answer][] = [];
+        try {
+          const parsed: unknown = stored ? JSON.parse(stored) : [];
+          // Older builds stored [{ questionId, answer }]; this one stores [questionId, answer] pairs.
+          if (Array.isArray(parsed)) {
+            initial = parsed.map((p) => (Array.isArray(p) ? (p as [string, Answer]) : [(p as Pending).questionId, (p as Pending).answer]));
+          }
+        } catch {
+          initial = [];
+        }
+        queue.current = new AnswerQueue(
+          async (item) => {
+            try {
+              const res = await fetch(`/api/play/${slug}/answer`, {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ responseId, ...item }),
+              });
+              // 4xx can't succeed on retry (bad value, already finished): don't block the queue on it.
+              const result = res.ok || res.status < 500 ? "ok" : "retry";
+              setOffline(result === "retry");
+              return result;
+            } catch {
+              setOffline(true);
+              return "retry";
+            }
+          },
+          (items) => writeLocal(key(slug, "queue"), items.length ? JSON.stringify(items) : null),
+          initial,
+        );
         const merged = { ...data.response, answers: { ...data.response.answers } };
-        for (const p of queue.current) merged.answers[p.questionId] = p.answer;
+        for (const [q, a] of initial) merged.answers[q] = a;
         setSurvey(data.survey);
         setResponse(merged);
         setState(data.alreadyAnswered ? "already" : "ready");
+        if (initial.length) void queue.current.flush();
       } catch {
         if (!cancelled) setState("error");
       }
@@ -83,57 +117,48 @@ export function usePlayerSession(slug: string, preview?: PublicSurvey, previewAr
     };
   }, [slug, preview]);
 
-  const flush = useCallback(async () => {
-    if (preview || !response) return;
-    while (queue.current.length) {
-      const next = queue.current[0];
-      try {
-        const res = await fetch(`/api/play/${slug}/answer`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ responseId: response.id, ...next }),
-        });
-        if (!res.ok && res.status >= 500) throw new Error("server");
-        queue.current.shift();
-        setOffline(false);
-      } catch {
-        setOffline(true);
-        break;
-      } finally {
-        writeLocal(key(slug, "queue"), queue.current.length ? JSON.stringify(queue.current) : null);
-      }
-    }
-  }, [preview, response, slug]);
-
   useEffect(() => {
-    const on = () => void flush();
+    const on = () => void queue.current?.flush();
     window.addEventListener("online", on);
     return () => window.removeEventListener("online", on);
-  }, [flush]);
+  }, []);
 
   const answer = useCallback(
     (questionId: string, a: Answer) => {
       setResponse((r) => (r ? { ...r, answers: { ...r.answers, [questionId]: a } } : r));
       if (preview) return;
-      queue.current = [...queue.current.filter((p) => p.questionId !== questionId), { questionId, answer: a }];
-      writeLocal(key(slug, "queue"), JSON.stringify(queue.current));
-      void flush();
+      queue.current?.set(questionId, a);
     },
-    [flush, preview, slug],
+    [preview],
   );
 
+  /** Completes only once every answer has reached the server; otherwise reports `ok: false`. */
   const complete = useCallback(
-    async (enjoyment: number | null): Promise<RevealData | null> => {
-      if (preview || !response) return null;
-      await flush();
-      const { data } = await post<{ response: ResponseRecord; reveal: RevealData | null }>(`/api/play/${slug}/complete`, {
-        responseId: response.id,
-        enjoyment,
-      });
-      if (data.response) setResponse((r) => (r ? { ...r, completedAt: data.response.completedAt } : r));
-      return data.reveal ?? null;
+    async (enjoyment: number | null): Promise<CompleteResult> => {
+      if (preview || !response) return { ok: true, reveal: null };
+      const drained = (await queue.current?.flush()) ?? true;
+      if (!drained) {
+        setOffline(true);
+        return { ok: false };
+      }
+      try {
+        const { status, data } = await post<{ response: ResponseRecord; reveal: RevealData | null }>(`/api/play/${slug}/complete`, {
+          responseId: response.id,
+          enjoyment,
+        });
+        if (status >= 500 || !data.response) {
+          setOffline(true);
+          return { ok: false };
+        }
+        setOffline(false);
+        setResponse((r) => (r ? { ...r, completedAt: data.response.completedAt } : r));
+        return { ok: true, reveal: data.reveal ?? null };
+      } catch {
+        setOffline(true);
+        return { ok: false };
+      }
     },
-    [flush, preview, response, slug],
+    [preview, response, slug],
   );
 
   const logEvent = useCallback(
