@@ -187,3 +187,18 @@ export type DashboardRequest = {
   schema: { fields: SchemaField[]; date_periods_available: number };
   current?: Dashboard;
 };
+
+/* ---------------- chat_with_data (combined.system.txt) ---------------- */
+
+export type AskCaveat = "small_group" | "flagged_responses" | "association_not_causation" | "convenience_sample" | "few_periods" | "not_in_survey";
+export type AskAnswer = {
+  answer: string;
+  interpretation_used: string;
+  evidence: { tool: "run_query" | "get_theme_summary" | "search_responses"; call_id: string; used_for: string }[];
+  quotes: { response_id: string; text: string }[];
+  caveats: AskCaveat[];
+  flagged_responses: { response_id: string; reason: string }[];
+  suggested_chart: DashChart | null;
+  follow_up_suggestions: string[];
+  declined: { request: string; reason: string };
+};

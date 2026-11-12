@@ -1,7 +1,9 @@
 "use client";
 
 import type { Gamified, PlayfulLevel, PresentationStyle, Question } from "@/lib/player/types";
-import type { BiasOutput, DashboardRequest, DashboardSpec, ShapedQuestion, ShapeEvent, SurveyRequest, ThemeOutput, ThemeRequest } from "./types";
+import type { ToolResult } from "@/lib/results/tools";
+import type { AskPlan } from "./demo-ask";
+import type { AskAnswer, BiasOutput, DashboardRequest, DashboardSpec, SchemaField, ShapedQuestion, ShapeEvent, SurveyRequest, ThemeOutput, ThemeRequest } from "./types";
 
 /** Run the create pipeline once and return the final result (no stage display). */
 export async function shapeOnce(request: SurveyRequest): Promise<Extract<ShapeEvent, { type: "result" }> | null> {
@@ -88,6 +90,26 @@ export async function buildDashboard(req: DashboardRequest): Promise<{ engine: "
       body: JSON.stringify(req),
     });
     return res.ok ? ((await res.json()) as { engine: "demo" | "claude"; spec: DashboardSpec; codeNotes: string[] }) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** chat_with_data, step 1: which tools to call for this question. */
+export async function askPlan(question: string, fields: SchemaField[]): Promise<AskPlan | null> {
+  try {
+    const res = await fetch("/api/ai/ask", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ phase: "plan", question, fields }) });
+    return res.ok ? ((await res.json()) as { plan: AskPlan }).plan : null;
+  } catch {
+    return null;
+  }
+}
+
+/** chat_with_data, step 2: the answer from the tool results (grounding is checked on the server). */
+export async function askAnswer(question: string, fields: SchemaField[], plan: AskPlan, results: ToolResult[]): Promise<{ answer: AskAnswer; removed: boolean } | null> {
+  try {
+    const res = await fetch("/api/ai/ask", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ phase: "answer", question, fields, plan, results }) });
+    return res.ok ? ((await res.json()) as { answer: AskAnswer; removed: boolean }) : null;
   } catch {
     return null;
   }

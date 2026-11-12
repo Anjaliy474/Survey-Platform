@@ -4,44 +4,13 @@
  * dashboard_spec JSON: library charts only, every adaptation explained, nothing silently changed.
  * The Claude version replaces this file; code re-checks the result either way.
  */
+import { findFields } from "./fields";
 import type { DashChart, Dashboard, DashboardRequest, DashboardSpec, SchemaField } from "./types";
 
 type Mapping = DashboardSpec["request_mapping"][number];
 
-const SYNONYMS: Record<string, RegExp> = {
-  Outlet: /outlet|branch|store|location|city|cities|where/,
-  City: /city|cities|location|where/,
-  "Recommendation (NPS)": /recommend|nps|promoter|loyal/,
-  Satisfaction: /satisf|happy|rating|rated/,
-  "Ordered food": /food|order/,
-  "Menu wishes": /menu|dish|item/,
-  "First time": /first.time|new (visitor|volunteer)s?|returning/,
-  Clarity: /clear|clarity|instruction/,
-  "Enjoyed most": /enjoy/,
-  "Likely to return": /likely|return|come back|join (the )?next/,
-  "How they heard": /hear|heard|channel|source/,
-  "Response date": /over time|trend|per day|daily|each day|by day|weekly|timeline/,
-};
-const THEMES_WORDS = /complain|theme|comment|said|suggest|feedback|open|written|what people/;
 const PERSONAL_WORDS = /\bemails?\b|phone|\bnames?\b|contact|address/;
 const INJECTION = /ignore (the )?(rules|previous|instructions)|bypass|show (all )?(raw|personal)|hide the caveat|remove the caveat/;
-
-function findFields(text: string, fields: SchemaField[]): SchemaField[] {
-  const t = text.toLowerCase();
-  const hits = fields.filter((f) => {
-    if (f.type === "personal") return false;
-    if (f.type === "themes") return THEMES_WORDS.test(t);
-    const syn = SYNONYMS[f.label];
-    if (syn?.test(t)) return true;
-    return t.includes(f.label.toLowerCase()) || t.includes(f.field.toLowerCase());
-  });
-  // Keep the order they appear in the request.
-  return hits.sort((a, b) => position(t, a) - position(t, b));
-}
-function position(t: string, f: SchemaField): number {
-  const m = (f.type === "themes" ? THEMES_WORDS : (SYNONYMS[f.label] ?? new RegExp(f.label.toLowerCase()))).exec(t);
-  return m ? m.index : 999;
-}
 
 function splitParts(request: string): string[] {
   const out: string[] = [];
