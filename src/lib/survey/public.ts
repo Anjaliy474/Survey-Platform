@@ -2,18 +2,20 @@
 import { percent, percentsSummingTo100 } from "@/lib/compute";
 import { MIN_RESPONSES_FOR_REVEAL } from "@/lib/compute";
 import { isOpen } from "./mechanics";
-import type { Gamifier, Question, QuickPicks, ResponseRecord, Survey, WorldSpec } from "./types";
+import type { Gamifier, Question, QuestionCore, QuickPicks, ResponseRecord, Survey, WorldSpec } from "./types";
+
+export type PublicGamifier = Omit<Gamifier, "notes_for_creator" | "flags">;
+export type PublicWorld = Omit<WorldSpec, "notes_for_creator" | "flags">;
 
 export type PublicSurvey = {
-  id: string;
   slug: string;
   status: Survey["status"];
   picks: Pick<QuickPicks, "format" | "look" | "mood" | "level" | "brandColor" | "logoDataUrl">;
   purposeLine: string;
   consentLine: string;
-  questions: Question[];
-  gamifier: Gamifier;
-  world: WorldSpec | null;
+  questions: QuestionCore[];
+  gamifier: PublicGamifier;
+  world: PublicWorld | null;
   storyAllowed: boolean;
 };
 
@@ -29,8 +31,17 @@ export function storyAllowed(s: Pick<Survey, "questionSet">): boolean {
 
 export function toPublic(s: Survey): PublicSurvey {
   const set = s.questionSet!;
+  const gamifier = { ...s.gamifier! } as Partial<Gamifier>;
+  delete gamifier.notes_for_creator;
+  delete gamifier.flags;
+  let world: PublicWorld | null = null;
+  if (storyAllowed(s) && s.world) {
+    const w = { ...s.world } as Partial<WorldSpec>;
+    delete w.notes_for_creator;
+    delete w.flags;
+    world = w as PublicWorld;
+  }
   return {
-    id: s.id,
     slug: s.slug,
     status: s.status,
     picks: {
@@ -43,15 +54,22 @@ export function toPublic(s: Survey): PublicSurvey {
     },
     purposeLine: set.purpose_line,
     consentLine: set.consent_line,
-    questions: set.questions,
-    gamifier: s.gamifier!,
-    world: storyAllowed(s) ? s.world : null,
+    questions: set.questions.map(publicQuestion),
+    gamifier: gamifier as PublicGamifier,
+    world,
     storyAllowed: storyAllowed(s),
   };
 }
 
+/** Only what the question looks like: never its reason, role, decision or edit history. */
+export function publicQuestion(q: Question): QuestionCore {
+  const core: QuestionCore = { id: q.id, text: q.text, type: q.type, options: q.options, scale: q.scale, required: q.required };
+  if (q.maxPicks !== undefined) core.maxPicks = q.maxPicks;
+  return core;
+}
+
 /** Option labels as respondents saw them: options, or numbered scale points with end labels. */
-export function optionLabels(q: Question): string[] {
+export function optionLabels(q: QuestionCore): string[] {
   if (q.type === "nps_0_10") return Array.from({ length: 11 }, (_, i) => String(i));
   if (q.type === "rating_scale") {
     const n = q.scale?.points ?? 5;

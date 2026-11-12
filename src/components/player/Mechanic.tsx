@@ -3,7 +3,7 @@
 import { Circle, Square } from "@phosphor-icons/react/dist/ssr";
 import { toggleMulti } from "@/lib/survey/answers";
 import { optionLabels } from "@/lib/survey/public";
-import type { Answer, GamifierItem, Question } from "@/lib/survey/types";
+import type { Answer, GamifierItem, QuestionCore } from "@/lib/survey/types";
 import { EmojiScale, NumberRow11, SegmentedScale, TapChipsMulti, TapChipsSingle, TextBox, ThisOrThat } from "./mechanics";
 
 const FACES = ["😞", "🙁", "😐", "🙂", "😄"];
@@ -22,7 +22,7 @@ export function Mechanic({
   pop,
   onLimit,
 }: {
-  question: Question;
+  question: QuestionCore;
   item: GamifierItem;
   value: Answer | undefined;
   onChange: (a: Answer) => void;

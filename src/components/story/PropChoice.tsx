@@ -4,7 +4,7 @@ import type { ComponentType } from "react";
 import { TextBox, useRovingKeys } from "@/components/player/mechanics";
 import { toggleMulti } from "@/lib/survey/answers";
 import { optionLabels } from "@/lib/survey/public";
-import type { Answer, GamifierItem, Look, Question } from "@/lib/survey/types";
+import type { Answer, GamifierItem, Look, QuestionCore } from "@/lib/survey/types";
 import type { SkinProps } from "./template-api";
 
 /**
@@ -23,7 +23,7 @@ export function PropChoice({
   labelledBy,
   onLimit,
 }: {
-  question: Question;
+  question: QuestionCore;
   item: GamifierItem;
   family: string;
   look: Look;

@@ -136,10 +136,14 @@ describe("player routes", () => {
     expect(last.reveal).not.toBeNull();
   });
 
-  it("keeps the public survey free of the bias report", async () => {
+  it("sends respondents only what they play", async () => {
     const s = await published();
     const start = await h.playStart(store, { visitorId: "V1" }, { slug: s.slug });
-    expect(JSON.stringify(start.body)).not.toContain("overall_note");
+    const publicSurvey = JSON.stringify((start.body as { survey: unknown }).survey);
+    for (const internal of ["overall_note", "maps_to_decision", "\"reason\"", "notes_for_creator", "\"flags\"", "\"role\"", "collects_personal_data", s.id]) {
+      expect(publicSurvey).not.toContain(internal);
+    }
+    expect(publicSurvey).toContain(s.questionSet!.questions[0].text);
   });
 
   it("marks a switch to plain", async () => {

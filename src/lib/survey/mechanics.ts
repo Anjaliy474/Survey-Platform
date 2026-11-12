@@ -1,4 +1,4 @@
-import type { Mechanic, Question } from "./types";
+import type { Mechanic, Question, QuestionCore } from "./types";
 
 /** emoji_scale is only for satisfaction or feelings, never agreement, likelihood or frequency. */
 const FEELING = /satisf|feel|happy|enjoy/i;
@@ -27,6 +27,6 @@ export function allowedMechanics(q: Question): Mechanic[] {
   }
 }
 
-export function isOpen(q: Question): boolean {
+export function isOpen(q: QuestionCore): boolean {
   return q.type === "short_text" || q.type === "long_text";
 }

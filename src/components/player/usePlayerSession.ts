@@ -50,7 +50,7 @@ export function usePlayerSession(slug: string, preview?: PublicSurvey, previewAr
   const [survey, setSurvey] = useState<PublicSurvey | null>(preview ?? null);
   const [response, setResponse] = useState<ResponseRecord | null>(
     preview
-      ? { id: "preview", surveyId: preview.id, arm: previewArm, switchedToPlain: false, answers: {}, startedAt: "", completedAt: null, enjoyment: null, visitorId: "preview" }
+      ? { id: "preview", surveyId: preview.slug, arm: previewArm, switchedToPlain: false, answers: {}, startedAt: "", completedAt: null, enjoyment: null, visitorId: "preview" }
       : null,
   );
   const [offline, setOffline] = useState(false);

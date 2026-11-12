@@ -56,6 +56,9 @@ export const questionSchema = z.object({
 });
 export type Question = z.infer<typeof questionSchema>;
 
+/** What a respondent's device receives: the question exactly as shown, nothing about why it was asked. */
+export type QuestionCore = Pick<Question, "id" | "text" | "type" | "options" | "scale" | "required" | "maxPicks">;
+
 export const questionSetSchema = z.object({
   status: z.string(),
   summary_for_creator: z.string(),
