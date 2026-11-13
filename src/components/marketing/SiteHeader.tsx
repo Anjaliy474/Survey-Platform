@@ -9,7 +9,6 @@ import { Logo } from "./Logo";
 export const NAV_LINKS = [
   { label: "What you get", href: "#creator" },
   { label: "How it works", href: "#ways" },
-  { label: "Styles", href: "#vibe" },
   { label: "Who it's for", href: "#who" },
   { label: "FAQ", href: "#faq" },
 ] as const;

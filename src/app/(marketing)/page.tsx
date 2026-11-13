@@ -4,7 +4,6 @@ import { Faq } from "@/components/marketing/Faq";
 import { FinalCta } from "@/components/marketing/FinalCta";
 import { Hero } from "@/components/marketing/Hero";
 import { MotionEffects } from "@/components/marketing/MotionEffects";
-import { PickTheVibe } from "@/components/marketing/PickTheVibe";
 import { ScrollReveal } from "@/components/marketing/ScrollReveal";
 import { SiteFooter } from "@/components/marketing/SiteFooter";
 import { SiteHeader } from "@/components/marketing/SiteHeader";
@@ -26,10 +25,9 @@ export default function LandingPage() {
       </a>
       <SiteHeader />
       <main id="main">
-        <Hero stats={pollStats} />
+        <Hero />
         <CreatorView stats={pollStats} />
         <ThreeWays />
-        <PickTheVibe />
         <AnswersToDecisions data={analyseCafeSurvey()} />
         <TrustStrip />
         <WhoItsFor />
