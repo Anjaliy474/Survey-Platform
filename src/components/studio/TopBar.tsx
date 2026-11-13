@@ -18,6 +18,8 @@ export type TopAction = {
   iconAfter?: boolean;
   /** Shown but not usable; the reason appears as a tooltip and under the button on phones. */
   disabledReason?: string;
+  /** While disabled: what a click does instead (for example, go to the first thing to fix). */
+  onDisabledClick?: () => void;
 };
 
 function ActionButton({ action, variant }: { action: TopAction; variant: "primary" | "secondary" }) {
@@ -32,7 +34,7 @@ function ActionButton({ action, variant }: { action: TopAction; variant: "primar
   );
   if (action.disabledReason)
     return (
-      <button type="button" className={cls} aria-disabled="true" title={action.disabledReason} aria-describedby="topbar-disabled-reason">
+      <button type="button" className={cls} aria-disabled="true" title={action.disabledReason} aria-describedby="topbar-disabled-reason" onClick={action.onDisabledClick}>
         {body}
       </button>
     );

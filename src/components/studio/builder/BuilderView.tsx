@@ -1,18 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { DragEvent } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, Info, LockSimple, Plus, Sparkle, Warning } from "@/components/icons";
-import { Badge, ComputedMark } from "@/components/ui/Badge";
+import { useId, useMemo, useState } from "react";
+import { ArrowRight, Plus, Sparkle } from "@/components/icons";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Drawer } from "@/components/ui/Drawer";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useToast } from "@/components/ui/Toast";
+import { useMe } from "@/lib/account";
 import { checkBias, shapeOnce } from "@/lib/ai/client";
 import { looksDuplicate } from "@/lib/ai/parse";
-import type { BiasFinding, SurveyRequest } from "@/lib/ai/types";
-import { useMediaQuery } from "@/lib/client-hooks";
+import type { SurveyRequest } from "@/lib/ai/types";
 import { formatDuration } from "@/lib/compute";
 import {
   type BuilderState,
@@ -27,8 +25,12 @@ import {
   keepMine,
   moveBackIn,
   move,
-  moveTo,
   nextGate,
+  allPlaceholders,
+  fillPlaceholder,
+  placeholdersIn,
+  type GateTarget,
+  type NextGate,
   openFindings,
   pendingCount,
   pendingItems,
@@ -46,7 +48,6 @@ import { TopBar } from "../TopBar";
 import { PreviewModal } from "./PreviewModal";
 import { QuestionCard } from "./QuestionCard";
 import { QuestionEditor } from "./QuestionEditor";
-import { ReviewPanel } from "./ReviewPanel";
 
 const EMPTY_CONTEXT: SurveyRequest["context"] = { audience: "", decision: "", known: "", anonymous: true, sensitive: false, time_limit_seconds: null };
 
@@ -57,7 +58,7 @@ const EMPTY_CONTEXT: SurveyRequest["context"] = { audience: "", decision: "", kn
 export function BuilderView({ survey }: { survey: StudioSurvey }) {
   const router = useRouter();
   const toast = useToast();
-  const narrow = useMediaQuery("(max-width: 1023px)");
+  const me = useMe();
   const state = useMemo<BuilderState | null>(
     () => survey.builder ?? (survey.ai ? createBuilderState(survey.ai.shaper, survey.ai.bias, survey.brief) : null),
     [survey.builder, survey.ai, survey.brief],
@@ -68,17 +69,14 @@ export function BuilderView({ survey }: { survey: StudioSurvey }) {
   const [flash, setFlash] = useState<string[]>([]);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [openFinding, setOpenFinding] = useState<{ key: string; category: string } | null>(null);
-  const [oneByOne, setOneByOne] = useState<{ total: number } | null>(null);
   const [checking, setChecking] = useState(false);
   const [busy, setBusy] = useState<"" | "suggest" | "update" | "draft">("");
   const [adding, setAdding] = useState(false);
-  const [panelOpen, setPanelOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [leftOpen, setLeftOpen] = useState(() => shaper?.status === "conflict" && !survey.builder?.leftOutSeen && (shaper?.cut_questions.length ?? 0) > 0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [confirmReplace, setConfirmReplace] = useState(false);
-  const [drag, setDrag] = useState<{ from: string | null; over: string | null }>({ from: null, over: null });
-  const latest = useRef<{ accept: () => void; edit: () => void; keepMine: () => void } | null>(null);
 
   const save = (next: BuilderState) => studio.patch(survey.id, () => ({ builder: next }));
   const saveWithUndo = (prev: BuilderState, next: BuilderState, message: string) => {
@@ -92,15 +90,18 @@ export function BuilderView({ survey }: { survey: StudioSurvey }) {
 
   const pending = state ? pendingItems(state) : [];
   const pendingUnits = state ? pendingCount(state) : 0;
-  const current = oneByOne ? pending[0] : undefined;
   const findings = state ? openFindings(state) : [];
-  const rules = state ? rulesFor(state, timeLimit) : null;
-  const gate = state && rules ? nextGate(state, rules) : { ok: false, reasons: ["Draft some questions first."] };
-  const biasStale = !!state && state.biasFor !== signature(state.items);
-  const labelFor = (key: string) => {
-    const i = state?.items.findIndex((x) => x.key === key) ?? -1;
-    return i >= 0 ? `Q${i + 1}` : key;
+  const purposeGaps = state ? placeholdersIn(state.purpose_line) : [];
+  const gaps = state ? allPlaceholders(state) : [];
+  const fillAll = (word: string, value: string) => {
+    if (!state) return;
+    const n = gaps.find((g) => g.word === word)?.count ?? 0;
+    saveWithUndo(state, fillPlaceholder(state, word, value), `Replaced ${word} in ${n} ${n === 1 ? "place" : "places"}.`);
   };
+  const suggestFor = (word: string) => (/organi[sz]ation|company|team|club|school|college/i.test(word) ? me?.org ?? "" : "");
+  const rules = state ? rulesFor(state, timeLimit) : null;
+  const gate: NextGate = state && rules ? nextGate(state, rules) : { ok: false, reasons: ["Draft some questions first."], blockers: [] };
+  const biasStale = !!state && state.biasFor !== signature(state.items);
 
   /* ---------------- actions ---------------- */
 
@@ -116,41 +117,6 @@ export function BuilderView({ survey }: { survey: StudioSurvey }) {
   function doRemove(key: string) {
     if (state) saveWithUndo(state, removeItem(state, key), "Question removed.");
   }
-
-  const controls = current
-    ? {
-        accept: () => doAccept(current.key),
-        edit: () => setEditingKey(current.key),
-        keepMine: () => (current.original ? doKeepMine(current.key) : doRemove(current.key)),
-      }
-    : null;
-  useEffect(() => {
-    latest.current = controls;
-  });
-
-  // One-by-one review: focus each pending card in turn; A / E / K act on it.
-  useEffect(() => {
-    if (!oneByOne || !current) return;
-    const el = document.getElementById(`card-${current.key}`);
-    el?.focus({ preventScroll: true });
-    el?.scrollIntoView({ block: "center", behavior: "smooth" });
-  }, [oneByOne, current]);
-
-  useEffect(() => {
-    if (!oneByOne) return;
-    const onKey = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement;
-      if (t.closest("input, textarea, select, [contenteditable]") || e.metaKey || e.ctrlKey || e.altKey) return;
-      const k = e.key.toLowerCase();
-      if (k === "a") latest.current?.accept();
-      else if (k === "e") latest.current?.edit();
-      else if (k === "k") latest.current?.keepMine();
-      else return;
-      e.preventDefault();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [oneByOne]);
 
   async function doCheckAgain() {
     if (!state) return;
@@ -203,31 +169,72 @@ export function BuilderView({ survey }: { survey: StudioSurvey }) {
     };
   }
 
+  /** Take the creator to the thing that is holding "Next" back. */
+  function showBlocker(target: GateTarget) {
+    const focusEl = (id: string, select?: string) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.scrollIntoView({ block: "center", behavior: "smooth" });
+      el.focus({ preventScroll: true });
+      if (select && el instanceof HTMLTextAreaElement) {
+        const at = el.value.indexOf(select);
+        if (at >= 0) el.setSelectionRange(at, at + select.length);
+      }
+    };
+    switch (target.kind) {
+      case "purpose":
+        return focusEl("purpose-line", placeholdersIn(state?.purpose_line ?? "")[0]);
+      case "consent":
+        return focusEl("consent-line");
+      case "question":
+        setEditingKey(target.key);
+        focusEl(`card-${target.key}`);
+        // Once the editor is open, put the cursor on the first [placeholder], in whichever box holds it.
+        window.setTimeout(() => {
+          const boxes = document.querySelectorAll<HTMLTextAreaElement>(`#card-${CSS.escape(target.key)} textarea`);
+          const box = [...boxes].find((b) => placeholdersIn(b.value).length);
+          if (!box) return;
+          const word = placeholdersIn(box.value)[0];
+          const at = box.value.indexOf(word);
+          box.focus({ preventScroll: true });
+          box.setSelectionRange(at, at + word.length);
+          box.scrollIntoView({ block: "center", behavior: "smooth" });
+        }, 60);
+        return;
+      case "finding": {
+        const f = findings.find((x) => x.id === target.key && x.severity === "critical");
+        if (f) setOpenFinding({ key: f.id, category: f.category });
+        return focusEl(`card-${target.key}`);
+      }
+      case "suggestions":
+        return focusEl("mb-suggest");
+      case "conflict":
+        return focusEl("conflict-banner");
+      case "questions":
+        return focusEl("builder-questions");
+    }
+  }
+
+  /** Put the cursor in a blank's box (the given [word], or the first one). Returns false when there are none. */
+  function focusBlank(word?: string) {
+    const boxes = [...document.querySelectorAll<HTMLInputElement>(".mb__fill-input")];
+    const box = boxes.find((b) => b.dataset.word === word) ?? boxes[0];
+    if (!box) return false;
+    box.scrollIntoView({ block: "center", behavior: "smooth" });
+    box.focus({ preventScroll: true });
+    return true;
+  }
+
   function goNext() {
-    if (!gate.ok) return;
+    if (!gate.ok) {
+      // Blanks first: put the cursor in the first empty box.
+      if (focusBlank()) return;
+      if (gate.blockers[0]) showBlocker(gate.blockers[0].target);
+      return;
+    }
     if (survey.step === "build") studio.patch(survey.id, () => ({ step: "style" }));
     router.push(surveyHref(survey.id, "style"));
   }
-
-  /* ---------------- drag and drop ---------------- */
-  const dnd = (key: string, index: number) => ({
-    over: drag.over === key && drag.from !== key,
-    onDragStart: (e: DragEvent) => {
-      e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("text/plain", key);
-      setDrag({ from: key, over: null });
-    },
-    onDragOver: (e: DragEvent) => {
-      if (!drag.from) return;
-      e.preventDefault();
-      if (drag.over !== key) setDrag({ ...drag, over: key });
-    },
-    onDrop: (e: DragEvent) => {
-      e.preventDefault();
-      if (state && drag.from && drag.from !== key) save(moveTo(state, drag.from, index));
-      setDrag({ from: null, over: null });
-    },
-  });
 
   /* ---------------- no draft yet (sample drafts) ---------------- */
   if (!state || !rules) {
@@ -278,46 +285,14 @@ export function BuilderView({ survey }: { survey: StudioSurvey }) {
     consent_line: state.consent_line,
     questions: currentQuestions(state),
   });
-  const toFix = findings.filter((f) => f.severity !== "minor").length;
-
-  const panel = (
-    <ReviewPanel
-      pendingCount={pendingUnits}
-      oneByOne={oneByOne && current ? { index: oneByOne.total - pendingUnits, total: oneByOne.total } : null}
-      onAcceptAll={() => {
-        const keys = pending.map((p) => p.key);
-        saveWithUndo(state, acceptAll(state), `Accepted ${pendingUnits} ${pendingUnits === 1 ? "suggestion" : "suggestions"}.`);
-        flashKeys(keys);
-        setPanelOpen(false);
-      }}
-      onStartOneByOne={() => {
-        setOneByOne({ total: pendingUnits });
-        setPanelOpen(false);
-      }}
-      onStopOneByOne={() => setOneByOne(null)}
-      oneByOneControls={controls}
-      findings={findings}
-      overallNote={state.bias?.overall_note ?? ""}
-      biasStale={biasStale}
-      checking={checking}
-      onCheckAgain={doCheckAgain}
-      onShowFinding={(f: BiasFinding) => {
-        setOpenFinding({ key: f.id, category: f.category });
-        setPanelOpen(false);
-        const el = document.getElementById(`card-${f.id}`);
-        el?.scrollIntoView({ block: "center", behavior: "smooth" });
-        el?.focus({ preventScroll: true });
-      }}
-      leftOutCount={state.leftOut.length}
-      onOpenLeftOut={() => {
-        setLeftOpen(true);
-        setPanelOpen(false);
-      }}
-      notes={shaper?.notes_for_creator ?? []}
-      flags={shaper?.flags ?? []}
-      labelFor={labelFor}
-    />
-  );
+  // Blanks are fixed in their own group; the rest of the gate shows as one quiet line each.
+  const otherBlockers = gate.blockers.filter((b) => b.target.kind !== "purpose" && b.target.kind !== "question" && b.target.kind !== "suggestions");
+  const count = rules.questionCount;
+  const acceptEverything = () => {
+    const keys = pending.map((p) => p.key);
+    saveWithUndo(state, acceptAll(state), `Accepted ${pendingUnits} ${pendingUnits === 1 ? "suggestion" : "suggestions"}.`);
+    flashKeys(keys);
+  };
 
   return (
     <>
@@ -326,96 +301,54 @@ export function BuilderView({ survey }: { survey: StudioSurvey }) {
         status="draft"
         saved
         secondary={[{ label: "Preview", onClick: () => setPreviewOpen(true) }]}
-        primary={{ label: "Next: Style", Icon: ArrowRight, iconAfter: true, onClick: goNext, disabledReason: gate.ok ? undefined : gate.reasons[0] }}
+        primary={{ label: "Next: Style", Icon: ArrowRight, iconAfter: true, onClick: goNext, disabledReason: gate.ok ? undefined : gate.reasons[0], onDisabledClick: goNext }}
       />
       <StepRail surveyId={survey.id} reached={survey.step} current="build" />
 
-      <div className="rulesbar" role="status" aria-label="Rules check">
-        <span className={`rulesbar__item is-${rules.countState}`}>
-          <span className="rulesbar__segs" aria-hidden="true">
-            {Array.from({ length: 10 }, (_, i) => (
-              <i key={i} className={i < rules.questionCount ? "is-on" : ""} />
-            ))}
-          </span>
-          Questions {rules.questionCount}/10
-          <ComputedMark />
-        </span>
-        <span className="rulesbar__item">
-          About {formatDuration(rules.seconds)}
-          <ComputedMark />
-        </span>
-        <span className={`rulesbar__item ${rules.openLastAndOptional ? "is-ok" : "is-warning"}`}>Open {rules.openCount}/2 {rules.openLastAndOptional ? "✓" : "!"}</span>
-        <span className={`rulesbar__item ${!rules.consentNeeded || rules.consentPresent ? "is-ok" : "is-blocked"}`}>
-          Consent {!rules.consentNeeded ? "not needed" : rules.consentPresent ? "✓" : "missing"}
-        </span>
-        <span className={`rulesbar__item ${toFix ? "is-warning" : "is-ok"}`}>Bias: {toFix ? `${toFix} to fix` : "clear"}</span>
-      </div>
+      <main
+        className="mb"
+        onClick={(e) => {
+          const ph = (e.target as HTMLElement).closest(".ph, .mbq__ph");
+          if (ph) focusBlank(ph.textContent?.trim());
+        }}
+      >
+        <h1 className="sr-only">Question builder: {survey.title}</h1>
+        <header className="mb__head">
+          <label className="sr-only" htmlFor="survey-title">
+            Survey title
+          </label>
+          <input id="survey-title" className="mb__title" value={survey.title} maxLength={80} onChange={(e) => studio.patch(survey.id, () => ({ title: e.target.value }))} />
+          <p className="mb__meta">
+            {count} {count === 1 ? "question" : "questions"} · about {formatDuration(rules.seconds)}
+            {rules.countState === "blocked" && <span className="mb__warn"> · too many, keep 15 or fewer</span>}
+            {shaper && (
+              <>
+                {" · "}
+                <button type="button" className="mb__link" onClick={() => setDetailsOpen(true)}>
+                  Draft details
+                </button>
+              </>
+            )}
+          </p>
+        </header>
 
-      <div className="builder">
-        <main className="builder__main">
-          <h1 className="sr-only">Question builder: {survey.title}</h1>
-          <div className="field builder__title">
-            <label className="field__label" htmlFor="survey-title">
-              Survey title
-            </label>
-            <input
-              id="survey-title"
-              className="input"
-              value={survey.title}
-              maxLength={80}
-              onChange={(e) => studio.patch(survey.id, () => ({ title: e.target.value }))}
-            />
-          </div>
-
-          {shaper && (
-            <section className="card-s ai-summary" aria-labelledby="ai-sum">
-              <div className="ai-summary__head">
-                <Badge kind="ai" />
-                <h2 id="ai-sum">{shaper.summary_for_creator}</h2>
+        {shaper?.status === "needs_clarification" && (
+          <section className="mb__notice" aria-labelledby="clarify-title">
+            <h2 id="clarify-title" className="mb__notice-title">
+              A few details would make this better
+            </h2>
+            {shaper.clarifying_questions.map((q, i) => (
+              <div className="field" key={q}>
+                <label className="field__label" htmlFor={`clarify-${i}`}>
+                  {q}
+                </label>
+                <input id={`clarify-${i}`} className="input" value={answers[i] ?? ""} onChange={(e) => setAnswers((a) => Object.assign([...a], { [i]: e.target.value }))} />
               </div>
-              {shaper.decisions_informed.length > 0 && (
-                <details open>
-                  <summary>This survey helps you decide ({shaper.decisions_informed.length})</summary>
-                  <ul>
-                    {shaper.decisions_informed.map((d) => (
-                      <li key={d}>{d}</li>
-                    ))}
-                  </ul>
-                </details>
-              )}
-              {shaper.assumptions.length > 0 && (
-                <details open={shaper.mode === "quick_prompt"}>
-                  <summary>Assumptions ({shaper.assumptions.length})</summary>
-                  <ul>
-                    {shaper.assumptions.map((a) => (
-                      <li key={a}>{a}</li>
-                    ))}
-                  </ul>
-                  <p className="field__help">To change an assumption, edit the questions below or update the draft from the brief.</p>
-                </details>
-              )}
-            </section>
-          )}
-
-          {shaper?.status === "needs_clarification" && (
-            <section className="status-banner status-banner--info" aria-labelledby="clarify-title">
-              <strong id="clarify-title">A few details would make this better</strong>
-              {shaper.clarifying_questions.map((q, i) => (
-                <div className="field" key={q}>
-                  <label className="field__label" htmlFor={`clarify-${i}`}>
-                    {q}
-                  </label>
-                  <input
-                    id={`clarify-${i}`}
-                    className="input"
-                    value={answers[i] ?? ""}
-                    onChange={(e) => setAnswers((a) => Object.assign([...a], { [i]: e.target.value }))}
-                  />
-                </div>
-              ))}
+            ))}
+            <div>
               <button
                 type="button"
-                className="btn btn--sm btn--ai"
+                className="btn btn--sm btn--primary"
                 disabled={busy === "update" || !answers.some((a) => a?.trim())}
                 onClick={() => {
                   if (state.items.some((i) => i.status === "accepted")) return setConfirmReplace(true);
@@ -423,58 +356,77 @@ export function BuilderView({ survey }: { survey: StudioSurvey }) {
                   if (req) void redraft(req);
                 }}
               >
-                <Sparkle size={16} /> {busy === "update" ? "Updating…" : "Update draft"}
+                {busy === "update" ? "Updating…" : "Update draft"}
               </button>
-              <p>The draft below is based on our assumptions until you answer.</p>
-            </section>
-          )}
-          {shaper?.status === "conflict" && !state.conflictConfirmed && (
-            <section className="status-banner status-banner--warning">
-              <strong>{shaper.conflict_explanation}</strong>
-              <div className="finding__actions">
-                <button type="button" className="btn btn--sm btn--primary" onClick={() => save({ ...state, conflictConfirmed: true })}>
-                  Confirm core set
-                </button>
-                <button type="button" className="btn btn--sm btn--secondary" onClick={() => setLeftOpen(true)}>
-                  See what was left out ({state.leftOut.length})
-                </button>
-              </div>
-            </section>
-          )}
-          {shaper?.status === "declined_with_alternative" && (
-            <section className="status-banner status-banner--danger">
-              <strong>{shaper.declined.reason}</strong>
-              <p>Report how many people answered and the exact wording of each question alongside any result.</p>
-            </section>
-          )}
-          {(shaper?.flags ?? []).map((f) => (
-            <p key={f} className="status-banner status-banner--danger">
-              <Warning size={18} weight="regular" /> {f}
-            </p>
-          ))}
-
-          <section className="consent-block" aria-labelledby="consent-title">
-            <LockSimple size={18} weight="regular" />
-            <div className="consent-block__fields">
-              <h2 id="consent-title" className="consent-block__title">
-                Purpose and consent <span className="field__help">Always shown first. You can edit it, not remove it.</span>
-              </h2>
-              <label className="field__label" htmlFor="purpose-line">
-                Purpose
-              </label>
-              <textarea id="purpose-line" className="textarea textarea--short" value={state.purpose_line} onChange={(e) => save({ ...state, purpose_line: e.target.value })} />
-              {(rules.consentNeeded || state.consent_line) && (
-                <>
-                  <label className="field__label" htmlFor="consent-line">
-                    Consent {rules.consentNeeded && <span className="field__req">Required: personal or sensitive questions</span>}
-                  </label>
-                  <textarea id="consent-line" className="textarea textarea--short" value={state.consent_line} onChange={(e) => save({ ...state, consent_line: e.target.value })} />
-                </>
-              )}
             </div>
           </section>
+        )}
+        {shaper?.status === "conflict" && !state.conflictConfirmed && (
+          <section id="conflict-banner" tabIndex={-1} className="mb__notice">
+            <p>{shaper.conflict_explanation}</p>
+            <div className="mb__notice-actions">
+              <button type="button" className="btn btn--sm btn--primary" onClick={() => save({ ...state, conflictConfirmed: true })}>
+                Confirm core set
+              </button>
+              <button type="button" className="mb__textbtn" onClick={() => setLeftOpen(true)}>
+                See what was left out ({state.leftOut.length})
+              </button>
+            </div>
+          </section>
+        )}
+        {shaper?.status === "declined_with_alternative" && (
+          <section className="mb__notice mb__notice--danger">
+            <p>{shaper.declined.reason}</p>
+          </section>
+        )}
+        {(shaper?.flags ?? []).map((f) => (
+          <p key={f} className="mb__notice mb__notice--danger">
+            {f}
+          </p>
+        ))}
 
-          <ol className="builder__list" aria-label="Questions">
+        {pendingUnits > 0 && (
+          <section id="mb-suggest" tabIndex={-1} className="mb__notice mb__notice--ai" aria-label="Suggestions">
+            <p>
+              <Sparkle size={16} /> {pendingUnits} {pendingUnits === 1 ? "suggestion" : "suggestions"} from AI. Check them below, or accept them all.
+            </p>
+            <button type="button" className="btn btn--sm btn--primary" onClick={acceptEverything}>
+              Accept all
+            </button>
+          </section>
+        )}
+
+        <section className="mb__group" aria-labelledby="mb-intro">
+          <h2 id="mb-intro" className="mb__label">
+            Shown before the questions
+          </h2>
+          <div className="mb__card">
+            <label className="sr-only" htmlFor="purpose-line">
+              Purpose
+            </label>
+            <textarea
+              id="purpose-line"
+              className={`mb__text${purposeGaps.length ? " is-blank" : ""}`}
+              rows={2}
+              value={state.purpose_line}
+              onChange={(e) => save({ ...state, purpose_line: e.target.value })}
+            />
+            {(rules.consentNeeded || state.consent_line) && (
+              <>
+                <label className="mb__rowlabel" htmlFor="consent-line">
+                  Consent{rules.consentNeeded ? " (required)" : ""}
+                </label>
+                <textarea id="consent-line" className="mb__text" rows={2} value={state.consent_line} onChange={(e) => save({ ...state, consent_line: e.target.value })} />
+              </>
+            )}
+          </div>
+        </section>
+
+        <section className="mb__group" aria-labelledby="mb-qs">
+          <h2 id="mb-qs" className="mb__label">
+            Questions
+          </h2>
+          <ol id="builder-questions" tabIndex={-1} className="mb__card mb__list builder__list" aria-label="Questions">
             {state.items.map((item, i) => (
               <li key={item.key}>
                 <QuestionCard
@@ -482,7 +434,7 @@ export function BuilderView({ survey }: { survey: StudioSurvey }) {
                   index={i}
                   total={state.items.length}
                   findings={findings.filter((f) => f.id === item.key)}
-                  focused={current?.key === item.key}
+                  focused={false}
                   flash={flash.includes(item.key)}
                   onAccept={() => doAccept(item.key)}
                   onKeepMine={() => doKeepMine(item.key)}
@@ -499,7 +451,6 @@ export function BuilderView({ survey }: { survey: StudioSurvey }) {
                     flashKeys([item.key]);
                   }}
                   onDismiss={(f, reason) => save(dismiss(state, f, reason))}
-                  dnd={dnd(item.key, i)}
                   editing={editingKey === item.key}
                   setEditing={(v) => setEditingKey(v ? item.key : null)}
                   openFinding={openFinding?.key === item.key ? openFinding.category : null}
@@ -507,69 +458,143 @@ export function BuilderView({ survey }: { survey: StudioSurvey }) {
                 />
               </li>
             ))}
+            <li className="mb__addrow">
+              {adding ? (
+                <div className="mbq__edit">
+                  <QuestionEditor
+                    initial={{ type: "single_choice", required: true }}
+                    submitLabel="Add question"
+                    onCancel={() => setAdding(false)}
+                    onSave={(patch) => {
+                      save(
+                        addQuestion(
+                          state,
+                          {
+                            text: "",
+                            type: "single_choice",
+                            options: [],
+                            scale: null,
+                            required: true,
+                            sensitive: false,
+                            collects_personal_data: false,
+                            role: "attitude",
+                            reason: "Added by you.",
+                            maps_to_decision: "",
+                            change: { action: "kept", source_id: "", before: "", why: "" },
+                            ...patch,
+                          },
+                          "you",
+                        ),
+                      );
+                      setAdding(false);
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="mb__addbtns">
+                  <button type="button" className="mb__add" onClick={() => setAdding(true)}>
+                    <Plus size={18} weight="bold" /> Add question
+                  </button>
+                  <button type="button" className="mb__textbtn" onClick={doSuggestOne} disabled={busy === "suggest"}>
+                    {busy === "suggest" ? "Suggesting…" : "Suggest one"}
+                  </button>
+                </div>
+              )}
+            </li>
           </ol>
+        </section>
 
-          {adding ? (
-            <div className="qcard qcard--solid">
-              <QuestionEditor
-                initial={{ type: "single_choice", required: true }}
-                submitLabel="Add question"
-                onCancel={() => setAdding(false)}
-                onSave={(patch) => {
-                  save(
-                    addQuestion(
-                      state,
-                      {
-                        text: "",
-                        type: "single_choice",
-                        options: [],
-                        scale: null,
-                        required: true,
-                        sensitive: false,
-                        collects_personal_data: false,
-                        role: "attitude",
-                        reason: "Added by you.",
-                        maps_to_decision: "",
-                        change: { action: "kept", source_id: "", before: "", why: "" },
-                        ...patch,
-                      },
-                      "you",
-                    ),
-                  );
-                  setAdding(false);
+        {gaps.length > 0 && (
+          <section id="mb-blanks-group" className="mb__group mb__group--blanks" aria-labelledby="mb-blanks">
+            <h2 id="mb-blanks" className="mb__label">
+              Fill in {gaps.length === 1 ? "the blank" : `${gaps.length} blanks`} to continue
+            </h2>
+            <div className="mb__card">
+              {gaps.map((g) => (
+                <FillRow key={g.word} word={g.word} initial={suggestFor(g.word)} onFill={fillAll} />
+              ))}
+            </div>
+            <p className="mb__foot">Type once and press Done. It is filled in everywhere it appears.</p>
+          </section>
+        )}
+
+        {!gate.ok && (
+          <div className="mb__gate builder__gate" role="status">
+            {gaps.length > 0 ? (
+              <button type="button" className="mb__link" onClick={() => focusBlank()}>
+                Fill in the blanks above, then Next: Style turns on.
+              </button>
+            ) : pendingUnits > 0 ? (
+              <p>Accept or change each suggestion to continue.</p>
+            ) : (
+              otherBlockers.map((b) => (
+                <button key={b.text} type="button" className="mb__link" onClick={() => showBlocker(b.target)}>
+                  {b.text}
+                </button>
+              ))
+            )}
+          </div>
+        )}
+      </main>
+
+      <Drawer open={detailsOpen} title="Draft details" onClose={() => setDetailsOpen(false)}>
+        <div className="mb-details">
+          {shaper && <p>{shaper.summary_for_creator}</p>}
+          {shaper && shaper.decisions_informed.length > 0 && (
+            <section>
+              <h3>Helps you decide</h3>
+              <ul>
+                {shaper.decisions_informed.map((d) => (
+                  <li key={d}>{d}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {shaper && shaper.assumptions.length > 0 && (
+            <section>
+              <h3>What the AI assumed</h3>
+              <ul>
+                {shaper.assumptions.map((a) => (
+                  <li key={a}>{a}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {(shaper?.notes_for_creator.length ?? 0) > 0 && (
+            <section>
+              <h3>Tips</h3>
+              <ul>
+                {shaper?.notes_for_creator.map((n) => (
+                  <li key={n}>{n}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+          <section>
+            <h3>Bias check</h3>
+            <p>{findings.length ? state.bias?.overall_note : "Every question reads neutrally."}</p>
+            {biasStale && <p className="mb__foot">Questions changed since the last check.</p>}
+            <button type="button" className="btn btn--sm btn--secondary" onClick={doCheckAgain} disabled={checking} aria-busy={checking}>
+              {checking ? "Checking…" : "Check again"}
+            </button>
+          </section>
+          {state.leftOut.length > 0 && (
+            <section>
+              <h3>Left out</h3>
+              <button
+                type="button"
+                className="mb__link"
+                onClick={() => {
+                  setDetailsOpen(false);
+                  setLeftOpen(true);
                 }}
-              />
-            </div>
-          ) : (
-            <div className="builder__add">
-              <button type="button" className="btn btn--md btn--secondary" onClick={() => setAdding(true)}>
-                <Plus size={16} /> Add question
+              >
+                See {state.leftOut.length} {state.leftOut.length === 1 ? "question" : "questions"} left out
               </button>
-              <button type="button" className="btn btn--md btn--ai" onClick={doSuggestOne} disabled={busy === "suggest"}>
-                <Sparkle size={16} /> {busy === "suggest" ? "Suggesting…" : "Suggest one more"}
-              </button>
-            </div>
+            </section>
           )}
-          {!gate.ok && (
-            <p className="builder__gate">
-              <Info size={16} weight="regular" /> Before moving on: {gate.reasons.join(" ")}
-            </p>
-          )}
-        </main>
-
-        {!narrow && <aside className="builder__panel">{panel}</aside>}
-      </div>
-
-      {narrow && (
-        <>
-          <button type="button" className="peekbar" onClick={() => setPanelOpen(true)} aria-haspopup="dialog">
-            {pendingUnits} {pendingUnits === 1 ? "suggestion" : "suggestions"} · {toFix} to fix <span aria-hidden="true">▲</span>
-          </button>
-          <Drawer open={panelOpen} title="Review" side="bottom" onClose={() => setPanelOpen(false)}>
-            {panel}
-          </Drawer>
-        </>
-      )}
+        </div>
+      </Drawer>
 
       <Drawer
         open={leftOpen}
@@ -586,9 +611,7 @@ export function BuilderView({ survey }: { survey: StudioSurvey }) {
             {state.leftOut.map((c, i) => (
               <li key={`${c.source_id}-${i}`} className="leftout__item">
                 <p className="leftout__text">{c.text}</p>
-                <p className="field__help">
-                  {c.reason} Suggested home: {c.suggested_home === "later_pulse" ? "a later pulse survey" : c.suggested_home === "optional_section" ? "an optional section" : "drop it"}.
-                </p>
+                <p className="field__help">{c.reason}</p>
                 <button type="button" className="btn btn--sm btn--secondary" onClick={() => saveWithUndo(state, moveBackIn(state, i), "Moved back in.")}>
                   Move back in
                 </button>
@@ -614,5 +637,28 @@ export function BuilderView({ survey }: { survey: StudioSurvey }) {
         <p>The AI will write a new draft from your answers. Changes you accepted in this draft will be replaced.</p>
       </ConfirmDialog>
     </>
+  );
+}
+
+/** One blank: type the real words once and they replace it everywhere. */
+function FillRow({ word, initial, onFill }: { word: string; initial: string; onFill: (word: string, value: string) => void }) {
+  const id = useId();
+  const [value, setValue] = useState(initial);
+  return (
+    <form
+      className="mb__fill"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (value.trim()) onFill(word, value);
+      }}
+    >
+      <label htmlFor={id} className="mb__fill-label">
+        {word.slice(1, -1)}
+      </label>
+      <input id={id} className="mb__fill-input" data-word={word} value={value} onChange={(e) => setValue(e.target.value)} placeholder="Type here" autoComplete="off" />
+      <button type="submit" className="mb__textbtn" disabled={!value.trim()}>
+        Done
+      </button>
+    </form>
   );
 }
