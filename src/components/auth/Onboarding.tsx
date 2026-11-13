@@ -6,7 +6,8 @@ import { useState } from "react";
 import { ArrowLeft, ArrowRight, ChartBar, Check, Lightbulb, Lightning, Star } from "@/components/icons";
 import type { IconProps } from "@/components/icons";
 import type { ComponentType } from "react";
-import { GOALS, ROLES, type Role, account, useMe } from "@/lib/account";
+import { GOALS, ROLES, type Role, account, safeNext, useMe } from "@/lib/account";
+import { useSearchParam } from "@/lib/client-hooks";
 
 const ROLE_ICON: Record<Role, ComponentType<IconProps>> = { business: Lightning, researcher: Lightbulb, community: Star, analyst: ChartBar };
 const START_FOR: Record<Role, string> = { business: "Quick prompt", researcher: "Describe your research", community: "Quick prompt", analyst: "Bring your questions" };
@@ -22,9 +23,11 @@ export function Onboarding() {
   const role = me?.role ?? null;
   const goal = me?.goal ?? null;
 
+  // Came from a page that needed an account (?next=…): finish there.
+  const next = safeNext(useSearchParam("next"));
   const finish = (href: string) => {
     account.update({ onboarded: true });
-    router.push(href);
+    router.push(next ?? href);
   };
 
   return (
@@ -142,7 +145,7 @@ export function Onboarding() {
           </div>
           <p className="onboard__fine">
             Or{" "}
-            <Link href="/app" className="link" onClick={() => account.update({ onboarded: true })}>
+            <Link href={next ?? "/app"} className="link" onClick={() => account.update({ onboarded: true })}>
               look at the sample surveys first
             </Link>
             .

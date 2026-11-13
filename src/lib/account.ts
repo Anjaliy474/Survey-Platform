@@ -129,3 +129,8 @@ function me(): Me {
 export function useMe(): Me | null {
   return useSyncExternalStore(subscribe, me, () => null);
 }
+
+/** Where to go after logging in (?next=…). Only Studio pages, so the link can't send people elsewhere. */
+export function safeNext(value: string | null | undefined): string | null {
+  return value && /^\/app(\/[\w\-/?=&%.]*)?$/.test(value) && !value.startsWith("//") ? value : null;
+}

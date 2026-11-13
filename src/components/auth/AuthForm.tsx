@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useId, useState } from "react";
 import { Eye, EyeSlash, Info } from "@/components/icons";
-import { EMAIL_RE, account } from "@/lib/account";
+import { EMAIL_RE, account, safeNext } from "@/lib/account";
+import { useSearchParam } from "@/lib/client-hooks";
 
 /**
  * A1 Sign up / Log in (UI_UX_LAYOUT.md). Inline errors announced to screen readers, password
@@ -20,6 +21,8 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
   const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({});
   const [google, setGoogle] = useState(false);
   const signup = mode === "signup";
+  const goTo = safeNext(useSearchParam("next"));
+  const withNext = (path: string) => (goTo ? `${path}?next=${encodeURIComponent(goTo)}` : path);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -40,7 +43,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
         setErrors({ email: "There’s already an account with this email. Log in instead." });
         return;
       }
-      router.push("/onboarding");
+      router.push(withNext("/onboarding"));
     } else {
       const ok = await account.logIn(email, password);
       setBusy(false);
@@ -48,7 +51,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
         setErrors({ form: "That email and password don’t match. Try again or reset your password." });
         return;
       }
-      router.push("/app");
+      router.push(goTo ?? "/app");
     }
   }
 
@@ -98,7 +101,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
             <p className="field__error" id={`${id}-email-err`} role="alert">
               {errors.email}{" "}
               {errors.email.includes("Log in") && (
-                <Link href="/login" className="link">
+                <Link href={withNext("/login")} className="link">
                   Log in
                 </Link>
               )}
@@ -157,7 +160,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
       </p>
       <p className="authform__switch">
         {signup ? "Already have an account? " : "New to PlaySurvey? "}
-        <Link href={signup ? "/login" : "/signup"} className="link">
+        <Link href={withNext(signup ? "/login" : "/signup")} className="link">
           {signup ? "Log in" : "Create a free account"}
         </Link>
       </p>
