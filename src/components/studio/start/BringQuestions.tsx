@@ -8,7 +8,8 @@ import { useLocalDraft } from "@/lib/local-draft";
 import { ChoiceChips, TIME_OPTIONS } from "./fields";
 import { StartFrame, useStartFlow } from "./StartFlow";
 
-const INITIAL = { text: "", audience: "", decision: "", time: null as number | null };
+export const QUESTIONS_KEY = "playsurvey:brief:questions";
+export const QUESTIONS_INITIAL = { text: "", audience: "", decision: "", time: null as number | null };
 const CHECKS = [
   "Wording that pushes an answer",
   "Two questions in one",
@@ -21,7 +22,7 @@ const CHECKS = [
 /** S3a "Bring your questions" (UI_UX_LAYOUT.md): paste, see what we detected, improve with AI. */
 export function BringQuestions() {
   const flow = useStartFlow();
-  const [draft, setDraft] = useLocalDraft("playsurvey:brief:questions", INITIAL);
+  const [draft, setDraft] = useLocalDraft(QUESTIONS_KEY, QUESTIONS_INITIAL);
   const [error, setError] = useState("");
   const textId = useId();
   const parsed = parsePastedQuestions(draft.text);

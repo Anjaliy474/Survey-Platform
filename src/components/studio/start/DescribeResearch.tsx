@@ -8,7 +8,8 @@ import { ChoiceChips, Segmented, Switch, TIME_OPTIONS } from "./fields";
 import { StartFrame, titleFrom, useStartFlow } from "./StartFlow";
 
 const AUDIENCES = ["Customers", "Students", "Employees", "Event attendees", "Other"];
-const INITIAL = {
+export const RESEARCH_KEY = "playsurvey:brief:research";
+export const RESEARCH_INITIAL = {
   decision: "",
   audience: "",
   audienceOther: "",
@@ -21,7 +22,7 @@ const INITIAL = {
 /** S3b "Describe your research" (UI_UX_LAYOUT.md): a friendly brief; only the decision is required. */
 export function DescribeResearch() {
   const flow = useStartFlow();
-  const [d, setD] = useLocalDraft("playsurvey:brief:research", INITIAL);
+  const [d, setD] = useLocalDraft(RESEARCH_KEY, RESEARCH_INITIAL);
   const [error, setError] = useState("");
   const id = useId();
 
