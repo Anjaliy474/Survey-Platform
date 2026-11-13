@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowClockwise, ArrowRight, ArrowUpRight, Info, LinkSimple, LockSimple, Quotes, Warning } from "@/components/icons";
+import { ArrowClockwise, ArrowRight, ArrowUpRight, Info, LinkSimple, LockSimple, Quotes, ShareNetwork, Warning } from "@/components/icons";
 import { Badge, ComputedMark } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useNowMinute } from "@/lib/client-hooks";
@@ -12,12 +12,16 @@ import { useResponses } from "@/lib/player/published-store";
 import type { PlayerSurvey } from "@/lib/player/types";
 import { FLAG_LABEL, type FlagCode, type QuestionResult, formatSeconds, overview } from "@/lib/results/compute";
 import { type ResultResponse, localResponses, sampleResponses } from "@/lib/results/data";
+import { computeInsights } from "@/lib/results/insights";
+import { buildSnapshot } from "@/lib/results/snapshot";
 import { surveyHref } from "@/lib/studio/sections";
 import { studio } from "@/lib/studio/store";
 import type { StudioSurvey } from "@/lib/studio/types";
 import { ResultsTabs } from "../ResultsTabs";
 import { TopBar } from "../TopBar";
 import { type CaveatCode, ChartCard, Columns, HBars, KpiTile, LikertBar, NpsChart } from "./charts";
+import { KeyInsights } from "./KeyInsights";
+import { ShareAnalysis } from "./ShareAnalysis";
 
 const NO_REVIEW = {};
 
@@ -59,14 +63,20 @@ export function ResultsView({ survey }: { survey: StudioSurvey }) {
     [player, visibleRows, includeFlagged, review, now],
   );
   const fresh = survey.player ? liveCount - seen : 0;
+  const [shareOpen, setShareOpen] = useState(false);
+  const insightSet = useMemo(() => (player && data ? computeInsights(player, data.rows, visibleRows) : null), [player, data, visibleRows]);
+  const snapshot = useMemo(
+    () => (player && data && insightSet && now ? buildSnapshot({ title: survey.title, creator: player.creator.name, isSample, data, set: insightSet, now }) : null),
+    [player, data, insightSet, now, survey.title, isSample],
+  );
 
   const top = (
     <>
       <TopBar
         crumbs={[{ label: "Home", href: "/app" }, { label: survey.title }]}
         status={survey.status}
-        secondary={survey.slug ? [{ label: "View survey", href: `/s/${survey.slug}`, external: true, Icon: ArrowUpRight }] : []}
-        primary={survey.status === "live" ? { label: "Share", Icon: LinkSimple, href: surveyHref(survey.id, "publish") } : undefined}
+        secondary={survey.slug && !survey.source ? [{ label: "View survey", href: `/s/${survey.slug}`, external: true, Icon: ArrowUpRight }] : []}
+        primary={(data?.finished ?? 0) > 0 ? { label: "Share analysis", Icon: ShareNetwork, onClick: () => setShareOpen(true) } : undefined}
       />
       <ResultsTabs surveyId={survey.id} current="results" hasResponses={(data?.finished ?? 0) > 0} />
     </>
@@ -181,6 +191,12 @@ export function ResultsView({ survey }: { survey: StudioSurvey }) {
           </p>
         ) : null}
 
+        <div className="results__actions">
+          <button type="button" className="btn btn--sm btn--secondary" onClick={() => setShareOpen(true)}>
+            <ShareNetwork size={16} weight="regular" aria-hidden="true" /> Share analysis
+          </button>
+        </div>
+
         <div className="kpis">
           <KpiTile label="Responses" value={data.finished} format={(v) => formatCount(Math.round(v))} how={`Finished and submitted · ${formatCount(data.started)} started`} />
           <KpiTile label="Completion" value={data.completionPct} format={(v) => `${Math.round(v)}%`} how={`${formatCount(data.finished)} of ${formatCount(data.started)} who started`} />
@@ -193,6 +209,17 @@ export function ResultsView({ survey }: { survey: StudioSurvey }) {
           />
         </div>
 
+        {insightSet && (
+          <section className="results__insights" aria-labelledby="insights-title">
+            <h2 id="insights-title" className="results__h2">
+              Key insights
+            </h2>
+            <p className="results__sub">Found by comparing groups, time of day, trends and comments, not just counting answers. Every number is computed from the responses.</p>
+            <KeyInsights set={insightSet} themesHref={surveyHref(survey.id, "themes")} />
+          </section>
+        )}
+
+        <h2 className="results__h2">Activity</h2>
         <div className="results__pair">
           <ChartCard
             title="Responses over time"
@@ -275,6 +302,7 @@ export function ResultsView({ survey }: { survey: StudioSurvey }) {
           </p>
         </section>
       </main>
+      <ShareAnalysis open={shareOpen} onClose={() => setShareOpen(false)} snapshot={snapshot} />
     </>
   );
 }
