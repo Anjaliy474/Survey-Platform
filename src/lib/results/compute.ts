@@ -83,6 +83,8 @@ export type Overview = {
   dropSentence: string;
   left: number;
   questions: QuestionResult[];
+  /** The finished responses the charts use (after flag and review rules). */
+  rows: ResultResponse[];
   quality: { flagged: number; byCode: Record<FlagCode, number>; kept: number; excluded: number; included: boolean };
 };
 
@@ -207,6 +209,7 @@ export function overview(
     dropSentence,
     left: leftRows.length,
     questions: survey.questions.map((q) => questionResult(q, used)),
+    rows: used,
     quality: { flagged: flags.size, byCode, kept: kept.length, excluded: excluded.length, included: options.includeFlagged },
   };
 }

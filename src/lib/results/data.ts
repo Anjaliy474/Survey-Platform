@@ -64,7 +64,91 @@ type Spec = {
   emails?: { id: string; rate: number };
   plants: { speeders: number; duplicates: number; straightLiners: number; lowEffort: number };
   enjoyment: readonly number[];
+  /**
+   * Real answers hang together: a person's earlier answers, mood and visit time shift the next one.
+   * Returns new weights (or probabilities, or open-answer pool weights) for question q.
+   */
+  tilt?: (q: Question, ctx: TiltContext, weights: readonly number[]) => number[];
 };
+
+export type TiltContext = { answers: Answers; day: number; days: number; hour: number; mood: number };
+
+/** Lean a scale towards its top (s > 0) or bottom (s < 0); step sets how hard per point. */
+function lean(weights: readonly number[], s: number, step = 0.6): number[] {
+  const mid = (weights.length - 1) / 2;
+  return weights.map((w, i) => w * Math.exp(s * step * (i - mid)));
+}
+const num = (a: Answer | undefined, fallback: number) => (typeof a === "number" ? a : fallback);
+
+/** Café and canteen: outlet and visit time shape satisfaction; satisfaction drives recommending. */
+function cafeTilt(q: Question, ctx: TiltContext, w: readonly number[]): number[] {
+  const a = ctx.answers;
+  const outlet = num(a.Q1, 0);
+  const sat = num(a.Q2, 3);
+  const morning = ctx.hour < 11;
+  const evening = ctx.hour >= 17;
+  switch (q.id) {
+    case "Q2": {
+      // Gachibowli is busy and loud; Banjara Hills is the calm flagship; the last two days dipped.
+      const byOutlet = [0.55, -0.85, 0.1, -0.15][outlet] ?? 0;
+      const recent = ctx.day >= ctx.days - 2 ? -0.45 : 0;
+      return lean(w, byOutlet + recent + 0.8 * ctx.mood);
+    }
+    case "Q3":
+      return lean(w, 0.75 * (sat - 2.5) + 0.2 * ctx.mood, 0.24);
+    case "Q4":
+      return w.map((x, i) => (i === 0 ? x * Math.exp(0.35 * (sat - 3)) * (morning ? 1.4 : 1) : x));
+    case "Q5":
+      return w.map((p, i) => {
+        let m = 1;
+        if (i === 0 && morning) m = 2.3; // breakfast plates
+        if (i === 0 && evening) m = 0.5;
+        if (i === 3 && evening) m = 1.7; // desserts
+        if (i === 1 && outlet === 1) m = 1.8; // vegan, Gachibowli
+        return Math.min(0.92, p * m);
+      });
+    default:
+      return [...w];
+  }
+}
+
+/** Open answers lean by mood and outlet: unhappy visitors complain, happy ones praise. */
+function cafeOpenTilt(pool: readonly [string, number][], ctx: TiltContext): number[] {
+  const sat = num(ctx.answers.Q2, 3);
+  const outlet = num(ctx.answers.Q1, 0);
+  const morning = ctx.hour < 11;
+  return pool.map(([text, w]) => {
+    let m = 1;
+    const complaint = /noisy|loud|quiet|silent|slow|waited|queue|wifi|charging|expensive|prices|late|earlier/i.test(text);
+    const praise = /friendly|love|all good/i.test(text);
+    if (sat <= 1) m *= complaint ? 3.2 : praise ? 0.1 : 0.7;
+    else if (sat === 2) m *= complaint ? 1.6 : praise ? 0.5 : 1;
+    else if (sat >= 4) m *= complaint ? 0.45 : praise ? 2.6 : 1.2;
+    if (outlet === 1 && /noisy|loud|quiet|silent|study|slow|waited|queue/i.test(text)) m *= 2.6;
+    if (morning && /breakfast|poha|upma|open|earlier|8/i.test(text)) m *= 1.9;
+    return w * m;
+  });
+}
+
+/** Volunteers: first-timers found the instructions unclear; clarity and satisfaction drive coming back. */
+function volunteerTilt(q: Question, ctx: TiltContext, w: readonly number[]): number[] {
+  const a = ctx.answers;
+  const first = num(a.Q1, 1) === 0;
+  switch (q.id) {
+    case "Q2":
+      return lean(w, (first ? -0.35 : 0.2) + 0.8 * ctx.mood);
+    case "Q3":
+      return lean(w, (first ? -1.2 : 0.55) + 0.4 * ctx.mood);
+    case "Q5":
+      return lean(w, 0.8 * (num(a.Q2, 3) - 3) + 0.6 * (num(a.Q3, 3) - 2.5), 0.7);
+    default:
+      return [...w];
+  }
+}
+function volunteerOpenTilt(pool: readonly [string, number][], ctx: TiltContext): number[] {
+  const first = num(ctx.answers.Q1, 1) === 0;
+  return pool.map(([text, w]) => w * (first && /instructions|dig/i.test(text) ? 3 : 1));
+}
 
 const CAFE_OPEN: OpenPool = {
   rate: 0.7,
@@ -125,6 +209,7 @@ const SPECS: Record<string, Spec> = {
     open: { Q6: CAFE_OPEN },
     plants: { speeders: 9, duplicates: 3, straightLiners: 0, lowEffort: 4 },
     enjoyment: [3, 6, 22, 44, 25],
+    tilt: cafeTilt,
   },
   "volunteer-feedback": {
     started: 17,
@@ -142,6 +227,7 @@ const SPECS: Record<string, Spec> = {
     emails: { id: "Q6", rate: 0.45 },
     plants: { speeders: 1, duplicates: 0, straightLiners: 1, lowEffort: 0 },
     enjoyment: [0, 1, 3, 6, 4],
+    tilt: volunteerTilt,
   },
   "canteen-menu-poll": {
     started: 160,
@@ -158,14 +244,16 @@ const SPECS: Record<string, Spec> = {
     open: { Q6: { rate: 0.5, pool: CAFE_OPEN.pool.slice(10, 24) } },
     plants: { speeders: 4, duplicates: 1, straightLiners: 0, lowEffort: 2 },
     enjoyment: [2, 4, 15, 30, 20],
+    tilt: cafeTilt,
   },
 };
 
 const NAMES = ["priya.k", "rahul.m", "anita.r", "vikram.s", "meera.j", "arjun.p", "sana.f", "kiran.d", "neha.t", "rohit.b"];
 const LOW_EFFORT = ["asdfgh", "....", "hjkhjk", "aaaaaa"];
 
-function answerFor(q: Question, rand: () => number, spec: Spec, index: number): Answer | undefined {
-  const w = spec.weights[q.id];
+function answerFor(q: Question, rand: () => number, spec: Spec, index: number, ctx: TiltContext): Answer | undefined {
+  const base = spec.weights[q.id];
+  const w = base && spec.tilt ? spec.tilt(q, ctx, base) : base;
   switch (q.type) {
     case "single_choice":
     case "yes_no":
@@ -187,7 +275,9 @@ function answerFor(q: Question, rand: () => number, spec: Spec, index: number): 
     case "long_text": {
       const open = spec.open[q.id];
       if (!open || rand() >= open.rate) return undefined;
-      return open.pool[weighted(rand, open.pool.map(([, n]) => n))][0];
+      const poolTilt = spec.tilt === cafeTilt ? cafeOpenTilt : spec.tilt === volunteerTilt ? volunteerOpenTilt : null;
+      const poolWeights = poolTilt ? poolTilt(open.pool, ctx) : open.pool.map(([, n]) => n);
+      return open.pool[weighted(rand, poolWeights)][0];
     }
   }
 }
@@ -210,8 +300,9 @@ function generate(survey: PlayerSurvey, spec: Spec, now: number): ResultResponse
       const submittedAt = Math.min(latest, dayStart + (8 + rand() * 14) * 3600_000);
       const seconds = Math.round(estimate * (0.55 + rand() * 0.9));
       const answers: Answers = {};
+      const ctx: TiltContext = { answers, day: d, days: spec.days.length, hour: new Date(submittedAt).getHours(), mood: (rand() + rand() + rand()) / 1.5 - 1 };
       qs.forEach((q) => {
-        const a = answerFor(q, rand, spec, rows.length);
+        const a = answerFor(q, rand, spec, rows.length, ctx);
         if (a !== undefined) answers[q.id] = a;
       });
       rows.push({ day: d, startedAt: submittedAt - seconds * 1000, submittedAt, leftAt: null, seconds, answers, enjoyment: rand() < 0.8 ? weighted(rand, spec.enjoyment) : null });
@@ -255,8 +346,9 @@ function generate(survey: PlayerSurvey, spec: Spec, now: number): ResultResponse
     for (let k = 0; k < count; k++) {
       const startedAt = firstDay + Math.floor(rand() * spec.days.length) * DAY + (8 + rand() * 13) * 3600_000;
       const answers: Answers = {};
+      const ctx: TiltContext = { answers, day: 0, days: spec.days.length, hour: new Date(startedAt).getHours(), mood: (rand() + rand() + rand()) / 1.5 - 1 };
       qs.slice(0, qi).forEach((q) => {
-        const a = answerFor(q, rand, spec, rows.length);
+        const a = answerFor(q, rand, spec, rows.length, ctx);
         if (a !== undefined) answers[q.id] = a;
       });
       rows.push({ startedAt: Math.min(startedAt, now - 120_000), submittedAt: null, leftAt: qi, seconds: null, answers, enjoyment: null });

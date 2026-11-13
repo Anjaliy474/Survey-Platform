@@ -1,15 +1,15 @@
-import { ArrowDown, Check, Smiley, Star } from "@phosphor-icons/react/dist/ssr";
+import { Check, Smiley, Star } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
-import type { PollStats } from "@/lib/demo-poll";
+import { AnalyseLink } from "./AnalyseLink";
 import { ClayToys } from "./ClayToys";
 import { Clouds } from "./Clouds";
-import { LivePoll } from "./LivePoll";
 import { RotatingWord } from "./RotatingWord";
+import { StoryDemo } from "./StoryDemo";
 
 const WORDS = ["finish", "enjoy", "share", "remember"] as const;
 
-/** M1 §1 Hero: sky, clouds, clay pieces, rotating word, and the live poll card. */
-export function Hero({ stats }: { stats: PollStats }) {
+/** M1 §1 Hero: sky, clouds, clay pieces, rotating word, and a three-scene story survey to try. */
+export function Hero() {
   return (
     <section className="hero" id="top" aria-labelledby="hero-title">
       <Clouds set="hero" />
@@ -34,28 +34,19 @@ export function Hero({ stats }: { stats: PollStats }) {
           </span>
         </h1>
         <p className="hero__sub">
-          Two-minute, game-like surveys. Insight you can act on. Try one below.
+          Two-minute surveys people play like a story. Insight you can act on. Try one below.
         </p>
         <div className="hero__cta">
           <Link className="btn btn--lg btn--marketing" href="/signup" prefetch={false}>
             Create a survey, free
           </Link>
-          <a className="btn btn--lg btn--marketing-secondary" href="#creator">
-            See what creators get <ArrowDown size={16} weight="bold" aria-hidden="true" />
-          </a>
+          <AnalyseLink />
         </div>
-        <p className="hero__story">
-          Or{" "}
-          <Link href="/studio/new" prefetch={false}>
-            try Story Mode
-          </Link>
-          : turn a one-line idea into a survey people play like a story.
-        </p>
       </div>
 
       <div className="poll-stage">
         <div className="poll-glow" aria-hidden="true" />
-        <LivePoll stats={stats} />
+        <StoryDemo />
       </div>
 
       <ClayToys />

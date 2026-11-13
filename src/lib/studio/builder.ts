@@ -126,21 +126,66 @@ export function hasPlaceholders(state: BuilderState): boolean {
   return re.test(state.purpose_line) || state.items.some((i) => re.test(i.question.text) || i.question.options.some((o) => re.test(o)));
 }
 
-export type NextGate = { ok: boolean; reasons: string[] };
+/** The [placeholder] words still in a text, each listed once. */
+export function placeholdersIn(text: string): string[] {
+  return [...new Set(text.match(/\[[^\]]+\]/g) ?? [])];
+}
+
+/** Every distinct [placeholder] still in the draft, with how many places it appears. */
+export function allPlaceholders(state: BuilderState): { word: string; count: number }[] {
+  const texts = [state.purpose_line, state.consent_line, ...state.items.flatMap((i) => [i.question.text, ...i.question.options])];
+  const counts = new Map<string, number>();
+  for (const t of texts) for (const w of placeholdersIn(t)) counts.set(w, (counts.get(w) ?? 0) + 1);
+  return [...counts].map(([word, count]) => ({ word, count }));
+}
+
+/** Replace one [placeholder] everywhere it appears: purpose, consent, question wording, options and labels. */
+export function fillPlaceholder(state: BuilderState, word: string, value: string): BuilderState {
+  const v = value.trim();
+  if (!v || !word) return state;
+  const swap = (t: string) => t.split(word).join(v);
+  const swapDeep = <T,>(x: T): T => JSON.parse(JSON.stringify(x).split(word).join(JSON.stringify(v).slice(1, -1))) as T;
+  return {
+    ...state,
+    purpose_line: swap(state.purpose_line),
+    consent_line: swap(state.consent_line),
+    items: state.items.map((i) => ({ ...i, question: swapDeep(i.question) })),
+  };
+}
+
+const listWords = (words: string[]) => (words.length < 3 ? words.join(" and ") : `${words.slice(0, -1).join(", ")} and ${words.at(-1)}`);
+
+/** Where a blocker lives, so the page can take the creator straight to it. */
+export type GateTarget =
+  | { kind: "suggestions" }
+  | { kind: "finding"; key: string }
+  | { kind: "purpose" }
+  | { kind: "question"; key: string }
+  | { kind: "questions" }
+  | { kind: "consent" }
+  | { kind: "conflict" };
+export type GateBlocker = { text: string; target: GateTarget };
+export type NextGate = { ok: boolean; reasons: string[]; blockers: GateBlocker[] };
 
 /** "Next: Style" is enabled only when every rule below passes (UI_UX_LAYOUT.md S4). */
 export function nextGate(state: BuilderState, rules: RulesReport): NextGate {
-  const reasons: string[] = [];
+  const blockers: GateBlocker[] = [];
   const pending = pendingCount(state);
-  if (pending) reasons.push(`Decide on ${pending} ${pending === 1 ? "suggestion" : "suggestions"} first.`);
-  const critical = openFindings(state).filter((f) => f.severity === "critical").length;
-  if (critical) reasons.push(`Fix or dismiss ${critical} critical bias ${critical === 1 ? "flag" : "flags"}.`);
-  if (hasPlaceholders(state)) reasons.push("Fill every [placeholder].");
-  if (rules.questionCount === 0) reasons.push("Add at least one question.");
-  if (rules.countState === "blocked") reasons.push("Cut the survey to 15 questions or fewer.");
-  if (rules.consentNeeded && !rules.consentPresent) reasons.push("Add a consent line.");
-  if (!state.conflictConfirmed) reasons.push("Confirm the core set.");
-  return { ok: reasons.length === 0, reasons };
+  if (pending) blockers.push({ text: `Decide on ${pending} ${pending === 1 ? "suggestion" : "suggestions"}.`, target: { kind: "suggestions" } });
+  const critical = openFindings(state).filter((f) => f.severity === "critical");
+  if (critical.length)
+    blockers.push({ text: `Fix or dismiss ${critical.length} critical bias ${critical.length === 1 ? "flag" : "flags"}.`, target: { kind: "finding", key: critical[0].id } });
+  const inPurpose = placeholdersIn(state.purpose_line);
+  if (inPurpose.length) blockers.push({ text: `Replace ${listWords(inPurpose)} in the Purpose line.`, target: { kind: "purpose" } });
+  state.items.forEach((item, i) => {
+    const words = placeholdersIn([item.question.text, ...item.question.options].join(" \n "));
+    if (words.length) blockers.push({ text: `Replace ${listWords(words)} in Q${i + 1}.`, target: { kind: "question", key: item.key } });
+  });
+  if (rules.questionCount === 0) blockers.push({ text: "Add at least one question.", target: { kind: "questions" } });
+  if (rules.countState === "blocked") blockers.push({ text: "Cut the survey to 15 questions or fewer.", target: { kind: "questions" } });
+  if (rules.consentNeeded && !rules.consentPresent) blockers.push({ text: "Add a consent line.", target: { kind: "consent" } });
+  if (!state.conflictConfirmed) blockers.push({ text: "Confirm the core set.", target: { kind: "conflict" } });
+  return { ok: blockers.length === 0, reasons: blockers.map((b) => b.text), blockers };
 }
 
 /* ---------------- actions (each returns a new state) ---------------- */

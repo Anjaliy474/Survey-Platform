@@ -4,7 +4,8 @@
  * The creator's surveys. Until the backend exists they live in this browser (localStorage),
  * seeded with sample surveys; every action below becomes an API call later, with the same shape.
  */
-import { setPublishedStatus, unpublishLocal } from "@/lib/player/published-store";
+import { setPublishedStatus, setResponses, unpublishLocal } from "@/lib/player/published-store";
+import type { BuiltDataset } from "@/lib/results/importer";
 import { useSyncExternalStore } from "react";
 import type { SurveyRequest } from "@/lib/ai/types";
 import type { DraftAi, StudioSurvey } from "./types";
@@ -191,6 +192,35 @@ export const studio = {
       brief,
       ai,
     };
+    update((list) => [survey, ...list]);
+    return survey;
+  },
+  /** A closed survey made from an imported spreadsheet; its rows go into the response store. */
+  createImported(input: { title: string; fileName: string; build: (slug: string) => BuiltDataset }): StudioSurvey {
+    const now = Date.now();
+    const id = newId();
+    const slug = `import-${id.slice(2)}`;
+    const built = input.build(slug);
+    const day = 24 * 60 * 60 * 1000;
+    const lastSevenDays = Array.from({ length: 7 }, (_, i) => {
+      const from = now - (7 - i) * day;
+      return built.responses.filter((r) => r.submittedAt >= from && r.submittedAt < from + day).length;
+    });
+    const survey: StudioSurvey = {
+      id,
+      slug,
+      title: input.title,
+      status: "closed",
+      step: "publish",
+      questions: built.questions,
+      stats: { started: built.responses.length, finished: built.responses.length, lastSevenDays },
+      createdAt: now,
+      updatedAt: now,
+      closedAt: now,
+      player: built.survey,
+      source: { kind: "import", fileName: input.fileName, importedAt: now, rows: built.responses.length, hasTimes: built.hasTimes },
+    };
+    setResponses(slug, built.responses);
     update((list) => [survey, ...list]);
     return survey;
   },

@@ -15,7 +15,7 @@ const WANT = {
   WhatsappLogo: ["fill"], QrCode: ["regular"], Code: ["regular"], DownloadSimple: ["regular"], ChartBar: ["regular", "fill"], Table: ["regular"],
   ChatCircleText: ["regular", "fill"], FileText: ["regular", "fill"], Funnel: ["regular"], Flag: ["regular", "fill"], Quotes: ["regular", "fill"],
   SquaresFour: ["regular", "fill"], PaperPlaneRight: ["fill"], Eye: ["regular"], EyeSlash: ["regular"], User: ["regular"], SignOut: ["regular"],
-  Envelope: ["regular"], Printer: ["regular"],
+  Envelope: ["regular"], Printer: ["regular"], ShareNetwork: ["regular"], UploadSimple: ["regular"], ArrowUp: ["bold"], Paperclip: ["regular"],
 };
 const out = [];
 for (const [name, weights] of Object.entries(WANT)) {

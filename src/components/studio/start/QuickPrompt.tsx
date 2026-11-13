@@ -1,7 +1,8 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import type { SurveyRequest } from "@/lib/ai/types";
 import { Sparkle } from "@/components/icons";
 import { useSearchParam } from "@/lib/client-hooks";
 import { useLocalDraft, writeDraft } from "@/lib/local-draft";
@@ -12,21 +13,39 @@ export const PROMPT_EXAMPLES = [
   "Would students pay for a laundry pickup app?",
   "Customer satisfaction for our café",
 ];
-const KEY = "playsurvey:brief:prompt";
+export const PROMPT_KEY = "playsurvey:brief:prompt";
 const INITIAL = { text: "" };
+
+const requestFor = (text: string): SurveyRequest => ({
+  mode: "quick_prompt",
+  input: text.trim(),
+  context: { audience: "", decision: "", known: "", anonymous: true, sensitive: false, time_limit_seconds: null },
+});
 
 /** S3c "Quick prompt" (UI_UX_LAYOUT.md): one line is enough. Enter submits. */
 export function QuickPrompt() {
   const flow = useStartFlow();
-  const [d, setD] = useLocalDraft(KEY, INITIAL);
+  const [d, setD] = useLocalDraft(PROMPT_KEY, INITIAL);
   const [hint, setHint] = useState(false);
   const fromLink = useSearchParam("q");
   const id = useId();
 
-  // An example chip elsewhere (?q=…) fills the prompt in.
+  const autoStart = useSearchParam("go") === "1";
+  const started = useRef(false);
+  const flowRef = useRef(flow);
   useEffect(() => {
-    if (fromLink) writeDraft(KEY, { text: fromLink.slice(0, 200) });
-  }, [fromLink]);
+    flowRef.current = flow;
+  });
+
+  // An example chip elsewhere (?q=…) fills the prompt in; from the start page (&go=1) it also drafts straight away.
+  useEffect(() => {
+    if (!fromLink) return;
+    writeDraft(PROMPT_KEY, { text: fromLink.slice(0, 200) });
+    if (autoStart && !started.current && fromLink.trim()) {
+      started.current = true;
+      void flowRef.current.submit(requestFor(fromLink), titleFrom(fromLink, "New survey"));
+    }
+  }, [fromLink, autoStart]);
 
   function go(text: string) {
     if (!text.trim()) {
@@ -34,14 +53,7 @@ export function QuickPrompt() {
       return;
     }
     setHint(false);
-    void flow.submit(
-      {
-        mode: "quick_prompt",
-        input: text.trim(),
-        context: { audience: "", decision: "", known: "", anonymous: true, sensitive: false, time_limit_seconds: null },
-      },
-      titleFrom(text, "New survey"),
-    );
+    void flow.submit(requestFor(text), titleFrom(text, "New survey"));
   }
 
   return (

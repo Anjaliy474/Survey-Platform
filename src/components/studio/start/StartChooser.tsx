@@ -1,139 +1,100 @@
 "use client";
 
-import { type Role, useMe } from "@/lib/account";
 import Link from "next/link";
-import type { ComponentType, KeyboardEvent } from "react";
-import { useEffect, useRef, useState } from "react";
-import { ArrowRight, type IconProps, Lightning, ListChecks, MagnifyingGlass } from "@/components/icons";
-import { usePrefersReducedMotion } from "@/lib/client-hooks";
+import { useRouter } from "next/navigation";
+import type { FormEvent } from "react";
+import { useId, useState } from "react";
+import { ArrowUp, ChartBar } from "@/components/icons";
+import { parsePastedQuestions } from "@/lib/ai/parse";
+import { writeDraft } from "@/lib/local-draft";
 import { TopBar } from "../TopBar";
+import { QUESTIONS_INITIAL, QUESTIONS_KEY } from "./BringQuestions";
 import { PROMPT_EXAMPLES } from "./QuickPrompt";
 
-const WAYS: {
-  href: string;
-  title: string;
-  line: string;
-  example: string;
-  tone: "teal" | "persimmon" | "marigold";
-  Icon: ComponentType<IconProps>;
-}[] = [
-  {
-    href: "/app/new/questions",
-    title: "Bring your questions",
-    line: "Paste them, or import from Google Forms (soon).",
-    example: "How amazing was the new canteen menu?",
-    tone: "teal",
-    Icon: ListChecks,
-  },
-  {
-    href: "/app/new/research",
-    title: "Describe your research",
-    line: "Tell us the decision. We’ll suggest what to ask.",
-    example: "Should our café open on Sundays?",
-    tone: "persimmon",
-    Icon: MagnifyingGlass,
-  },
-  {
-    href: "/app/new/prompt",
-    title: "Quick prompt",
-    line: "One line is enough.",
-    example: "Feedback for our college fest",
-    tone: "marigold",
-    Icon: Lightning,
-  },
-];
-
-/** A tiny typing loop (DESIGN.md §6.1); the full line shows without JS or with reduced motion. */
-function TypingLine({ text, delay }: { text: string; delay: number }) {
-  const reduce = usePrefersReducedMotion();
-  const [shown, setShown] = useState(text.length);
-  useEffect(() => {
-    if (reduce) return;
-    let i = 0;
-    let timer = window.setTimeout(function tick() {
-      i = i >= text.length + 18 ? 0 : i + 1; // type, pause on the full line, start again
-      setShown(Math.min(i, text.length));
-      timer = window.setTimeout(tick, i === 0 ? 400 : 55);
-    }, delay);
-    return () => {
-      window.clearTimeout(timer);
-      setShown(text.length);
-    };
-  }, [reduce, text, delay]);
-  return (
-    <span className="typing-line" aria-hidden="true">
-      {text.slice(0, shown)}
-      <i />
-    </span>
-  );
-}
-
-const SUGGEST: Record<Role, string> = {
-  business: "/app/new/prompt",
-  researcher: "/app/new/research",
-  community: "/app/new/prompt",
-  analyst: "/app/new/questions",
-};
-
-/** S2 "How do you want to start?" (UI_UX_LAYOUT.md). Arrow keys move between the cards. */
+/**
+ * S2 New survey: one box for every way in. Describe the idea or the decision in a line, or paste
+ * questions you already have; two or more pasted questions go to the question review, anything
+ * else is drafted from the description.
+ */
 export function StartChooser() {
-  const refs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const me = useMe();
-  // From onboarding: the start that suits the creator's role.
-  const suggested = me?.role ? SUGGEST[me.role] : null;
+  const router = useRouter();
+  const id = useId();
+  const [text, setText] = useState("");
+  const value = text.trim();
+  const pasted = parsePastedQuestions(text);
+  const asQuestions = pasted.length >= 2;
 
-  function onKeyDown(e: KeyboardEvent, i: number) {
-    const keys: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
-    if (!(e.key in keys)) return;
+  function submit(e: FormEvent) {
     e.preventDefault();
-    refs.current[(i + keys[e.key] + WAYS.length) % WAYS.length]?.focus();
+    if (!value) return;
+    if (asQuestions) {
+      writeDraft(QUESTIONS_KEY, { ...QUESTIONS_INITIAL, text: value });
+      router.push("/app/new/questions");
+    } else router.push(`/app/new/prompt?q=${encodeURIComponent(value.slice(0, 200))}&go=1`);
   }
 
   return (
     <>
       <TopBar crumbs={[{ label: "Home", href: "/app" }, { label: "New survey" }]} />
-      <main className="page chooser">
-        <div className="chooser__head">
-          <h1 className="page__title">How do you want to start?</h1>
-          <p>Any way works. AI suggests, you decide.</p>
+      <main className="page start">
+        <div className="start__head">
+          <h1 className="start__title">What do you want to find out?</h1>
+          <p>Describe it in a line, or paste questions you already have.</p>
         </div>
-        <ul className="chooser__grid">
-          {WAYS.map((w, i) => (
-            <li key={w.href}>
-              <Link
-                href={w.href}
-                ref={(el) => {
-                  refs.current[i] = el;
-                }}
-                className={`chooser-card chooser-card--${w.tone}`}
-                onKeyDown={(e) => onKeyDown(e, i)}
+
+        <section className="start__area" aria-label="Start a survey">
+          <form onSubmit={submit} className="composer">
+            <label htmlFor={`${id}-text`} className="sr-only">
+              Your idea, decision or questions
+            </label>
+            <textarea
+              id={`${id}-text`}
+              className="composer__input"
+              rows={4}
+              value={text}
+              placeholder={"For example: Feedback for our college fest\nOr: Should our café open on Sundays?\nOr paste your questions, one per line"}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => {
+                // Enter drafts a one-liner; with several lines it's a new line, Ctrl/⌘ + Enter submits.
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey || (!e.shiftKey && !text.includes("\n")))) {
+                  e.preventDefault();
+                  e.currentTarget.form?.requestSubmit();
+                }
+              }}
+            />
+            <div className="composer__bar">
+              {value ? (
+                <span className="composer__hint" aria-live="polite">
+                  {asQuestions ? `${pasted.length} questions found. We’ll check each for bias and fix the wording with you.` : "We’ll draft the questions. You review every one."}
+                </span>
+              ) : (
+                <div className="composer__chips" aria-label="Examples">
+                  {PROMPT_EXAMPLES.map((ex) => (
+                    <button key={ex} type="button" className="composer__chip" onClick={() => setText(ex)}>
+                      {ex}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <button
+                type="submit"
+                className="composer__send"
+                disabled={!value}
+                aria-label={asQuestions ? "Improve my questions" : "Draft my survey"}
+                title={asQuestions ? "Improve my questions" : "Draft my survey"}
               >
-                <span className="chooser-card__icon" aria-hidden="true">
-                  <w.Icon size={26} weight="regular" />
-                </span>
-                {suggested === w.href && <span className="chooser-card__suggested">Suggested for you</span>}
-                <h2>{w.title}</h2>
-                <p>{w.line}</p>
-                <span className="chooser-card__example">
-                  <TypingLine text={w.example} delay={i * 700} />
-                </span>
-                <span className="chooser-card__go" aria-hidden="true">
-                  Start <ArrowRight size={16} />
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <div className="chooser__examples">
-          <p>Not sure? Try a quick prompt:</p>
-          <div className="idea-chips">
-            {PROMPT_EXAMPLES.map((ex) => (
-              <Link key={ex} href={`/app/new/prompt?q=${encodeURIComponent(ex)}`} className="chip">
-                {ex}
-              </Link>
-            ))}
-          </div>
-        </div>
+                <ArrowUp size={18} weight="bold" aria-hidden="true" />
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <p className="start__note">
+          Already have answers?{" "}
+          <Link href="/app/analyse" className="start__switch">
+            <ChartBar size={16} weight="regular" aria-hidden="true" /> Analyse existing data
+          </Link>
+        </p>
       </main>
     </>
   );

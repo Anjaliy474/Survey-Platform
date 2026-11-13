@@ -44,6 +44,8 @@ export type StudioSurvey = {
   deletedResponses?: string[];
   /** The dashboard built from the creator's request (Dashboard page). */
   dashboard?: DashboardState;
+  /** Made from a spreadsheet of past responses ("Analyse existing data"), not run in PlaySurvey. */
+  source?: { kind: "import"; fileName: string; importedAt: number; rows: number; hasTimes: boolean };
   /** Insight reports, one per reader (Report page). */
   report?: Partial<Record<Reader, { output: ReportOutput; generatedAt: number; dropped: string[] }>>;
 };

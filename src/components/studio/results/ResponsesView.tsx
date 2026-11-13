@@ -89,7 +89,7 @@ export function ResponsesView({ survey }: { survey: StudioSurvey }) {
       <TopBar
         crumbs={[{ label: "Home", href: "/app" }, { label: survey.title }]}
         status={survey.status}
-        secondary={survey.slug ? [{ label: "View survey", href: `/s/${survey.slug}`, external: true, Icon: ArrowUpRight }] : []}
+        secondary={survey.slug && !survey.source ? [{ label: "View survey", href: `/s/${survey.slug}`, external: true, Icon: ArrowUpRight }] : []}
         primary={survey.status === "live" ? { label: "Share", Icon: LinkSimple, href: surveyHref(survey.id, "publish") } : undefined}
       />
       <ResultsTabs surveyId={survey.id} current="responses" hasResponses={rows.length > 0} />

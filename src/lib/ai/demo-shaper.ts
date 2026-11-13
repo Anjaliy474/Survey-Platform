@@ -74,6 +74,16 @@ function subjectOf(text: string): string | null {
       if (words(s) <= 7) return s;
     }
   }
+  // A short title with no "for/about" ("School student admission", "Hostel food survey") is the subject itself.
+  const bare = t
+    .replace(/\b(?:a|an)\s+(?:survey|poll|questionnaire|form)\b/gi, "")
+    .replace(/\b(?:feedback|survey|poll|questionnaire|form|review)\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (bare && words(bare) <= 6 && !/^(how|what|which|why|when|where|who|do|does|is|are|should|would|can)\b/i.test(bare)) {
+    const lower = bare.replace(/^(our|my|your)\s+/i, "").toLowerCase();
+    return /^the\b/.test(lower) ? lower : `the ${lower}`;
+  }
   return null;
 }
 
