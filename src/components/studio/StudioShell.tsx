@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType, ReactNode } from "react";
 import { useSyncExternalStore } from "react";
-import { Gear, House, Plus, PlusCircle, SidebarSimple } from "@/components/icons";
+import { ChartBar, Gear, House, PlusCircle, SidebarSimple } from "@/components/icons";
 import { ToastProvider } from "@/components/ui/Toast";
 
 /* Sidebar preference: "auto" follows the screen size (icons only on tablets). */
@@ -37,6 +37,7 @@ function subscribePref(l: () => void) {
 type NavItem = { href: string; label: string; Icon: ComponentType<{ size?: number; weight?: "regular" | "fill" }>; match: (p: string) => boolean };
 const HOME: NavItem = { href: "/app", label: "Home", Icon: House, match: (p) => p === "/app" || p.startsWith("/app/s/") };
 const NEW: NavItem = { href: "/app/new", label: "New survey", Icon: PlusCircle, match: (p) => p.startsWith("/app/new") };
+const ANALYSE: NavItem = { href: "/app/analyse", label: "Analyse data", Icon: ChartBar, match: (p) => p.startsWith("/app/analyse") };
 const SETTINGS: NavItem = { href: "/app/settings", label: "Settings", Icon: Gear, match: (p) => p.startsWith("/app/settings") };
 
 /**
@@ -78,12 +79,10 @@ export function StudioShell({ children }: { children: ReactNode }) {
             <span className="logo__mark" aria-hidden="true" />
             <span className="sidebar__label">PlaySurvey</span>
           </Link>
-          <Link href="/app/new" className="sidebar__new" title="New survey">
-            <Plus size={18} />
-            <span className="sidebar__label">New survey</span>
-          </Link>
           <nav className="sidebar__nav" aria-label="Main">
             {item(HOME)}
+            {item(NEW)}
+            {item(ANALYSE)}
           </nav>
           <div className="sidebar__bottom">
             {item(SETTINGS)}
@@ -120,12 +119,12 @@ export function StudioShell({ children }: { children: ReactNode }) {
         </div>
 
         <nav className="tabbar" aria-label="Main">
-          {[HOME, NEW, SETTINGS].map((n) => {
+          {[HOME, NEW, ANALYSE, SETTINGS].map((n) => {
             const active = n.match(pathname);
             return (
               <Link key={n.href} href={n.href} className="tabbar__item" aria-current={active ? "page" : undefined}>
                 <n.Icon size={24} weight={active ? "fill" : "regular"} />
-                <span>{n.label === "New survey" ? "New" : n.label}</span>
+                <span>{n.label === "New survey" ? "New" : n.label === "Analyse data" ? "Analyse" : n.label}</span>
               </Link>
             );
           })}

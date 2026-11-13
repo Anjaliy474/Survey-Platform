@@ -6,10 +6,12 @@ import { ArrowClockwise, MagnifyingGlass, Plus, Star, Warning } from "@/componen
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useToast } from "@/components/ui/Toast";
+import { useMe } from "@/lib/account";
 import { useSearchParam } from "@/lib/client-hooks";
 import { studio, useStudio } from "@/lib/studio/store";
 import type { StudioSurvey, SurveyStatus } from "@/lib/studio/types";
-import { SurveyCard } from "./SurveyCard";
+import { HomeFindings, HomeSummary } from "./HomeOverview";
+import { SurveyRow } from "./SurveyRow";
 import { TopBar } from "./TopBar";
 
 const FILTERS: { key: "all" | SurveyStatus; label: string }[] = [
@@ -26,6 +28,7 @@ const IDEAS = ["Customer feedback", "Event feedback", "Research study"];
  */
 export function HomeView() {
   const state = useStudio();
+  const me = useMe();
   const preview = useSearchParam("preview");
   const toast = useToast();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all");
@@ -59,7 +62,10 @@ export function HomeView() {
       <TopBar crumbs={[{ label: "Home" }]} />
       <main className="page">
         <div className="home-head">
-          <h1 className="page__title">Your surveys</h1>
+          <div>
+            <h1 className="page__title">{me?.name && me.signedIn ? `Hi, ${me.name.split(/[\s.@]/)[0]}` : "Home"}</h1>
+            <p className="home-head__sub">Here’s how your surveys are doing.</p>
+          </div>
           <Link href="/app/new" className="btn btn--md btn--primary">
             <Plus size={18} /> New survey
           </Link>
@@ -76,13 +82,11 @@ export function HomeView() {
         )}
 
         {view === "loading" && (
-          <div className="survey-grid" aria-busy="true" aria-label="Loading your surveys">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="survey-card skeleton-card" aria-hidden="true">
-                <span className="skeleton" style={{ width: "28%", height: 20 }} />
-                <span className="skeleton" style={{ width: "80%", height: 24 }} />
-                <span className="skeleton" style={{ width: "60%", height: 16 }} />
-                <span className="skeleton" style={{ width: "100%", height: 44 }} />
+          <div className="slist" aria-busy="true" aria-label="Loading your surveys">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="srow srow--skeleton" aria-hidden="true">
+                <span className="skeleton" style={{ width: "46%", height: 18 }} />
+                <span className="skeleton" style={{ width: "18%", height: 14 }} />
               </div>
             ))}
           </div>
@@ -118,7 +122,10 @@ export function HomeView() {
 
         {view === "ready" && surveys.length > 0 && (
           <>
+            <HomeSummary surveys={surveys} />
+            <HomeFindings surveys={surveys} />
             <div className="home-tools">
+              <h2 className="home-h2">Surveys</h2>
               <div className="chips" role="group" aria-label="Filter surveys">
                 {FILTERS.map((f) => (
                   <button key={f.key} type="button" className="chip" aria-pressed={filter === f.key} onClick={() => setFilter(f.key)}>
@@ -138,10 +145,20 @@ export function HomeView() {
             </p>
 
             {shown.length > 0 ? (
-              <div className="survey-grid">
-                {shown.map((s) => (
-                  <SurveyCard key={s.id} survey={s} onDuplicate={() => duplicate(s)} onClose={() => close(s)} onDelete={() => setToDelete(s)} />
-                ))}
+              <div className="slist">
+                <div className="slist__head" aria-hidden="true">
+                  <span>Survey</span>
+                  <span>Responses</span>
+                  <span>Completion</span>
+                  <span>Last 7 days</span>
+                  <span>Edited</span>
+                  <span />
+                </div>
+                <ul className="slist__rows" aria-label="Surveys">
+                  {shown.map((s) => (
+                    <SurveyRow key={s.id} survey={s} onDuplicate={() => duplicate(s)} onClose={() => close(s)} onDelete={() => setToDelete(s)} />
+                  ))}
+                </ul>
               </div>
             ) : (
               <div className="no-match">
