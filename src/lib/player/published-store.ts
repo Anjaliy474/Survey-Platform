@@ -118,6 +118,11 @@ export function updateResponse(slug: string, id: string, patch: Partial<StoredRe
   if (list.some((r) => r.id === id)) set(responsesKey(slug), list.map((r) => (r.id === id ? { ...r, ...patch } : r)));
 }
 
+/** Replace every response at once (an imported spreadsheet). */
+export function setResponses(slug: string, list: StoredResponse[]) {
+  set(responsesKey(slug), list);
+}
+
 export function clearResponses(slug: string) {
   set(responsesKey(slug), EMPTY);
 }
