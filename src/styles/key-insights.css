@@ -1,0 +1,321 @@
+/* Key insights (Results, Home, shared analysis), Share analysis panel and the shared page. */
+
+.results__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: calc(var(--ps-space-3) * -1);
+}
+.results__sub {
+  margin: -4px 0 var(--ps-space-2);
+  color: var(--ps-ink-500);
+  font-size: 0.9375rem;
+}
+.results__insights {
+  display: grid;
+  gap: var(--ps-space-2);
+}
+
+/* ---------------- insight cards ---------------- */
+.kin {
+  display: grid;
+  gap: var(--ps-space-3);
+}
+.kin__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: var(--ps-space-3);
+}
+.kin--compact .kin__grid {
+  grid-template-columns: 1fr;
+  gap: var(--ps-space-2);
+}
+.kin__card {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: var(--ps-white);
+  box-shadow: 0 0 0 1px var(--ps-sand-200);
+  border-left: 4px solid var(--ps-sand-300);
+}
+.kin__card--bad {
+  border-left-color: var(--ps-persimmon-600);
+}
+.kin__card--good {
+  border-left-color: var(--ps-success);
+}
+.kin__card--neutral {
+  border-left-color: var(--ps-viz-3);
+}
+.kin__card--score {
+  grid-column: 1 / -1;
+}
+.kin--compact .kin__card {
+  padding: 12px 14px;
+  gap: 4px;
+  box-shadow: none;
+  background: var(--ps-cream-50, var(--ps-sand-100));
+}
+.kin__kind {
+  margin: 0;
+  color: var(--ps-ink-500);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.kin__headline {
+  margin: 0;
+  color: var(--ps-ink-900);
+  font-family: var(--ps-font-body);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.kin--compact .kin__headline {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.kin__detail,
+.kin__action {
+  margin: 0;
+  color: var(--ps-ink-700);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.kin__action strong {
+  color: var(--ps-ink-900);
+}
+.kin__basis {
+  margin: 2px 0 0;
+  color: var(--ps-ink-500);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.kin__conf {
+  font-weight: 700;
+}
+.kin__conf::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: 1px;
+}
+.kin__conf--clear {
+  color: var(--ps-success);
+}
+.kin__conf--likely {
+  color: var(--ps-info);
+}
+.kin__conf--early {
+  color: var(--ps-warning);
+}
+.kin__note {
+  margin: 0;
+  color: var(--ps-ink-500);
+  font-size: 0.875rem;
+}
+.kin--empty {
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: var(--ps-white);
+  box-shadow: 0 0 0 1px var(--ps-sand-200);
+  color: var(--ps-ink-700);
+}
+
+/* Comparison bars inside a card */
+.kin__bars {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.kin__bars th {
+  width: 38%;
+  padding: 4px 10px 4px 0;
+  color: var(--ps-ink-700);
+  font-weight: 500;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.kin__bars td {
+  padding: 4px 0;
+}
+.kin__track {
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--ps-sand-100);
+  overflow: hidden;
+}
+.kin__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--ps-sand-300);
+}
+.is-best .kin__fill {
+  background: var(--ps-viz-2);
+}
+.is-worst .kin__fill {
+  background: var(--ps-viz-1);
+}
+.is-best th,
+.is-worst th {
+  color: var(--ps-ink-900);
+  font-weight: 700;
+}
+.kin__pct {
+  width: 1%;
+  padding-left: 10px !important;
+  color: var(--ps-ink-900);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: right;
+}
+.kin__n {
+  margin-left: 6px;
+  color: var(--ps-ink-500);
+  font-weight: 400;
+  font-size: 0.75rem;
+}
+.kin__words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.kin__words li {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--ps-persimmon-50);
+  color: var(--ps-persimmon-700);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+.kin__words span {
+  color: var(--ps-ink-500);
+  font-weight: 500;
+}
+
+/* ---------------- Home: what your surveys are telling you ---------------- */
+
+/* ---------------- Share analysis panel ---------------- */
+.share-an {
+  display: grid;
+  gap: var(--ps-space-3);
+  color: var(--ps-ink-800);
+}
+.share-an p {
+  margin: 0;
+}
+.share-an__safe {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--ps-success-bg);
+  color: var(--ps-success);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.share-an__link {
+  font-size: 0.875rem;
+  color: var(--ps-ink-700);
+}
+.share-an__btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.share-an__btns .is-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* ---------------- The shared page (/r) ---------------- */
+.shared {
+  display: grid;
+  gap: var(--ps-space-5);
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--ps-space-5) 16px var(--ps-space-16);
+  background: var(--ps-cream-50, #fffaf2);
+  min-height: 100svh;
+  align-content: start;
+}
+.shared--loading,
+.shared__missing {
+  color: var(--ps-ink-700);
+}
+.shared__missing {
+  display: grid;
+  justify-items: start;
+  gap: var(--ps-space-3);
+  margin-top: var(--ps-space-12);
+}
+.shared__missing h1 {
+  margin: 0;
+  font-family: var(--ps-font-display);
+  font-size: 1.5rem;
+}
+.shared__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.shared__brand {
+  color: var(--ps-persimmon-700);
+  font-family: var(--ps-font-display);
+  font-size: 1.125rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+.shared__title h1 {
+  margin: 4px 0;
+  font-family: var(--ps-font-display);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.shared__eyebrow,
+.shared__meta {
+  margin: 0;
+  color: var(--ps-ink-500);
+  font-size: 0.9375rem;
+}
+.shared__eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.shared__foot {
+  color: var(--ps-ink-500);
+  font-size: 0.875rem;
+}
+
+@media print {
+  .shared__print,
+  .chartcard__toggle {
+    display: none !important;
+  }
+  .shared {
+    padding: 0;
+    background: #fff;
+  }
+  .kin__card,
+  .chartcard {
+    break-inside: avoid;
+  }
+}
