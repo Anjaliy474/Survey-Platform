@@ -20,7 +20,7 @@ export const FACES_5 = ["😞", "🙁", "😐", "🙂", "😄"] as const;
  * Arrow-key movement inside a radio group (roving focus), plus number keys:
  * `digitBase` 1 means key "1" picks the first option; 0 means key "0" picks the first (0–10 row).
  */
-function useRovingKeys(count: number, value: number | null, onChange: (i: number) => void, digitBase = 1) {
+export function useRovingKeys(count: number, value: number | null, onChange: (i: number) => void, digitBase = 1) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   function onKeyDown(e: KeyboardEvent) {
     const current = value ?? -1;
@@ -42,7 +42,7 @@ function useRovingKeys(count: number, value: number | null, onChange: (i: number
     refs.current[i] = el;
   };
   const tabIndex = (i: number) => (value === i || (value === null && i === 0) ? 0 : -1);
-  return { setRef, onKeyDown, tabIndex };
+  return { refs, setRef, onKeyDown, tabIndex };
 }
 
 const selectedClass = (selected: boolean, pop?: boolean) => `${selected ? "is-selected" : ""} ${selected && pop ? "is-pop" : ""}`;
@@ -330,16 +330,18 @@ export function TextBox({
   value,
   onChange,
   labelledBy,
-  multiline,
+  multiline = true,
   inputKind = "text",
   maxLength = 500,
+  placeholder,
 }: {
   value: string;
   onChange: (text: string) => void;
   labelledBy: string;
-  multiline: boolean;
+  multiline?: boolean;
   inputKind?: "text" | "email";
   maxLength?: number;
+  placeholder?: string;
 }) {
   const near = value.length >= maxLength * 0.9;
   return (
@@ -351,7 +353,7 @@ export function TextBox({
           rows={4}
           maxLength={maxLength}
           value={value}
-          placeholder="Type your answer (optional)"
+          placeholder={placeholder ?? "Type your answer (optional)"}
           onChange={(e) => onChange(e.target.value)}
         />
       ) : (

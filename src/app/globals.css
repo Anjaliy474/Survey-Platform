@@ -3,6 +3,8 @@
 @import "../styles/ui.css";
 @import "../styles/player.css";
 @import "../styles/system.css";
+/* Area styles load in their layouts: marketing in (marketing), the /app Studio in app/app,
+   Story Mode's Studio in app/studio, and story styles in app/s and app/studio. */
 
 /*
  * Tailwind mapping (DESIGN.md §3.10). The default palette, fonts, type scale, radii and

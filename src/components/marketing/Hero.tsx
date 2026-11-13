@@ -44,6 +44,13 @@ export function Hero({ stats }: { stats: PollStats }) {
             See what creators get <ArrowDown size={16} weight="bold" aria-hidden="true" />
           </a>
         </div>
+        <p className="hero__story">
+          Or{" "}
+          <Link href="/studio/new" prefetch={false}>
+            try Story Mode
+          </Link>
+          : turn a one-line idea into a survey people play like a story.
+        </p>
       </div>
 
       <div className="poll-stage">

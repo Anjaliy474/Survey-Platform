@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { LocalSurvey } from "@/components/player/LocalSurvey";
 import { Player } from "@/components/player/Player";
 import { PlayerMessage } from "@/components/player/PlayerMessage";
 import { checkSurvey } from "@/lib/player/rules";
 import { SAMPLE_SURVEYS, getSurvey } from "@/lib/player/samples";
+import { SurveyBySlug } from "./SurveyBySlug";
 
 export function generateStaticParams() {
   return SAMPLE_SURVEYS.map((s) => ({ slug: s.slug }));
@@ -35,8 +35,8 @@ export default function SurveyPage({ params }: PageProps<"/s/[slug]">) {
 async function SurveyFromUrl({ params }: { params: PageProps<"/s/[slug]">["params"] }) {
   const { slug } = await params;
   const survey = getSurvey(slug);
-  // Not a built-in sample: a survey published from the Studio in this browser (no backend yet).
-  if (!survey) return <LocalSurvey slug={slug} />;
+  // Not a built-in sample: published from the /app Studio in this browser, or a Story Mode survey.
+  if (!survey) return <SurveyBySlug slug={slug} />;
 
   if (survey.status === "closed") {
     return (

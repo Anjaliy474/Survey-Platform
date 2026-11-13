@@ -1,0 +1,658 @@
+/* Story Mode (spec §6, §9). Scenes sit behind; the question card is always solid. */
+
+.story {
+  position: relative;
+  min-height: 100svh;
+  isolation: isolate;
+  overflow-x: clip;
+}
+.story__scene {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--st-sky-top), var(--st-sky-bottom));
+}
+.story__scene svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.story__frame {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--ps-space-4);
+  width: 100%;
+  max-width: 560px;
+  min-height: 100svh;
+  margin-inline: auto;
+  padding: max(14px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+.story__top {
+  display: grid;
+  gap: var(--ps-space-3);
+}
+.story__body {
+  display: grid;
+  align-content: end;
+  gap: var(--ps-space-3);
+  min-height: 0;
+}
+
+/* ---- HUD ---- */
+.story-hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ps-space-2);
+}
+.story-hud__tools {
+  display: inline-flex;
+  gap: var(--ps-space-2);
+}
+.story-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--ps-r-pill);
+  background: var(--story-chip-bg);
+  color: var(--story-chip-text);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+.story-chip--progress {
+  cursor: default;
+}
+button.story-chip:focus-visible {
+  outline: 2px solid var(--story-card-text);
+  outline-offset: 2px;
+}
+
+/* ---- Card ---- */
+.story-card {
+  --theme-bg: var(--story-card);
+  display: grid;
+  gap: var(--ps-space-3);
+  padding: var(--ps-space-5);
+  border-radius: var(--ps-r-xl);
+  background: var(--story-card);
+  color: var(--story-card-text);
+  box-shadow: var(--story-card-shadow);
+}
+.story-card .splayer__col {
+  min-height: 0;
+  padding: 0;
+}
+.story-card--title .splayer__center {
+  align-content: start;
+}
+.story-card--line {
+  justify-items: start;
+}
+.story-card--tap {
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.story-card__eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--story-card-text) 60%, transparent);
+}
+.story-line {
+  font-family: var(--ps-font-display);
+  font-size: 1.25rem;
+  line-height: 1.6rem;
+  font-weight: 700;
+}
+.story-premise {
+  font-size: 1rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--story-card-text) 75%, transparent);
+}
+/* ---- Prop choices ---- */
+.props {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--ps-space-2);
+}
+.prop {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 6px;
+  min-width: 72px;
+  min-height: 48px;
+  max-width: 100%;
+  padding: 8px 10px 10px;
+  border: 1.5px solid transparent;
+  border-radius: var(--ps-r-lg);
+  background: transparent;
+  color: var(--story-card-text);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    transform var(--ps-dur-fast) var(--ps-ease-out),
+    border-color var(--ps-dur-base) var(--ps-ease-out),
+    background-color var(--ps-dur-base) var(--ps-ease-out);
+}
+.prop:hover {
+  border-color: color-mix(in srgb, var(--story-card-text) 18%, transparent);
+}
+.prop:active {
+  transform: scale(0.97);
+}
+.prop:focus-visible {
+  outline: 2px solid var(--theme-button);
+  outline-offset: 2px;
+}
+.prop.is-selected {
+  border-color: var(--theme-button);
+  background: var(--theme-selected);
+}
+.prop__obj {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 56px;
+}
+.prop__obj svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.prop__label {
+  max-width: 14ch;
+  font-size: 0.875rem;
+  line-height: 1.15rem;
+  font-weight: 600;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.props--many .prop {
+  min-width: 52px;
+  padding-inline: 4px;
+}
+.props--many .prop__obj {
+  width: 36px;
+  height: 40px;
+}
+.props--star_row,
+.props--shelf_numbers {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+@media (min-width: 480px) {
+  .props--star_row,
+  .props--shelf_numbers {
+    grid-template-columns: repeat(11, minmax(0, 1fr));
+  }
+}
+.props--star_row .prop,
+.props--shelf_numbers .prop {
+  min-width: 0;
+  padding-inline: 2px;
+}
+.props--reply_chips {
+  justify-content: flex-start;
+}
+.props--reply_chips .prop {
+  grid-auto-flow: column;
+  align-items: center;
+  align-content: center;
+  min-height: 48px;
+  padding: 0 16px;
+  border-color: color-mix(in srgb, var(--story-card-text) 18%, transparent);
+  border-radius: var(--ps-r-pill);
+}
+.props--reply_chips .prop__obj {
+  display: none;
+}
+.props--reply_chips .prop__label {
+  max-width: none;
+}
+.prop-text--postcard .pl-text,
+.prop-text--notebook .pl-text {
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0 27px,
+    color-mix(in srgb, var(--story-card-text) 12%, transparent) 27px 28px
+  );
+  line-height: 28px;
+}
+
+/* Selected objects glow the same way in every family; nothing else changes. */
+.skin-glow {
+  opacity: 0;
+  transition: opacity var(--ps-dur-base) var(--ps-ease-out);
+}
+.is-selected .skin-glow {
+  opacity: 1;
+}
+.look-clay .skin {
+  filter: drop-shadow(0 3px 3px var(--story-paper-shadow));
+}
+.look-paper_cut .skin {
+  filter: drop-shadow(2px 3px 0 var(--story-paper-shadow));
+}
+
+/* ---- Scene layers per look ---- */
+.look-clay .layer {
+  filter: drop-shadow(0 10px 14px rgba(34, 25, 46, 0.25));
+}
+.look-paper_cut .layer {
+  filter: drop-shadow(0 6px 0 rgba(34, 25, 46, 0.22));
+}
+.look-clay .gloss {
+  opacity: 0.55;
+}
+.look-paper_cut .gloss {
+  opacity: 0;
+}
+.look-clay .grain {
+  opacity: 0;
+}
+.look-paper_cut .grain {
+  opacity: 0.22;
+  mix-blend-mode: multiply;
+}
+
+/* ---- Scene motion ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .scene-enter {
+    animation: scene-in 700ms var(--ps-ease-out) both;
+  }
+  .twinkle {
+    animation: twinkle 3.2s ease-in-out infinite;
+  }
+  .drift {
+    animation: drift 14s ease-in-out infinite alternate;
+  }
+  .rise {
+    animation: rise 7s ease-in infinite;
+  }
+  .sway {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: sway 5s ease-in-out infinite alternate;
+  }
+  .story-card {
+    animation: card-in 420ms var(--ps-ease-out) both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene-enter {
+    animation: fade 120ms linear both;
+  }
+}
+@keyframes scene-in {
+  from {
+    opacity: 0;
+    transform: translateX(6%) scale(1.04);
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+@keyframes twinkle {
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes drift {
+  to {
+    transform: translateX(40px);
+  }
+}
+@keyframes rise {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-520px);
+    opacity: 0;
+  }
+}
+@keyframes sway {
+  from {
+    transform: rotate(-4deg);
+  }
+  to {
+    transform: rotate(4deg);
+  }
+}
+
+/* ---- Trail map (Journey Map) ---- */
+.trail {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: var(--ps-r-pill);
+  background: var(--story-chip-bg);
+  backdrop-filter: blur(8px);
+  justify-self: center;
+}
+.trail__stop {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--story-chip-text) 25%, transparent);
+}
+.trail__stop.is-done {
+  background: var(--st-accent);
+}
+.trail__stop.is-here {
+  width: 14px;
+  height: 14px;
+  background: var(--st-accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--st-accent) 30%, transparent);
+}
+.trail__line {
+  width: 22px;
+  height: 2px;
+  background: color-mix(in srgb, var(--story-chip-text) 25%, transparent);
+}
+.trail__line.is-done {
+  background: var(--st-accent);
+}
+
+/* ---- Chat Story ---- */
+.chat-thread {
+  display: grid;
+  align-content: end;
+  gap: var(--ps-space-2);
+}
+.chat-head {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ps-space-2);
+  padding: 8px 14px;
+  border-radius: var(--ps-r-pill);
+  background: var(--story-chip-bg);
+  color: var(--story-chip-text);
+  font-weight: 700;
+  font-size: 0.875rem;
+  justify-self: start;
+}
+.chat-bubble {
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: 18px 18px 18px 6px;
+  background: var(--story-card);
+  color: var(--story-card-text);
+  font-size: 0.9375rem;
+  box-shadow: 0 6px 16px -10px rgba(34, 25, 46, 0.4);
+  justify-self: start;
+}
+.chat-bubble--you {
+  justify-self: end;
+  border-radius: 18px 18px 6px 18px;
+  background: var(--theme-selected);
+}
+.chat-sticker {
+  justify-self: center;
+  width: 112px;
+  height: 112px;
+}
+.chat-typing {
+  display: inline-flex;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: var(--story-card);
+  justify-self: start;
+}
+.chat-typing i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--story-card-text) 50%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .chat-typing i {
+    animation: twinkle 900ms ease-in-out infinite;
+  }
+  .chat-typing i:nth-child(2) {
+    animation-delay: 150ms;
+  }
+  .chat-typing i:nth-child(3) {
+    animation-delay: 300ms;
+  }
+}
+
+/* ---- Postcard ---- */
+.postcard {
+  display: grid;
+  gap: var(--ps-space-2);
+  justify-items: center;
+  width: 100%;
+}
+.postcard canvas {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  border-radius: var(--ps-r-lg);
+  box-shadow: var(--story-card-shadow);
+}
+
+/* ---------- Story Mode player shell (moved from player.css when merging into main; prefixed
+   splayer so it never restyles the main Player, which shares /s/[slug]) ---------- */
+.pl-ends {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--ps-space-3);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--theme-text) 70%, transparent);
+}
+
+/* ---------- Player shell (/s/[slug]) ---------- */
+.splayer {
+  min-height: 100svh;
+  background: var(--theme-bg);
+  color: var(--theme-text);
+}
+.splayer__col {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--ps-space-5);
+  width: 100%;
+  max-width: 560px;
+  min-height: 100svh;
+  margin-inline: auto;
+  padding: max(16px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+}
+.splayer__top {
+  display: grid;
+  gap: var(--ps-space-3);
+}
+.splayer__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ps-space-3);
+}
+.splayer__logo {
+  height: 28px;
+  width: auto;
+}
+.splayer__body {
+  display: grid;
+  align-content: start;
+  gap: var(--ps-space-4);
+}
+.splayer__bar {
+  position: sticky;
+  bottom: 0;
+  padding-block: var(--ps-space-3) 0;
+  background: linear-gradient(to top, var(--theme-bg) 70%, transparent);
+}
+.splayer__milestone {
+  padding: var(--ps-space-2) var(--ps-space-3);
+  border-radius: var(--ps-r-md);
+  background: var(--theme-pill);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.splayer__center {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: var(--ps-space-4);
+}
+.splayer__title {
+  font-family: var(--ps-font-display);
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+@media (min-width: 768px) {
+  .splayer__title {
+    font-size: 2.5rem;
+    line-height: 2.875rem;
+  }
+  .pl-question {
+    font-size: 1.75rem;
+    line-height: 2.25rem;
+  }
+}
+.splayer__text {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: color-mix(in srgb, var(--theme-text) 78%, transparent);
+  max-width: 46ch;
+}
+.splayer__consent {
+  display: flex;
+  gap: var(--ps-space-2);
+  align-items: flex-start;
+  font-size: 0.875rem;
+  color: color-mix(in srgb, var(--theme-text) 72%, transparent);
+}
+.splayer__plain-link {
+  background: none;
+  border: 0;
+  padding: var(--ps-space-2) 0;
+  color: inherit;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.splayer__made {
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--theme-text) 60%, transparent);
+}
+.splayer__made a {
+  color: inherit;
+}
+.pl-joy {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+}
+.pl-joy__face {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: var(--ps-space-2) 2px;
+  border-radius: var(--ps-r-lg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.1;
+}
+.pl-joy__face b {
+  font-size: 1.5rem;
+}
+.reveal-card {
+  display: grid;
+  gap: var(--ps-space-4);
+  width: 100%;
+  padding: var(--ps-space-5);
+  border-radius: var(--ps-r-xl);
+  background: linear-gradient(160deg, var(--theme-pill), var(--theme-tile) 80%);
+}
+.reveal-card h3 {
+  font-family: var(--ps-font-display);
+  font-size: 1rem;
+}
+.reveal-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40%  44px;
+  align-items: center;
+  gap: var(--ps-space-2);
+  font-size: 0.875rem;
+}
+.reveal-bar__track {
+  height: 10px;
+  border-radius: var(--ps-r-pill);
+  background: color-mix(in srgb, var(--theme-text) 10%, transparent);
+  overflow: hidden;
+}
+.reveal-bar__track i {
+  display: block;
+  height: 100%;
+  background: var(--theme-accent);
+  border-radius: inherit;
+}
+.reveal-bar__val {
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.player-state {
+  display: grid;
+  place-items: center;
+  min-height: 100svh;
+  padding: 24px max(20px, env(safe-area-inset-left));
+  text-align: center;
+  background: var(--theme-bg);
+  color: var(--theme-text);
+}
+.player-state > div {
+  display: grid;
+  gap: var(--ps-space-3);
+  justify-items: center;
+  max-width: 420px;
+}
+.player-offline {
+  padding: var(--ps-space-2) var(--ps-space-3);
+  border-radius: var(--ps-r-md);
+  background: var(--ps-warning-bg);
+  color: var(--ps-warning);
+  font-size: 0.875rem;
+  font-weight: 600;
+}

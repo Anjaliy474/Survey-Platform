@@ -2381,3 +2381,16 @@ button.clay:focus-visible {
     padding: var(--ps-space-5);
   }
 }
+
+/* Secondary way in: Story Mode (/studio) */
+.hero__story {
+  margin-top: var(--ps-space-3);
+  font-size: 0.9375rem;
+  color: var(--ps-ink-500);
+}
+.hero__story a {
+  color: var(--ps-ink-900);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

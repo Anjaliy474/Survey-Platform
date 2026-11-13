@@ -21,7 +21,14 @@ npm run dev        # http://localhost:3000
 | `combined.system.txt` | The AI engine's system prompt and JSON schemas |
 | `survey-platform-architecture.mmd` | End-to-end architecture flow |
 | `src/styles/tokens.css` | Design tokens (`--ps-*`), mapped to Tailwind in `src/app/globals.css` |
-| `src/components/player/` | Survey Player mechanics, shared by the landing poll and (next) the Player |
+| `src/components/player/` | Survey Player: all 7 mechanics, the plain one-per-screen Player, title, thank-you, reveal |
+| `src/components/story/` | Story Mode engine and templates (Journey Map, Stations Room, Chat Story) |
+| `src/app/studio/` | Studio: start from a concept, review questions, story, publish, results |
+| `src/lib/story/` | Template catalogue, world validator, postcard, ambient sound |
+| `src/lib/ai/` | Gemini client, AI stages, prepared demo examples |
+| `src/lib/store/` | Storage: Supabase when configured, else `.data/store.json` |
+| `supabase/migrations/` | Database tables to run on the team's Supabase project |
+| `docs/superpowers/` | Story Mode design and implementation plan |
 | `src/components/marketing/` | Landing page sections |
 | `src/lib/compute.ts` | The compute layer: every number shown comes from here, never from the AI |
 
@@ -53,9 +60,31 @@ Following `UI_UX_LAYOUT.md`, one page at a time:
 - [x] R2 Responses (`/app/s/:id/responses`): flagged responses pinned with Keep / Exclude, filters, response drawer, personal data masked (showing it is confirmed and logged), CSV export with an "excluded" column; M2 Pricing (`/pricing`)
 - [x] R5 Ask your data (`/app/s/:id/ask`): the assistant picks tools, code runs them, every number in the answer is checked against the tool results; base always given, with/without flagged, how it was calculated, pin to dashboard
 - [x] R6 Insight report (`/app/s/:id/report`): code builds the analysis pack (data quality, shares, NPS, chi-square tests with Holm correction, effect sizes, themes), the report cites evidence IDs, and code drops any finding whose numbers can't be traced; Creator / Analyst / Leadership versions; Download PDF via print
+- [x] Story Mode demo release (Nisarg): its own Studio at `/studio` and story Players at `/s/:slug`, with a Gemini client, a store (Supabase or `.data/store.json`) and story vs plain A/B results
 
 Every page in `UI_UX_LAYOUT.md` §7 is built. Next would be connecting Claude in place of the `src/lib/ai/demo-*.ts` stand-ins, and a backend in place of browser storage.
 
 **AI in demo mode.** `POST /api/ai/shape` runs the create pipeline (question shaper → bias checker → rules engine) and streams each stage; `POST /api/ai/gamify` runs the gamifier and then the Player's schema check. `POST /api/ai/themes` masks personal data, runs the theme extractor, then checks every quote is an exact substring of its response. `POST /api/ai/dashboard`, `/api/ai/ask` and `/api/ai/report` follow the same pattern: the AI stage writes words and specs, code computes every number and checks the AI's output against it. The AI stages are built-in stand-ins in `src/lib/ai/demo-*.ts` that return the exact `combined.system.txt` JSON schemas; the rules engine (`src/lib/ai/rules-engine.ts`) and every check in code are real. Connecting Claude replaces the demo files, not their callers.
 
 **Accounts are a prototype too:** sign-up stores a salted PBKDF2 hash (never the password) in this browser, and the Studio stays usable as a guest ("Demo creator"). The Studio keeps sample surveys in your browser until the backend exists. Surveys you publish, and the answers they collect, are stored in the same browser, so their `/s/:slug` link opens only there for now. Preview Home's states with `/app?preview=loading|empty|error`; "Demo only: restore the sample surveys" is in Settings.
+
+**Two Studios for now.** `/app` is the Studio described above (demo AI stand-ins, browser storage). `/studio` is Story Mode (below). They share the landing page, the design tokens, the 7 Player mechanics and the `/s/:slug` route: built-in samples and surveys published from `/app` in this browser open there first, and any other slug goes to the Story Mode Player.
+
+## Story Mode setup
+
+```bash
+npm test
+node scripts/seed-prepared.mjs http://localhost:3000
+```
+
+`npm test` runs the unit tests (Vitest). The seed script publishes the three demo surveys on a running app and prints their links.
+
+Environment variables (set by the team, never committed):
+
+| Variable | What |
+|---|---|
+| `GEMINI_API_KEY` | Google AI Studio key. Without it, the three prepared examples still work |
+| `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | The team's Supabase project. Without them, data goes to `.data/store.json` |
+| `NEXT_PUBLIC_SITE_URL` | Public site URL, used in links the API returns |
+
+Run `supabase/migrations/0001_story_mode.sql` on the Supabase project once before the first deploy. On Vercel, the local file store does not persist, so Supabase is required there.
